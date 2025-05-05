@@ -1090,8 +1090,6 @@ def parent_get_group_data(sourcetype, source_engine, dim_col, meas, date_columns
             final_formula = final_formula.replace(key, str(df_grouped[key]))
 
     try:
-        print(f'final_formula:{final_formula}')
-
         # Check if final_formula is a string that looks like a DataFrame output
         # (contains a row index and a numeric value)
         if isinstance(final_formula, str) and '\n' in final_formula and any(char.isdigit() for char in final_formula):

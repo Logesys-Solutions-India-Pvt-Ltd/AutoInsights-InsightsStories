@@ -78,7 +78,6 @@ def delta_analysis(datamart_id, sourcetype, source_engine, dim, meas, date_colum
             # No need for "others" row as we have fewer rows than the threshold
             others_count = 0
             others_value = 0
-        print(f'df_diff_val_positive:\n{df_diff_val_positive}')
         
         df_diff_val_negative = df_diff_val[df_diff_val[meas] < 0]
         df_diff_val_negative = df_diff_val_negative.sort_values(by=meas, ascending=True)
@@ -91,9 +90,7 @@ def delta_analysis(datamart_id, sourcetype, source_engine, dim, meas, date_colum
         else:
             # No need for "others" row
             others_count = 0
-            others_value = 0
-        print(f'df_diff_val_negative:\n{df_diff_val_negative}')
-        
+            others_value = 0        
         
         string_list = ''
         if df_diff_val[df_diff_val[meas] >= 0].shape[0] > 0:
@@ -134,7 +131,6 @@ def delta_analysis(datamart_id, sourcetype, source_engine, dim, meas, date_colum
         insight_id = uuid.uuid1()
 #         importance = 0
         related_fields_list = "#|#".join(related_fields_list)
-        print(f'df_diff_val:\n{df_diff_val}')
         # engine = azure_sql_database_connect(source_username, source_password, source_server, source_database)
         # cnxn, cursor = sql_connect()
         # insert_insights(datamart_id, string_list, str(waterfall), 'Avg CY vs LY', 'Waterfall', str(related_fields_list), importance, tags, 'Delta Analysis', 'Insight', cnxn, cursor, insight_code, version_num)

@@ -64,7 +64,6 @@ def new_entrants(datamart_id, sourcetype, source_engine, dim, meas, dim_table, d
             chartFooterTitle = rename_variables(chartFooterTitle, rename_dim_meas)
             tags = rename_variables(tags, rename_dim_meas)
             
-            print(f'data:\n{df_new_entrant}')
             data = LineChart(df_new_entrant,[meas],[], xAxisTitle, yAxisTitle, chart_title, chartSubTitle, chartFooterTitle, '', non_highlight_color = '#B0CBFF', highlight_color = '#3862FF')
             related_fields = dim  + ' : ' + dim_value + ' | ' + 'measure : ' + meas + ' | ' + 'function : New Entrant'
             
