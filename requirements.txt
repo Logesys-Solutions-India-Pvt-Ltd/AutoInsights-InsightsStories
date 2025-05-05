@@ -1,0 +1,12 @@
+pandas
+scikit-learn
+scipy
+numpy
+sqlalchemy
+pymssql
+boto3
+azure-storage-blob
+openpyxl
+flask
+datetime
+pyodbc
