@@ -8,7 +8,7 @@ app = Flask(__name__)
 def trigger_metadata():
     try:
         event = request.get_json()
-        result = main_handler(event)  # Call your handler
+        result = main_handler(event)  
 
         return Response(result, status=200, mimetype='application/json')
         # OR if it's a dict: return jsonify(result), 200
