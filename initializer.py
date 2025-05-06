@@ -2,7 +2,6 @@ from sqlalchemy import create_engine, text
 from datetime import datetime
 from initializer_functions import *
 from multiple_tables_csv_excel import *
-from Insights import *
 from Stories.stories_call import stories_call
 import os
 import pandas as pd
