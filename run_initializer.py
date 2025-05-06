@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from flask import Flask, request, jsonify, Response
 from initializer import main_handler
 
@@ -15,5 +16,6 @@ def trigger_metadata():
     except Exception as e:
         return jsonify({"status": "ERROR", "message": str(e)}), 500
 
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+# Comment out or remove for production with Gunicorn
+# if __name__ == "__main__":
+#     app.run(host="0.0.0.0", port=5000)

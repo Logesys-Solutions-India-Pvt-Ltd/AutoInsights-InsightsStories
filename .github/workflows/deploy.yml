@@ -9,19 +9,15 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-    - name: Set up Python
-      uses: actions/setup-python@v3
-      with:
-        python-version: '3.9.21'  # Matches your specified version
+    - name: Verify Python 3.9.21
+      run: |
+        python3 --version
+        python3 -m pip --version
     - name: Install dependencies
       run: |
-        python -m pip install --user --no-cache-dir -r requirements.txt
-        python -m pip install --user --no-cache-dir gunicorn
-    - name: Run Flask application
-      run: |
-        # Stop any existing Flask or Gunicorn processes
-        pkill -f "gunicorn|run_initializer.py" || true
-        # Run Flask app with Gunicorn in the background
-        nohup gunicorn --workers 3 --bind 0.0.0.0:8000 run_initializer:app > app.log 2>&1 &
-      env:
-        FLASK_ENV: production
+        python3 -m pip install --user --no-cache-dir -r requirements.txt
+        python3 -m pip install --user --no-cache-dir gunicorn
+    - name: Restart Flask application
+      run: sudo systemctl restart flask_app
+    - name: Restart Nginx
+      run: sudo systemctl restart nginx
