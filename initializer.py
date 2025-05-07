@@ -11,7 +11,7 @@ import json
 import boto3
 
 
-def main_handler(event):
+def insights_generator(event):
     #### Received from API ####
 
     datamart_id = event.get('datamart_id', "68F4413C-FD9A-11EF-BA6C-2CEA7F154E8D")
@@ -67,6 +67,7 @@ def main_handler(event):
         derived_measures_dict_expanded = json.loads(derived_measures_dict_expanded['Body'].read().decode('utf-8'))
         ########## Transform expanded derived measures dictionary to a compressed format ##########
         derived_measures_dict = transform_derived_measures(derived_measures_dict_expanded)
+        print(f'derived_measures_dict:{derived_measures_dict}')
         df_sql_table_names = create_table_name_mapping(tables_info)
 
         df_sql_meas_functions = {
@@ -214,7 +215,7 @@ def main_handler(event):
         }
 
     except Exception as e:
-        error_message = f"Error in main_handler: {e}"
+        error_message = f"Error in insights_generator: {e}"
         print(error_message)
         return {"status": "error", "message": error_message}
 
