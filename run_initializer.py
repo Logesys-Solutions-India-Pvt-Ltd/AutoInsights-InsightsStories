@@ -4,9 +4,9 @@ from initializer import main_handler
 
 app = Flask(__name__)
 
-@app.route("/test", methods=["GET"])
-def hello():
-    return "Hello world"
+# @app.route("/test", methods=["GET"])
+# def hello():
+#     return "Hello world"
 
 
 @app.route("/trigger", methods=["POST"])
@@ -15,18 +15,18 @@ def trigger_metadata():
         event = request.get_json()
         result = main_handler(event)
 
-        return "Hello World"
-        # if isinstance(result, dict): 
-        #     if result.get("status") == "error":  
-        #         return jsonify({"status": "ERROR", "message": result["message"]}), 500
-        #     elif result.get("status") == "success":
-        #         return jsonify(result), 200 
-        #     else:
-        #         return jsonify(result), 200
-        # elif isinstance(result, str):
-        #      return Response(result, status=200, mimetype='application/json')
-        # else:
-        #     return jsonify({"status": "SUCCESS", "message": "Processed successfully", "data": result}), 200
+        # return "Hello World"
+        if isinstance(result, dict): 
+            if result.get("status") == "error":  
+                return jsonify({"status": "ERROR", "message": result["message"]}), 500
+            elif result.get("status") == "success":
+                return jsonify(result), 200 
+            else:
+                return jsonify(result), 200
+        elif isinstance(result, str):
+             return Response(result, status=200, mimetype='application/json')
+        else:
+            return jsonify({"status": "SUCCESS", "message": "Processed successfully", "data": result}), 200
 
     except Exception as e:
         error_message = f"Error in trigger_metadata: {e}"
