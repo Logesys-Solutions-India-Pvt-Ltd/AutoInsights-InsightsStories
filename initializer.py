@@ -39,9 +39,11 @@ def main_handler(event):
     start_month = 1
     end_month = 12
     #########selected_insights = f"SELECT selected_insights FROM table_name WHERE datamart_id = '{datamart_id}'"
-    selected_insights = ['Hi-Pots', 'Movements', 'Rank Analysis', 'Delta Analysis', 'New Entrants',
-                        'Trends', 'Outliers', 'Monthly Anomalies', 'Weekly Anomalies']
-
+    # selected_insights = ['Hi-Pots', 'Movements', 'Rank Analysis', 'Delta Analysis', 'New Entrants',
+    #                     'Trends', 'Outliers', 'Monthly Anomalies', 'Weekly Anomalies']
+    selected_insights = ['Hi-Pots']
+    
+    print('Process started.')
     ########## Establish Logesys Database Connection ##########
     cnxn, cursor, logesys_engine = sql_connect()
 
