@@ -131,7 +131,7 @@ def main_handler(event):
         # # ########################################## Automate this ##########################################
 
         ### Stories Call ###
-        # stories_call(source_type, source_engine, datamart_id, date_columns, dates_filter_dict, derived_measures_dict, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, Significant_dimensions, df_list_ly, df_list_ty, df_relationship, rename_dim_meas, significance_score, cnxn, cursor)
+        stories_call(source_type, source_engine, datamart_id, date_columns, dates_filter_dict, derived_measures_dict, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, Significant_dimensions, df_list_ly, df_list_ty, df_relationship, rename_dim_meas, significance_score, cnxn, cursor)
 
         # # # # ################################################## Insights Call ##########################################
 
@@ -204,34 +204,17 @@ def main_handler(event):
                 insight_function(datamart_id, source_type, source_engine, date_columns, dates_filter_dict, Significant_dimensions, derived_measures_dict, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, df_relationship, df_list_ly, df_list_ty, rename_dim_meas, significance_score, max_year, max_month, outliers_dates, df_version_number, cnxn, cursor)
                 print(f"Executed: {insight_name}")
 
-
-        # dim_table = 'Location_Dist'
-        # dim = 'Store Name'
-        # meas = 'Markdown %'
-
-
-        # for insight_name, insight_function in insight_functions.items():
-        #     if insight_name == 'Hi-Pots':
-        #         insight_function(datamart_id, source_type, source_engine, derived_measures_dict, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, df_relationship, rename_dim_meas, dim, meas, date_columns, dates_filter_dict, df_list_ty, dim_table, df_version_number, cnxn, cursor)
-        #     elif insight_name == 'Movements':     
-        #         insight_function(datamart_id, source_type, source_engine, derived_measures_dict, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, df_relationship, rename_dim_meas, dim, meas, date_columns, dates_filter_dict, df_list_ly, df_list_ty, dim_table, df_version_number, significance_score, cnxn, cursor)
-        #     elif insight_name == 'Rank Analysis':
-        #         insight_function(datamart_id, source_type, source_engine, derived_measures_dict, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, df_relationship, rename_dim_meas, df_list_ty, df_list_ly, dim_table, dim, meas, date_columns, dates_filter_dict, df_version_number, cnxn, cursor)
-        #     elif insight_name == 'Delta Analysis':
-        #         insight_function(datamart_id, source_type, source_engine, dim, meas, date_columns, dates_filter_dict, derived_measures_dict, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, df_relationship, rename_dim_meas, df_list, df_list_ty, df_list_ly, dim_table, df_version_number, cnxn, cursor)
-        #     elif insight_name == 'New Entrants':
-        #         insight_function(datamart_id, source_type, source_engine, dim, meas, dim_table, date_columns, dates_filter_dict, derived_measures_dict, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, df_list_last12months, df_relationship, rename_dim_meas, significance_score, max_month, max_date, df_version_number, cnxn, cursor)
-        #     elif insight_name == 'Trends':
-        #         insight_function(datamart_id, source_type, source_engine, date_columns, dates_filter_dict, Significant_dimensions, derived_measures_dict, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, df_list_last12months, df_relationship, rename_dim_meas, significance_score, max_month, max_date, df_version_number, cnxn, cursor)
-        #     elif insight_name == 'Monthly Anomalies':
-        #         insight_function(datamart_id, source_type, source_engine, date_columns, dates_filter_dict, Significant_dimensions, derived_measures_dict, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, df_list_last12months, df_relationship, rename_dim_meas, significance_score, max_month, max_date, df_version_number, cnxn, cursor)
-        #     elif insight_name == 'Weekly Anomalies':
-        #         insight_function(datamart_id, source_type, source_engine, date_columns, dates_filter_dict, Significant_dimensions, derived_measures_dict, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, df_list_last52weeks, df_relationship, rename_dim_meas, significance_score, max_month, max_date, df_version_number, cnxn, cursor)
-        #     elif insight_name == 'Outliers':
-        #         insight_function(datamart_id, source_type, source_engine, date_columns, dates_filter_dict, Significant_dimensions, derived_measures_dict, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, df_relationship, df_list_ly, df_list_ty, rename_dim_meas, significance_score, max_year, max_month, outliers_dates, df_version_number, cnxn, cursor)
+        return {
+            "status": "success",
+            "message": "Insights and stories processed",
+            "datamart_id": datamart_id,
+            "organization_id": organization_id,
+        }
+    
     except Exception as e:
-        print(f"Error in main_handler: {e}")
-        return f"Error processing insights: {e}"
+        error_message = f"Error in main_handler: {e}"
+        print(error_message)
+        return {"status": "error", "message": error_message}
 
     finally:
         if cnxn:
