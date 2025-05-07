@@ -62,10 +62,8 @@ def insights_generator(event):
         s3_key_name_derived_meas_formula = f"{datamart_id.lower()}_formula.json"
         derived_measures_dict_expanded = s3_client.get_object(Bucket=s3_bucket_derived_meas_formula, Key=s3_key_name_derived_meas_formula)
         derived_measures_dict_expanded = json.loads(derived_measures_dict_expanded['Body'].read().decode('utf-8'))
-        print(f'derived_measures_dict_expanded:{derived_measures_dict_expanded}')
         ########## Transform expanded derived measures dictionary to a compressed format ##########
         derived_measures_dict = transform_derived_measures(derived_measures_dict_expanded)
-        print(f'derived_measures_dict:{derived_measures_dict}')
         print(f'Formulae received and processed.')
         df_sql_table_names = create_table_name_mapping(tables_info)
 
@@ -120,7 +118,8 @@ def insights_generator(event):
 
         # ######### Significance Score ##########
         significance_score = significance_engine_sql(source_engine, df_sql_table_names, df_sql_meas_functions, Significant_dimensions, Significant_measures, df_relationship)
-
+        print('Significance score assigned to dimensions and metrics.')
+        
         # # ########################################## Automate this ##########################################
         rename_dim_meas = {
             'CRANE_MINS': 'Crane Mins',
