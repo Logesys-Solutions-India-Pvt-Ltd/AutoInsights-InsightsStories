@@ -10,7 +10,7 @@ def trigger_metadata():
         event = request.get_json()
         result = main_handler(event)
 
-        # return "Hello World"
+        return "Hello World"
         # if isinstance(result, dict): 
         #     if result.get("status") == "error":  
         #         return jsonify({"status": "ERROR", "message": result["message"]}), 500
