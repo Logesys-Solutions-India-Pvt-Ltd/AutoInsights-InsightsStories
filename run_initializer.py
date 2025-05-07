@@ -4,6 +4,11 @@ from initializer import main_handler
 
 app = Flask(__name__)
 
+@app.route("/test", methods=["GET"])
+def hello():
+    return "Hello world"
+
+
 @app.route("/trigger", methods=["POST"])
 def trigger_metadata():
     try:
