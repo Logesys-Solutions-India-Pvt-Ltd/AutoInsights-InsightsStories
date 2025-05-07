@@ -23,7 +23,6 @@ def trigger_metadata():
         # else:
         #     return jsonify({"status": "SUCCESS", "message": "Processed successfully", "data": result}), 200
 
-
     except Exception as e:
         error_message = f"Error in trigger_metadata: {e}"
         print(error_message)  
