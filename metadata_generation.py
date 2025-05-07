@@ -180,7 +180,7 @@ def get_metadata_json(table, json_output_str):
         raise ValueError(f"Error while inserting metadata of {table} into m_datamart_metadata: {e}")
 
 
-def update_metadata(datamart, table_id, df_metadata, engine):
+def update_metadata(datamart_id, table_id, df_metadata, engine):
     updated_date = datetime.now()
     # query_delete_metadata = "DELETE FROM m_datamart_metadata WHERE TableId = '" + str(table_id) + "'"
 
@@ -210,14 +210,14 @@ def update_metadata(datamart, table_id, df_metadata, engine):
                                              [UpdatedDatetime],
                                              [CreatedDate],
                                              [TableId])
-            VALUES (:metadata_id, :datamart, :field_id, :field_name, :display_new_name,
+            VALUES (:metadata_id, :datamart_id, :field_id, :field_name, :display_new_name,
                     :data_type, :field_type, :measure_type, :significance, :updated_date,
                     :created_date, :table_id)
         """)
 
         params = {
             "metadata_id": metadata_id,
-            "datamart": datamart,
+            "datamart_id": datamart_id,
             "field_id": field_id,
             "field_name": field_name,
             "display_new_name": display_new_name,
@@ -237,12 +237,12 @@ def update_metadata(datamart, table_id, df_metadata, engine):
 
 
 def metadata_generator(event):
-    datamart = event["datamart"]
+    datamart_id = event["datamart_id"]
     table_id = event["table_id"]
     refresh = event["refresh"]  # 'True' or 'False'
     # organization = event["organization"]
 
-    # datamart = "6AA6BCAA-258A-11F0-A1AD-2CEA7F154E8D"
+    # datamart_id = "6AA6BCAA-258A-11F0-A1AD-2CEA7F154E8D"
     # table_id = "6E6D3197-258A-11F0-842A-2CEA7F154E8D"
     # refresh = False
 
@@ -258,7 +258,7 @@ def metadata_generator(event):
     query_table_name = f"""
         SELECT TableName 
         FROM m_datamart_tables 
-        WHERE DataMartId = '{datamart}'
+        WHERE DataMartId = '{datamart_id}'
         AND TableId = '{table_id}'
     """
     table_name = pd.read_sql_query(query_table_name, logesys_engine)['TableName'].iloc[0]
@@ -270,7 +270,7 @@ def metadata_generator(event):
             UserName,
             Password
         FROM m_datamart_tables
-        WHERE DataMartId = '{datamart}'
+        WHERE DataMartId = '{datamart_id}'
         AND TableId = '{table_id}'
     """
     source_creds = pd.read_sql_query(query_source_creds, logesys_engine)
@@ -285,7 +285,7 @@ def metadata_generator(event):
     query_count_metadata_rows = f"""
                 SELECT COUNT(*)
                 FROM m_datamart_metadata
-                WHERE DataMartId = '{datamart}'
+                WHERE DataMartId = '{datamart_id}'
                 AND TableId = '{table_id}'
             """
     count_metadata_rows = pd.read_sql_query(query_count_metadata_rows, logesys_engine).iloc[0,0]
@@ -320,7 +320,7 @@ def metadata_generator(event):
         # Inserting metadata into m_datamart_metadata table
         df_metadata_initial = get_metadata_json(table_name, json_output_str)
         # Upload the df into m_datamart_metadata
-        update_metadata(datamart, table_id, df_metadata_initial, logesys_engine)
+        update_metadata(datamart_id, table_id, df_metadata_initial, logesys_engine)
 
         return json_output_str
     elif count_metadata_rows > 0 and refresh == 'False':
