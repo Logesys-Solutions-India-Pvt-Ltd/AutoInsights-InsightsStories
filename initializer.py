@@ -12,8 +12,6 @@ import boto3
 
 
 def insights_generator(event):
-    #### Received from API ####
-
     datamart_id = event.get('datamart_id', "68F4413C-FD9A-11EF-BA6C-2CEA7F154E8D")
     organization_id = event.get('organization_id', "1F3B7012-EFEA-46EF-ABED-BD297BF3BB61")
     engine_id = event.get('engine_id', "BA2ACCBB-31B4-11EB-9A5D-A85E45BE6945")
@@ -23,7 +21,6 @@ def insights_generator(event):
     # organization_id = "1F3B7012-EFEA-46EF-ABED-BD297BF3BB61"
     # engine_id = "BA2ACCBB-31B4-11EB-9A5D-A85E45BE6945"
     # organization = "Timesquare"
-    #### Received from API ####
 
     df_relationship_path = 'Relationship Table Dist.xlsx'
 
@@ -65,9 +62,11 @@ def insights_generator(event):
         s3_key_name_derived_meas_formula = f"{datamart_id.lower()}_formula.json"
         derived_measures_dict_expanded = s3_client.get_object(Bucket=s3_bucket_derived_meas_formula, Key=s3_key_name_derived_meas_formula)
         derived_measures_dict_expanded = json.loads(derived_measures_dict_expanded['Body'].read().decode('utf-8'))
+        print(f'derived_measures_dict_expanded:{derived_measures_dict_expanded}')
         ########## Transform expanded derived measures dictionary to a compressed format ##########
         derived_measures_dict = transform_derived_measures(derived_measures_dict_expanded)
         print(f'derived_measures_dict:{derived_measures_dict}')
+        print(f'Formulae received and processed.')
         df_sql_table_names = create_table_name_mapping(tables_info)
 
         df_sql_meas_functions = {
