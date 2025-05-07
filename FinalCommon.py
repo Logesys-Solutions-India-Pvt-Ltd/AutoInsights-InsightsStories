@@ -50,7 +50,7 @@ def sql_connect():
     database = "Insights_DB_Dev"
     logesys_engine = create_engine(f"mssql+pymssql://{username}:{password.replace('@', '%40')}@{server}/{database}")
 
-    cnxn = pyodbc.connect("Driver={ODBC Driver 11 for SQL Server};"
+    cnxn = pyodbc.connect("Driver={ODBC Driver 17 for SQL Server};"
                   "Server=logesyssolutions.database.windows.net;"
                   "Database=Insights_DB_Dev;"
                  "UID=lsdbadmin;"

@@ -210,7 +210,7 @@ def main_handler(event):
             "datamart_id": datamart_id,
             "organization_id": organization_id,
         }
-    
+
     except Exception as e:
         error_message = f"Error in main_handler: {e}"
         print(error_message)
