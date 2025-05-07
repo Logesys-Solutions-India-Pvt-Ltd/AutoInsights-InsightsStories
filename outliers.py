@@ -10,6 +10,7 @@ import numpy as np
 
 
 def outliers(datamart_id, sourcetype, source_engine, date_columns, dates_filter_dict, Significant_dimensions, derived_measures_dict, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, df_relationship, df_list_ly, df_list_ty, rename_dim_meas, significance_score, max_year, max_month, outliers_dates, df_version_number, cnxn, cursor):
+    print('--OUTLIERS--')
     dim_allowed_for_derived_metrics = {
      'Markdown %': [dim for dims in Significant_dimensions.values() for dim in dims],
      'ASP': [dim for dims in Significant_dimensions.values() for dim in dims],
@@ -40,6 +41,7 @@ def outliers(datamart_id, sourcetype, source_engine, date_columns, dates_filter_
                     print(f'dim:{dim}, meas:{meas}')
 
                     for val, importance in zip(['Week On Week', 'Month On Month', 'Rolling 3 Months', 'MTD', 'YTD'], [220, 209, 198, 187, 176]):  
+                        print(f'Val:{val}')
                         if val == 'MTD':
                             if sourcetype == 'xlsx':
                                 this_period_setting, last_period_setting = df_list_ty.copy(), df_list_ly.copy()

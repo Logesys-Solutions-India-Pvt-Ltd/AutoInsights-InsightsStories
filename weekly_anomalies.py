@@ -10,6 +10,7 @@ import numpy as np
 
 
 def weekly_anomalies(datamart_id, sourcetype, source_engine, date_columns, dates_filter_dict, Significant_dimensions, derived_measures_dict, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, df_list_last52weeks, df_relationship, rename_dim_meas, significance_score, max_month, max_date, df_version_number, cnxn, cursor):
+    print('--WEEKLY ANOMALIES--')
     dim_allowed_for_derived_metrics = {
      'Markdown %': [dim for dims in Significant_dimensions.values() for dim in dims],
      'ASP': [dim for dims in Significant_dimensions.values() for dim in dims],

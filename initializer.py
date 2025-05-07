@@ -134,7 +134,7 @@ def main_handler(event):
 
         ### Stories Call ###
         stories_call(source_type, source_engine, datamart_id, date_columns, dates_filter_dict, derived_measures_dict, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, Significant_dimensions, df_list_ly, df_list_ty, df_relationship, rename_dim_meas, significance_score, cnxn, cursor)
-
+        print('Stories generated.')
         # # # # ################################################## Insights Call ##########################################
 
         insightcode_sql = "SELECT InsightCode, MAX(VersionNumber) AS VersionNumber, MAX(Importance) AS Importance FROM tt_insights WHERE datamartid = '" + str(datamart_id) + "' GROUP BY InsightCode"

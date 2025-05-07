@@ -19,7 +19,6 @@ def stories_avg_cy_ly(sourcetype, source_engine, datamart_id, date_columns, date
         
     for dim_table, dim_list in Significant_dimensions.items():
         for dim in dim_list:
-            print(f'dim:{dim}')
             if (meas in ['ATV', 'UPT']) and (dim_table == 'Item_master_Insights'):
                 continue
             is_ratio = False
