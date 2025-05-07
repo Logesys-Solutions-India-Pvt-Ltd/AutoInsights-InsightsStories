@@ -27,7 +27,7 @@ def trigger_insights_generation():
 
         # return "Hello World"
         if isinstance(result, dict): 
-            print(result.get())
+            print(result.get("status"))
             if result.get("status") == "error":  
                 stop_gunicorn()
                 return jsonify({"status": "ERROR", "message": result["message"]}), 500
