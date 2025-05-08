@@ -9,24 +9,27 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-    - name: Verify Python 3.9.21
+
+    - name: Verify Python and Pip version  #Python 3.9.21 is used
       run: |
         python3 --version
         python3 -m pip --version
+
     - name: Install dependencies
       run: |
         python3 -m pip install --user --no-cache-dir -r requirements.txt
         python3 -m pip install --user --no-cache-dir gunicorn
+
     - name: Restart Flask application
       run: sudo systemctl restart flask_app
+
     - name: Restart Nginx
       run: sudo systemctl restart nginx
-    # - name: Restart Flask App with PM2
-    #   uses: appleboy/ssh-action@master
-    #   with:
-    #     host: ${{ secrets.EC2_HOST }}
-    #     username: ${{ secrets.EC2_USERNAME }}
-    #     key: ${{ secrets.EC2_PRIVATE_KEY }}
-    #     script: |
-    #       cd /home/ec2-user/actions-runner/_work/AutoInsights-InsightsStories/AutoInsights-InsightsStories
-    #       pm2 restart flask-app
+
+    - name: Print Deployment Success
+      run: echo "Deployment successful!"
+
+    - name: Start Gunicorn
+      run: |
+        cd /home/ec2-user/actions-runner/_work/AutoInsights-InsightsStories/AutoInsights-InsightsStories
+        gunicorn --workers 3 --bind 0.0.0.0:8000 --timeout 7300 --enable-stdio-inheritance run_initializer:app

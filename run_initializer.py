@@ -28,10 +28,10 @@ def metadata_generation():
         result = metadata_generator(event)
 
         if isinstance(result, dict):
-            stop_gunicorn()
+            # stop_gunicorn()
             return jsonify(result), 200
         elif isinstance(result, str):
-            stop_gunicorn()
+            # stop_gunicorn()
             return Response(result, status=200, mimetype='application/json')
     except Exception as e:
         error_message = f"Error in metadata_generation: {e}"
@@ -53,13 +53,13 @@ def trigger_insights_generation():
                 stop_gunicorn()
                 return jsonify({"status": "ERROR", "message": result["message"]}), 500
             elif result.get("status") == "success":
-                stop_gunicorn()
+                # stop_gunicorn()
                 return jsonify(result), 200 
             else:
-                stop_gunicorn()
+                # stop_gunicorn()
                 return jsonify(result), 200
         elif isinstance(result, str):
-             stop_gunicorn()
+            #  stop_gunicorn()
              return Response(result, status=200, mimetype='application/json')
         else:
             stop_gunicorn()
