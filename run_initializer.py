@@ -35,7 +35,7 @@ def metadata_generation():
             return Response(result, status=200, mimetype='application/json')
     except Exception as e:
         error_message = f"Error in metadata_generation: {e}"
-        stop_gunicorn()
+        # stop_gunicorn()
         return jsonify({"status": "ERROR", "message": error_message}), 500
 
 
@@ -50,7 +50,7 @@ def trigger_insights_generation():
         if isinstance(result, dict): 
             print(result.get("status"))
             if result.get("status") == "error":  
-                stop_gunicorn()
+                # stop_gunicorn()
                 return jsonify({"status": "ERROR", "message": result["message"]}), 500
             elif result.get("status") == "success":
                 # stop_gunicorn()
@@ -62,13 +62,13 @@ def trigger_insights_generation():
             #  stop_gunicorn()
              return Response(result, status=200, mimetype='application/json')
         else:
-            stop_gunicorn()
+            # stop_gunicorn()
             return jsonify({"status": "SUCCESS", "message": "Processed successfully", "data": result}), 200
 
     except Exception as e:
         error_message = f"Error in trigger_insights_generation: {e}"
         print(error_message)  
-        stop_gunicorn()
+        # stop_gunicorn()
         return jsonify({"status": "ERROR", "message": error_message}), 500
     
 
@@ -79,12 +79,12 @@ def ask_summary_generation():
         result = ask_summary_generator(event)
 
         if isinstance(result, dict):
-            stop_gunicorn()
+            # stop_gunicorn()
             return jsonify(result), 200
         elif isinstance(result, str):
-            stop_gunicorn()
+            # stop_gunicorn()
             return Response(result, status=200, mimetype='application/json')
     except Exception as e:
         error_message = f"Error in ask_summary_generation: {e}"
-        stop_gunicorn()
+        # stop_gunicorn()
         return jsonify({"status": "ERROR", "message": error_message}), 500

@@ -32,4 +32,4 @@ jobs:
     - name: Start Gunicorn
       run: |
         cd /home/ec2-user/actions-runner/_work/AutoInsights-InsightsStories/AutoInsights-InsightsStories
-        gunicorn --workers 3 --bind 0.0.0.0:8000 --timeout 7300 --enable-stdio-inheritance run_initializer:app
+        gunicorn --workers 3 --bind 0.0.0.0:8000 --timeout 10800 --enable-stdio-inheritance run_initializer:app
