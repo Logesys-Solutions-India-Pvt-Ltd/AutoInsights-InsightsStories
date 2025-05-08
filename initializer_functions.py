@@ -257,15 +257,16 @@ def get_datamart_source_credentials(datamart_id, logesys_engine):
 
 def rename_fields(datamart_id, rename_dim_meas, cnxn, cursor):
     display_fieldname_query = f"""SELECT FieldName, DisplayFieldName FROM m_datamart_metadata
-                                    WHERE datamart_id = {datamart_id}"""
+                                    WHERE datamartid = '{datamart_id}'"""
     cursor.execute(display_fieldname_query)
+
     metadata_rows = cursor.fetchall()
- 
     for row in metadata_rows:
         field_name, display_field_name = row
         if field_name != display_field_name:
             rename_dim_meas[field_name] = display_field_name
     return rename_dim_meas
+
 
 def significant_fields(cursor, source_engine, datamart_id, table_id, start_month, end_month):
     """
