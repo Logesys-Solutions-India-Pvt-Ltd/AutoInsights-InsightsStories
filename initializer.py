@@ -13,20 +13,9 @@ import boto3
 
 def insights_generator(event):
     datamart_id = event.get('datamart_id', "68F4413C-FD9A-11EF-BA6C-2CEA7F154E8D")
-    organization_id = event.get('organization_id', "1F3B7012-EFEA-46EF-ABED-BD297BF3BB61")
-    engine_id = event.get('engine_id', "BA2ACCBB-31B4-11EB-9A5D-A85E45BE6945")
-    organization = event.get('organization', "Timesquare")
-
-    # datamart_id = "68F4413C-FD9A-11EF-BA6C-2CEA7F154E8D"
-    # organization_id = "1F3B7012-EFEA-46EF-ABED-BD297BF3BB61"
-    # engine_id = "BA2ACCBB-31B4-11EB-9A5D-A85E45BE6945"
-    # organization = "Timesquare"
-
+    # datamart_id = "68F4413C-FD9A-11EF-BA6C-2CEA7F154E8D" ## Timesquare
+    # datamart_id = "5C8A4096-25B7-11F0-92B1-3CE9F73E436E" ## JMBaxi
     df_relationship_path = 'Relationship Table Dist.xlsx'
-
-    # datamart_id = "5C8A4096-25B7-11F0-92B1-3CE9F73E436E"
-    # organization = "JMBaxi"
-    # df_relationship_path = ''
 
     if df_relationship_path != '':
         df_relationship = read_data(df_relationship_path, type='xlsx')
@@ -39,7 +28,7 @@ def insights_generator(event):
     # selected_insights = ['Hi-Pots', 'Movements', 'Rank Analysis', 'Delta Analysis', 'New Entrants',
     #                     'Trends', 'Outliers', 'Monthly Anomalies', 'Weekly Anomalies']
     selected_insights = ['Hi-Pots']
-    
+
     print('Process started.')
     ########## Establish Logesys Database Connection ##########
     cnxn, cursor, logesys_engine = sql_connect()
@@ -85,6 +74,9 @@ def insights_generator(event):
         max_year_dict = sig_fields['max_year_dict']
         max_month_dict = sig_fields['max_month_dict']
         max_date_dict = sig_fields['max_date_dict']
+        print(f'max_year_dict:{max_year_dict}')
+        print(f'max_month_dict:{max_month_dict}')
+        print(f'max_date_dict:{max_date_dict}')
 
         max_year = max(max_year_dict.values())
         max_month = max(max_month_dict.values())
@@ -119,11 +111,11 @@ def insights_generator(event):
         # ######### Significance Score ##########
         # significance_score = significance_engine_sql(source_engine, df_sql_table_names, df_sql_meas_functions, Significant_dimensions, Significant_measures, df_relationship)
         # print('Significance score assigned to dimensions and metrics.')
-        
+
         # # ########################################## Automate this ##########################################
         rename_dim_meas = {}
         rename_dim_meas = rename_fields(datamart_id, rename_dim_meas, cnxn, cursor)
-        
+
         print(f'rename_dim_meas:\n{rename_dim_meas}')
 
         # rename_dim_meas = {
@@ -213,14 +205,13 @@ def insights_generator(event):
         # return {
         #     "status": "success",
         #     "message": "Insights and stories processed",
-        #     "datamart_id": datamart_id,
-        #     "organization_id": organization_id,
+        #     "datamart_id": datamart_id
         # }
 
     except Exception as e:
         error_message = f"Error in insights_generator: {e}"
         print(error_message)
-        return {"status": "error", "message": error_message}
+        # return {"status": "error", "message": error_message}
 
     finally:
         if cnxn:
