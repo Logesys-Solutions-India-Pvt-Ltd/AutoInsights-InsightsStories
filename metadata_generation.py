@@ -312,10 +312,11 @@ def metadata_generator(event):
             source_engine = create_engine(f"mssql+pymssql://{source_username}:{source_password.replace('@', '%40')}@{source_server}/{source_database}")
             json_output = connect_to_db(table_name, source_username, source_password, source_server, source_database)
             json_output_str = json.dumps(json_output)
-        # Creating metadata JSON and uploading in s3
-        s3_key = f"metadata_{table_name}_{source_type}.json"
-        s3_client.put_object(Bucket=s3_bucket_name, Key=s3_key, Body=json_output_str)
-        print(f"Metadata uploaded to s3://{s3_bucket_name}/{s3_key}")
+            
+        # # Creating metadata JSON and uploading in s3
+        # s3_key = f"metadata_{table_name}_{source_type}.json"
+        # s3_client.put_object(Bucket=s3_bucket_name, Key=s3_key, Body=json_output_str)
+        # print(f"Metadata uploaded to s3://{s3_bucket_name}/{s3_key}")
 
         # Inserting metadata into m_datamart_metadata table
         df_metadata_initial = get_metadata_json(table_name, json_output_str)

@@ -106,8 +106,8 @@ def insights_generator(event):
 
 
         # ######### Significance Score ##########
-        # significance_score = significance_engine_sql(source_engine, df_sql_table_names, df_sql_meas_functions, Significant_dimensions, Significant_measures, df_relationship)
-        # print('Significance score assigned to dimensions and metrics.')
+        significance_score = significance_engine_sql(source_engine, df_sql_table_names, df_sql_meas_functions, Significant_dimensions, Significant_measures, df_relationship)
+        print('Significance score assigned to dimensions and metrics.')
 
         ########### Getting Display Names ##########
         rename_dim_meas = {}
