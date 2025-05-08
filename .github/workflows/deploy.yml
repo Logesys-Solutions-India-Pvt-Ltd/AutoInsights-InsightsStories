@@ -24,7 +24,7 @@ jobs:
       run: sudo systemctl restart flask_app
 
     - name: Restart Nginx
-      run: sudo systemctl restart nginx
+      run: sudo systemctl reload nginx
 
     - name: Print Deployment Success
       run: echo "Deployment successful!"
