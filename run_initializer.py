@@ -4,6 +4,7 @@ import signal
 from flask import Flask, request, jsonify, Response
 from initializer import insights_generator
 from metadata_generation import metadata_generator
+from ask_summary_generation import ask_summary_generator
 
 app = Flask(__name__)
 
@@ -70,6 +71,20 @@ def trigger_insights_generation():
         stop_gunicorn()
         return jsonify({"status": "ERROR", "message": error_message}), 500
     
-# Comment out or remove for production with Gunicorn
-# if __name__ == "__main__":
-#     app.run(host="0.0.0.0", port=5000)
+
+@app.route("/ask", methods=["POST"])
+def ask_summary_generation():
+    try:
+        event = request.get_json()
+        result = ask_summary_generator(event)
+
+        if isinstance(result, dict):
+            stop_gunicorn()
+            return jsonify(result), 200
+        elif isinstance(result, str):
+            stop_gunicorn()
+            return Response(result, status=200, mimetype='application/json')
+    except Exception as e:
+        error_message = f"Error in ask_summary_generation: {e}"
+        stop_gunicorn()
+        return jsonify({"status": "ERROR", "message": error_message}), 500
