@@ -314,9 +314,9 @@ def metadata_generator(event):
             json_output_str = json.dumps(json_output)
             
         # # Creating metadata JSON and uploading in s3
-        # s3_key = f"metadata_{table_name}_{source_type}.json"
-        # s3_client.put_object(Bucket=s3_bucket_name, Key=s3_key, Body=json_output_str)
-        # print(f"Metadata uploaded to s3://{s3_bucket_name}/{s3_key}")
+        s3_key = f"metadata_{table_name}_{source_type}.json"
+        s3_client.put_object(Bucket=s3_bucket_name, Key=s3_key, Body=json_output_str)
+        print(f"Metadata uploaded to s3://{s3_bucket_name}/{s3_key}")
 
         # Inserting metadata into m_datamart_metadata table
         df_metadata_initial = get_metadata_json(table_name, json_output_str)
