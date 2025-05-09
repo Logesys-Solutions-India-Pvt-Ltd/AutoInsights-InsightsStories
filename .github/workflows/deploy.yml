@@ -5,12 +5,12 @@ on:
       - main
 jobs:
   deploy:
-    runs-on: self-hosted  # Use the self-hosted runner
+    runs-on: self-hosted
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Verify Python and Pip version  #Python 3.9.21 is used
+    - name: Verify Python and Pip version
       run: |
         python3 --version
         python3 -m pip --version
@@ -20,16 +20,23 @@ jobs:
         python3 -m pip install --user --no-cache-dir -r requirements.txt
         python3 -m pip install --user --no-cache-dir gunicorn
 
-    - name: Restart Flask application
-      run: sudo systemctl restart flask_app
+    - name: Stop existing Flask application (if running)
+      run: |
+        sudo systemctl stop flask_app || true # Ignore error if service is not running
+
+    - name: Start Gunicorn
+      run: |
+        cd /home/ec2-user/actions-runner/_work/AutoInsights-InsightsStories/AutoInsights-InsightsStories
+        nohup gunicorn --workers 3 --bind 0.0.0.0:8000 --timeout 10800 --enable-stdio-inheritance run_initializer:app &
+      # Consider adding a sleep command here if your application takes time to start
+      # - name: Wait for application to start
+      #   run: sleep 5
+
+    - name: Check Flask application status (optional)
+      run: sudo systemctl status flask_app
 
     - name: Restart Nginx
       run: sudo systemctl reload nginx
 
     - name: Print Deployment Success
       run: echo "Deployment successful!"
-
-    - name: Start Gunicorn
-      run: |
-        cd /home/ec2-user/actions-runner/_work/AutoInsights-InsightsStories/AutoInsights-InsightsStories
-        gunicorn --workers 3 --bind 0.0.0.0:8000 --timeout 10800 --enable-stdio-inheritance run_initializer:app
