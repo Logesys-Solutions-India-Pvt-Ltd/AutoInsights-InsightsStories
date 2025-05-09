@@ -10,10 +10,6 @@ from ask_summary_generation import ask_summary_generator
 app = Flask(__name__)
 CORS(app)
 
-# @app.route("/test", methods=["GET"])
-# def hello():
-#     return "Hello world"
-
 def stop_gunicorn():
     """
     Stops the Gunicorn master process.  This should be called after the
@@ -46,6 +42,7 @@ def metadata_generation():
 def trigger_insights_generation():
     try:
         event = request.get_json()
+        print(f"Received /trigger request from {request.remote_addr} with payload: {event}")
         result = insights_generator(event)
 
         # return "Hello World"
