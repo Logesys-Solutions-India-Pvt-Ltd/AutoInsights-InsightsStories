@@ -27,27 +27,17 @@ jobs:
       run: |
         echo "Killing processes on port 8000..."
         sudo fuser -k 8000/tcp || true
-        ps aux | grep gunicorn || true  # Log any remaining Gunicorn processes
+        sleep 2
+        sudo netstat -tulnp | grep 8000 || true
 
-    - name: Stop existing Flask application (if running)
+    - name: Restart Flask application
       run: |
-        sudo systemctl stop flask_app || true
-        sudo systemctl disable flask_app || true  # Prevent auto-start
-
-    - name: Start Gunicorn
-      run: |
-        cd /home/ec2-user/actions-runner/_work/AutoInsights-InsightsStories/AutoInsights-InsightsStories
-        nohup gunicorn --workers 3 --bind 0.0.0.0:8000 --timeout 10800 --enable-stdio-inheritance \
-        --log-level debug --log-file /home/ec2-user/gunicorn.log run_initializer:app &
-        echo "Gunicorn started"
-
-    - name: Wait for Gunicorn to start
-      run: sleep 10  # Increased to ensure Gunicorn is fully up
-
-    - name: Verify Gunicorn is running
-      run: |
-        ps aux | grep gunicorn || true
-        netstat -tulnp | grep 8000 || true  # Check if port 8000 is in use
+        echo "Restarting flask_app service..."
+        sudo systemctl restart flask_app
+        sleep 5
+        sudo systemctl status flask_app || true
+        sudo netstat -tulnp | grep 8000 || true
+        tail -n 50 /home/ec2-user/gunicorn.log || true
 
     - name: Restart Nginx
       run: sudo systemctl reload nginx
