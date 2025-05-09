@@ -12,7 +12,6 @@ import boto3
 
 
 def insights_generator(event):
-    print(f'event:{event}')
     datamart_id = event.get('datamart_id')
     # datamart_id = "68F4413C-FD9A-11EF-BA6C-2CEA7F154E8D" ## Timesquare
     # datamart_id = "5C8A4096-25B7-11F0-92B1-3CE9F73E436E" ## JMBaxi
@@ -36,6 +35,7 @@ def insights_generator(event):
     selected_insights_list = cursor.fetchone()
     selected_insights = json.loads(selected_insights_list[0])
 
+    print(f'datamart_id:{datamart_id}')
     print(selected_insights)  
     print('Process started.')
 
