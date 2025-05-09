@@ -24,14 +24,20 @@ def insights_generator(event):
 
     start_month = 1
     end_month = 12
-    #########selected_insights = f"SELECT selected_insights FROM table_name WHERE datamart_id = '{datamart_id}'"
-    # selected_insights = ['Hi-Pots', 'Movements', 'Rank Analysis', 'Delta Analysis', 'New Entrants',
-    #                     'Trends', 'Outliers', 'Monthly Anomalies', 'Weekly Anomalies']
-    selected_insights = ['Hi-Pots']
 
-    print('Process started.')
     ########## Establish Logesys Database Connection ##########
     cnxn, cursor, logesys_engine = sql_connect()
+    
+    ########## Get the selected insights #########
+    selected_insights_query = f"""
+                            SELECT selected_insights FROM insight_settings WHERE datamartid = '{datamart_id}'"""
+    cursor.execute(selected_insights_query)
+    selected_insights_list = cursor.fetchone()
+    selected_insights = json.loads(selected_insights_list[0])
+
+    print(selected_insights)  
+    print('Process started.')
+
 
     try:
         ########## Get client's credentials from the database ##########
