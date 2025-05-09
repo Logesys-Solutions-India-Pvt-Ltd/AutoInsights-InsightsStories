@@ -35,6 +35,7 @@ def insights_generator(event):
         selected_insights_query = f"""
                                 SELECT selected_insights FROM insight_settings WHERE datamartid = '{datamart_id}'"""
         cursor.execute(selected_insights_query)
+        cnxn.commit()
         selected_insights_list = cursor.fetchone()
         selected_insights = json.loads(selected_insights_list[0])
         print(selected_insights)  

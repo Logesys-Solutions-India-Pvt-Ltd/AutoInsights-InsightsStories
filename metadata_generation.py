@@ -235,100 +235,155 @@ def update_metadata(datamart_id, table_id, df_metadata, engine):
             connection.commit()
 
 
+def transform_metadata_to_json(retrieved_metadata):
+    """
+    Transforms a Pandas DataFrame containing metadata into the desired JSON format.
+
+    Args:
+        df (pd.DataFrame): DataFrame with columns 'FieldName', 'DisplayFieldName',
+                           'DataType', and 'FieldType'.
+
+    Returns:
+        str: JSON string representing the transformed metadata.
+    """
+    metadata_list = []
+    for index, row in retrieved_metadata.iterrows():
+        metadata_item = {
+            "MetaDataId": str(row['MetaDataId']),
+            "Field Name": row['FieldName'],
+            "New Name": row['DisplayFieldName'],
+            "Data Type": row['DataType'],
+            "Field Type": row['FieldType']
+        }
+        metadata_list.append(metadata_item)
+    output_json = {"Meta Data": metadata_list}
+    return json.dumps(output_json, indent=4)
+
 
 def metadata_generator(event):
     datamart_id = event["datamart_id"]
     table_id = event["table_id"]
     refresh = event["refresh"]  # 'True' or 'False'
-    # organization = event["organization"]
 
-    # datamart_id = "6AA6BCAA-258A-11F0-A1AD-2CEA7F154E8D"
-    # table_id = "6E6D3197-258A-11F0-842A-2CEA7F154E8D"
-    # refresh = False
+# datamart_id = "68F4413C-FD9A-11EF-BA6C-2CEA7F154E8D"
+# table_id = "664493B1-FF38-11EF-BD32-2CEA7F154E8D"
+# refresh = 'True'
 
-    username = "lsdbadmin"
-    password = "logesys@1"
-    server = "logesyssolutions.database.windows.net"
-    database = "Insights_DB_Dev"
-    logesys_engine = create_engine(f"mssql+pymssql://{username}:{password.replace('@', '%40')}@{server}/{database}")
+    try:
+        username = "lsdbadmin"
+        password = "logesys@1"
+        server = "logesyssolutions.database.windows.net"
+        database = "Insights_DB_Dev"
+        logesys_engine = create_engine(f"mssql+pymssql://{username}:{password.replace('@', '%40')}@{server}/{database}")
 
-    s3_client = boto3.client('s3', region_name='us-east-1')
-    s3_bucket_name = "auto-insights-metadata-jsonfiles-24-march-2025"
+        s3_client = boto3.client('s3', region_name='us-east-1')
+        s3_bucket_name = "auto-insights-metadata-jsonfiles-24-march-2025"
 
-    query_table_name = f"""
-        SELECT TableName 
-        FROM m_datamart_tables 
-        WHERE DataMartId = '{datamart_id}'
-        AND TableId = '{table_id}'
-    """
-    table_name = pd.read_sql_query(query_table_name, logesys_engine)['TableName'].iloc[0]
+        query_table_name = f"""
+            SELECT TableName 
+            FROM m_datamart_tables 
+            WHERE DataMartId = '{datamart_id}'
+            AND TableId = '{table_id}'
+        """
+        table_name = pd.read_sql_query(query_table_name, logesys_engine)['TableName'].iloc[0]
 
-    query_source_creds = f"""
-        SELECT
-            SourceType,
-            FilePath,
-            UserName,
-            Password
-        FROM m_datamart_tables
-        WHERE DataMartId = '{datamart_id}'
-        AND TableId = '{table_id}'
-    """
-    source_creds = pd.read_sql_query(query_source_creds, logesys_engine)
-    source_type = source_creds.iloc[0]['SourceType']
-    file_path = source_creds.iloc[0]['FilePath']
-    source_username = source_creds.iloc[0]['UserName']
-    source_password = source_creds.iloc[0]['Password']
+        query_source_creds = f"""
+            SELECT
+                SourceType,
+                FilePath,
+                UserName,
+                Password
+            FROM m_datamart_tables
+            WHERE DataMartId = '{datamart_id}'
+            AND TableId = '{table_id}'
+        """
+        source_creds = pd.read_sql_query(query_source_creds, logesys_engine)
+        source_type = source_creds.iloc[0]['SourceType']
+        file_path = source_creds.iloc[0]['FilePath']
+        source_username = source_creds.iloc[0]['UserName']
+        source_password = source_creds.iloc[0]['Password']
 
-    if source_type != 'table':
-        file_path_json = json.loads(file_path.replace("'", '"'))
-        print(f'file_path_json:{file_path_json}')
-    query_count_metadata_rows = f"""
-                SELECT COUNT(*)
-                FROM m_datamart_metadata
-                WHERE DataMartId = '{datamart_id}'
-                AND TableId = '{table_id}'
-            """
-    count_metadata_rows = pd.read_sql_query(query_count_metadata_rows, logesys_engine).iloc[0,0]
+        if source_type != 'table':
+            file_path_json = json.loads(file_path.replace("'", '"'))
 
-    if count_metadata_rows == 0 or refresh == 'True':
-        print(f'Creating metadata for the table:{table_name}')
-        if source_type == 'csv' or source_type == 'xlsx':
-            if 'connectionString' in file_path_json:
-                connection_string = file_path_json['connectionString']
-                container_name = file_path_json['containerName']
-                blob_name = file_path_json['fileName']
-                json_output = process_csv_excel_from_azure(source_type, connection_string, container_name, blob_name)
+        query_count_metadata_rows = f"""
+                    SELECT COUNT(*)
+                    FROM m_datamart_metadata
+                    WHERE DataMartId = '{datamart_id}'
+                    AND TableId = '{table_id}'
+                """
+
+        count_metadata_rows = pd.read_sql_query(query_count_metadata_rows, logesys_engine).iloc[0,0]
+
+
+        if count_metadata_rows == 0 or refresh == 'True':
+            if count_metadata_rows > 0 and refresh == 'True':
+                delete_query = text(f"DELETE FROM m_datamart_metadata WHERE datamartid = '{datamart_id}' AND tableid = '{table_id}'")
+                with logesys_engine.connect() as cnxn:
+                    cnxn.execute(delete_query)
+                    cnxn.commit()  
+                print(f"Deleted existing metadata for datamartid: {datamart_id}, tableid: {table_id}")
+
+            print(f'Creating metadata for the table:{table_name}')
+            if source_type == 'csv' or source_type == 'xlsx':
+                if 'connectionString' in file_path_json:
+                    connection_string = file_path_json['connectionString']
+                    container_name = file_path_json['containerName']
+                    blob_name = file_path_json['fileName']
+                    json_output = process_csv_excel_from_azure(source_type, connection_string, container_name, blob_name)
+                    json_output_str = json.dumps(json_output)
+                elif 'bucketName' in file_path_json:
+                    bucket_name = file_path_json['bucketName']
+                    file_key = file_path_json['fileKey']
+                    region = file_path_json['region']
+                    json_output = process_csv_excel_from_s3(source_type, bucket_name, file_key, region)
+                    json_output_str = json.dumps(json_output)
+                else:
+                    raise ValueError("Invalid file path format: Azure connection string not found")
+            elif source_type == 'table':
+                source_server, source_database = file_path.split('//')
+                source_engine = create_engine(f"mssql+pymssql://{source_username}:{source_password.replace('@', '%40')}@{source_server}/{source_database}")
+                json_output = connect_to_db(table_name, source_username, source_password, source_server, source_database)
                 json_output_str = json.dumps(json_output)
-            elif 'bucketName' in file_path_json:
-                bucket_name = file_path_json['bucketName']
-                file_key = file_path_json['fileKey']
-                region = file_path_json['region']
-                json_output = process_csv_excel_from_s3(source_type, bucket_name, file_key, region)
-                json_output_str = json.dumps(json_output)
-            else:
-                raise ValueError("Invalid file path format: Azure connection string not found")
-        elif source_type == 'table':
-            source_server, source_database = file_path.split('//')
-            source_engine = create_engine(f"mssql+pymssql://{source_username}:{source_password.replace('@', '%40')}@{source_server}/{source_database}")
-            json_output = connect_to_db(table_name, source_username, source_password, source_server, source_database)
-            json_output_str = json.dumps(json_output)
-            
-        # # Creating metadata JSON and uploading in s3
-        s3_key = f"metadata_{table_name}_{source_type}.json"
-        s3_client.put_object(Bucket=s3_bucket_name, Key=s3_key, Body=json_output_str)
-        print(f"Metadata uploaded to s3://{s3_bucket_name}/{s3_key}")
+                
+            # # Creating metadata JSON and uploading in s3
+            # s3_key = f"metadata_{table_name}_{source_type}.json"
+            # s3_client.put_object(Bucket=s3_bucket_name, Key=s3_key, Body=json_output_str)
+            # print(f"Metadata uploaded to s3://{s3_bucket_name}/{s3_key}")
 
-        # Inserting metadata into m_datamart_metadata table
-        df_metadata_initial = get_metadata_json(table_name, json_output_str)
-        # Upload the df into m_datamart_metadata
-        update_metadata(datamart_id, table_id, df_metadata_initial, logesys_engine)
+            # Inserting metadata into m_datamart_metadata table
+            df_metadata_initial = get_metadata_json(table_name, json_output_str)
+            # Upload the df into m_datamart_metadata
+            update_metadata(datamart_id, table_id, df_metadata_initial, logesys_engine)
+            return json_output_str
+        elif count_metadata_rows > 0 and refresh == 'False':
+            print(f"Retrieving metadata for the table:{table_name} ")
 
-        return json_output_str
-    elif count_metadata_rows > 0 and refresh == 'False':
-        print(f"Retrieving metadata for the table:{table_name} ")
+            retrieve_metadata_query = f"""
+                                    SELECT MetaDataId,
+                                        FieldName,
+                                        DisplayFieldName, 
+                                        DataType,
+                                        FieldType
+                                    FROM m_datamart_metadata
+                                    WHERE DataMartId = '{datamart_id}'
+                                        """
+            retrieved_metadata = pd.read_sql_query(retrieve_metadata_query, logesys_engine)
+            retrieved_metadata = pd.DataFrame(retrieved_metadata)
 
-        # Download the metadata file from S3
-        response = s3_client.get_object(Bucket=s3_bucket_name, Key=f"metadata_{table_name}_{source_type}.json")
-        json_output_str = response['Body'].read().decode('utf-8')
+            json_output_str = transform_metadata_to_json(retrieved_metadata)
 
-        return json_output_str
+            # # Download the metadata file from S3
+            # response = s3_client.get_object(Bucket=s3_bucket_name, Key=f"metadata_{table_name}_{source_type}.json")
+            # json_output_str = response['Body'].read().decode('utf-8')
+            # print(f'json_output_str:{json_output_str}')
+            return json_output_str
+
+    except Exception as e:
+        error_message = f"Error in metadata_generator: {e}"
+        print(error_message)
+        return {"status": "error", "message": error_message}
+
+    finally:
+        if cnxn:
+            cnxn.close()
