@@ -17,7 +17,6 @@ def insights_generator(event):
     # datamart_id = "5C8A4096-25B7-11F0-92B1-3CE9F73E436E" ## JMBaxi
     df_relationship_path = 'Relationship Table Dist.xlsx'
 
-
     if df_relationship_path != '':
         df_relationship = read_data(df_relationship_path, type='xlsx')
     else:
@@ -26,22 +25,20 @@ def insights_generator(event):
     start_month = 1
     end_month = 12
 
-    ########## Establish Logesys Database Connection ##########
-    cnxn, cursor, logesys_engine = sql_connect()
-    
-    ########## Get the selected insights #########
-    selected_insights_query = f"""
-                            SELECT selected_insights FROM insight_settings WHERE datamartid = '{datamart_id}'"""
-    cursor.execute(selected_insights_query)
-    selected_insights_list = cursor.fetchone()
-    selected_insights = json.loads(selected_insights_list[0])
-
-    print(f'datamart_id:{datamart_id}')
-    print(selected_insights)  
-    print('Process started.')
-
-
     try:
+        print(f'datamart_id:{datamart_id}')
+        print('Process started.')
+        ########## Establish Logesys Database Connection ##########
+        cnxn, cursor, logesys_engine = sql_connect()
+        
+        ########## Get the selected insights #########
+        selected_insights_query = f"""
+                                SELECT selected_insights FROM insight_settings WHERE datamartid = '{datamart_id}'"""
+        cursor.execute(selected_insights_query)
+        selected_insights_list = cursor.fetchone()
+        selected_insights = json.loads(selected_insights_list[0])
+        print(selected_insights)  
+        
         ########## Get client's credentials from the database ##########
         tables_info, common_credentials = get_datamart_source_credentials(datamart_id, logesys_engine)
 
