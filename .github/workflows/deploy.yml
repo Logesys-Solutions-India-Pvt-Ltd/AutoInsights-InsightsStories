@@ -20,9 +20,13 @@ jobs:
         python3 -m pip install --user --no-cache-dir -r requirements.txt
         python3 -m pip install --user --no-cache-dir gunicorn
 
+    - name: Stop existing processes on port 8000
+      run: |
+        sudo fuser -k 8000/tcp || true # Kill any process using port 8000, ignore errors if none found
+
     - name: Stop existing Flask application (if running)
       run: |
-        sudo systemctl stop flask_app || true # Ignore error if service is not running
+        sudo systemctl stop flask_app || true # Stop systemd service if it exists
 
     - name: Start Gunicorn
       run: |
