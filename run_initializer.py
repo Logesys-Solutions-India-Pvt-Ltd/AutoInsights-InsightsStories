@@ -2,11 +2,13 @@
 import os
 import signal
 from flask import Flask, request, jsonify, Response
+from flask_cors import CORS
 from initializer import insights_generator
 from metadata_generation import metadata_generator
 from ask_summary_generation import ask_summary_generator
 
 app = Flask(__name__)
+CORS(app)
 
 # @app.route("/test", methods=["GET"])
 # def hello():
