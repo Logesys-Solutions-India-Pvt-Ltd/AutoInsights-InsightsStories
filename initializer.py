@@ -24,12 +24,13 @@ def insights_generator(event):
 
     start_month = 1
     end_month = 12
-
+    
+    ########## Establish Logesys Database Connection ##########
+    cnxn, cursor, logesys_engine = sql_connect()
     try:
         print(f'datamart_id:{datamart_id}')
         print('Process started.')
-        ########## Establish Logesys Database Connection ##########
-        cnxn, cursor, logesys_engine = sql_connect()
+        
         
         ########## Get the selected insights #########
         selected_insights_query = f"""

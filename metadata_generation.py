@@ -1,6 +1,7 @@
 from azure.storage.blob import BlobServiceClient
 from sqlalchemy import create_engine, text
 from datetime import datetime
+from FinalCommon import sql_connect
 import pandas as pd
 import numpy as np
 import json
@@ -254,6 +255,9 @@ def metadata_generator(event):
     table_id = event["table_id"]
     refresh = event["refresh"]  # 'True' or 'False'
 
+    ########## Establish Logesys Database Connection ##########
+    cnxn, cursor, logesys_engine = sql_connect()
+    
     # datamart_id = "68F4413C-FD9A-11EF-BA6C-2CEA7F154E8D"
     # table_id = "664493B1-FF38-11EF-BD32-2CEA7F154E8D"
     # refresh = 'True'
