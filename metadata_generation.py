@@ -34,14 +34,9 @@ def create_metadata_json(df_top1000):
     return blob_metadata
 
 
-def connect_to_db(table, username, password, server, database):
-    # username = 'lsdbadmin'
-    # password = 'logesys@1'
-    # server = 'logesyssolutions.database.windows.net'
-    # database = 'testDB'
-    engine = create_engine(f"mssql+pymssql://{username}:{password.replace('@', '%40')}@{server}/{database}")
+def connect_to_db(table, source_engine):
     try:
-        with engine.connect() as connection: 
+        with source_engine.connect() as connection: 
             # Find column names and dtypes
             query_col_dtype = f"""  
                                     SELECT 
@@ -65,7 +60,7 @@ def connect_to_db(table, username, password, server, database):
             
             # Query top 1000 rows from the table
             query_top_1000_rows = f"select distinct top 1000* from [{table}]"
-            result_top_1000_rows = pd.read_sql_query(query_top_1000_rows, engine)
+            result_top_1000_rows = pd.read_sql_query(query_top_1000_rows, source_engine)
             
             df_top1000 = result_top_1000_rows
             
@@ -182,12 +177,6 @@ def get_metadata_json(table, json_output_str):
 
 def update_metadata(datamart_id, table_id, df_metadata, engine):
     updated_date = datetime.now()
-    # query_delete_metadata = "DELETE FROM m_datamart_metadata WHERE TableId = '" + str(table_id) + "'"
-
-    # with engine.connect() as connection:
-    #     connection.execute(text(query_delete_metadata))
-    #     connection.commit()
-
     field_id = 0
     for i in range(0,len(df_metadata['New Name'])):
         field_id+=1
@@ -229,10 +218,10 @@ def update_metadata(datamart_id, table_id, df_metadata, engine):
             "created_date": updated_date,
             "table_id": table_id,
         }
-
-        with engine.connect() as connection:
-            connection.execute(query, params)
-            connection.commit()
+        
+        with engine.connect() as cnxn:
+            cnxn.execute(query, params)
+            cnxn.commit()
 
 
 def transform_metadata_to_json(retrieved_metadata):
@@ -265,9 +254,9 @@ def metadata_generator(event):
     table_id = event["table_id"]
     refresh = event["refresh"]  # 'True' or 'False'
 
-# datamart_id = "68F4413C-FD9A-11EF-BA6C-2CEA7F154E8D"
-# table_id = "664493B1-FF38-11EF-BD32-2CEA7F154E8D"
-# refresh = 'True'
+    # datamart_id = "68F4413C-FD9A-11EF-BA6C-2CEA7F154E8D"
+    # table_id = "664493B1-FF38-11EF-BD32-2CEA7F154E8D"
+    # refresh = 'True'
 
     try:
         username = "lsdbadmin"
@@ -275,9 +264,6 @@ def metadata_generator(event):
         server = "logesyssolutions.database.windows.net"
         database = "Insights_DB_Dev"
         logesys_engine = create_engine(f"mssql+pymssql://{username}:{password.replace('@', '%40')}@{server}/{database}")
-
-        s3_client = boto3.client('s3', region_name='us-east-1')
-        s3_bucket_name = "auto-insights-metadata-jsonfiles-24-march-2025"
 
         query_table_name = f"""
             SELECT TableName 
@@ -343,19 +329,29 @@ def metadata_generator(event):
             elif source_type == 'table':
                 source_server, source_database = file_path.split('//')
                 source_engine = create_engine(f"mssql+pymssql://{source_username}:{source_password.replace('@', '%40')}@{source_server}/{source_database}")
-                json_output = connect_to_db(table_name, source_username, source_password, source_server, source_database)
+                json_output = connect_to_db(table_name, source_engine)
                 json_output_str = json.dumps(json_output)
-                
-            # # Creating metadata JSON and uploading in s3
-            # s3_key = f"metadata_{table_name}_{source_type}.json"
-            # s3_client.put_object(Bucket=s3_bucket_name, Key=s3_key, Body=json_output_str)
-            # print(f"Metadata uploaded to s3://{s3_bucket_name}/{s3_key}")
-
+ 
             # Inserting metadata into m_datamart_metadata table
             df_metadata_initial = get_metadata_json(table_name, json_output_str)
             # Upload the df into m_datamart_metadata
             update_metadata(datamart_id, table_id, df_metadata_initial, logesys_engine)
-            return json_output_str
+
+            created_metadata_query = f"""
+                                    SELECT  
+                                        MetaDataId,
+                                        FieldName,
+                                        DisplayFieldName,
+                                        DataType, 
+                                        FieldType
+                                    FROM m_datamart_metadata
+                                    WHERE DataMartId = '{datamart_id}'
+                                    AND TableId = '{table_id}'"""
+            created_metadata = pd.read_sql_query(created_metadata_query, logesys_engine)
+            created_metadata = pd.DataFrame(created_metadata)
+            created_metadata_json = transform_metadata_to_json(created_metadata)
+            return created_metadata_json
+        
         elif count_metadata_rows > 0 and refresh == 'False':
             print(f"Retrieving metadata for the table:{table_name} ")
 
@@ -370,14 +366,8 @@ def metadata_generator(event):
                                         """
             retrieved_metadata = pd.read_sql_query(retrieve_metadata_query, logesys_engine)
             retrieved_metadata = pd.DataFrame(retrieved_metadata)
-
-            json_output_str = transform_metadata_to_json(retrieved_metadata)
-
-            # # Download the metadata file from S3
-            # response = s3_client.get_object(Bucket=s3_bucket_name, Key=f"metadata_{table_name}_{source_type}.json")
-            # json_output_str = response['Body'].read().decode('utf-8')
-            # print(f'json_output_str:{json_output_str}')
-            return json_output_str
+            retrieved_metadata_json = transform_metadata_to_json(retrieved_metadata)
+            return retrieved_metadata_json
 
     except Exception as e:
         error_message = f"Error in metadata_generator: {e}"
