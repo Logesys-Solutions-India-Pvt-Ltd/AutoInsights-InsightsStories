@@ -17,6 +17,7 @@ def insights_generator(event):
     # datamart_id = "5C8A4096-25B7-11F0-92B1-3CE9F73E436E" ## JMBaxi
     df_relationship_path = 'Relationship Table Dist.xlsx'
 
+
     if df_relationship_path != '':
         df_relationship = read_data(df_relationship_path, type='xlsx')
     else:
