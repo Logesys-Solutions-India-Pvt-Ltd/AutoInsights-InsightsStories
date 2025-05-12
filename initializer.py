@@ -110,6 +110,7 @@ def insights_generator(event):
             'last52weeks_end_date_dict': sig_fields['last52weeks_end_date_dict']
         }
 
+        ### Timesquare ###
         dim_allowed_for_derived_metrics = {
             'Markdown %': [dim for dims in Significant_dimensions.values() for dim in dims],
             'ASP': [dim for dims in Significant_dimensions.values() for dim in dims],
@@ -119,6 +120,15 @@ def insights_generator(event):
             'UPT': [dim for dim in Significant_dimensions['Location_Dist']
                     if dim in ['Store Name', 'Region', 'Business', 'Mall Name', 'Territory']],
         }
+        ### Timesquare ###
+
+        ### JM Baxi ###
+        dim_allowed_for_derived_metrics = {
+            'MOVES': [dim for dims in Significant_dimensions.values() for dim in dims],
+            'NCR': [dim for dims in Significant_dimensions.values() for dim in dims]
+        }
+        ### JM Baxi ###
+
 
         # # ########## Dates calculations for Outliers ##########
         outliers_dates = calculate_periodic_dates_for_outliers(source_type, source_engine, date_columns, df_sql_table_names, df_list, df_list_ty, df_list_ly)
