@@ -110,17 +110,17 @@ def insights_generator(event):
             'last52weeks_end_date_dict': sig_fields['last52weeks_end_date_dict']
         }
 
-        ### Timesquare ###
-        dim_allowed_for_derived_metrics = {
-            'Markdown %': [dim for dims in Significant_dimensions.values() for dim in dims],
-            'ASP': [dim for dims in Significant_dimensions.values() for dim in dims],
-            'Stock Cover': [dim for dims in Significant_dimensions.values() for dim in dims],
-            'ATV': [dim for dim in Significant_dimensions['Location_Dist']
-                    if dim in ['Store Name', 'Region', 'Business', 'Mall Name', 'Territory']],
-            'UPT': [dim for dim in Significant_dimensions['Location_Dist']
-                    if dim in ['Store Name', 'Region', 'Business', 'Mall Name', 'Territory']],
-        }
-        ### Timesquare ###
+        # ### Timesquare ###
+        # dim_allowed_for_derived_metrics = {
+        #     'Markdown %': [dim for dims in Significant_dimensions.values() for dim in dims],
+        #     'ASP': [dim for dims in Significant_dimensions.values() for dim in dims],
+        #     'Stock Cover': [dim for dims in Significant_dimensions.values() for dim in dims],
+        #     'ATV': [dim for dim in Significant_dimensions['Location_Dist']
+        #             if dim in ['Store Name', 'Region', 'Business', 'Mall Name', 'Territory']],
+        #     'UPT': [dim for dim in Significant_dimensions['Location_Dist']
+        #             if dim in ['Store Name', 'Region', 'Business', 'Mall Name', 'Territory']],
+        # }
+        # ### Timesquare ###
 
         ### JM Baxi ###
         dim_allowed_for_derived_metrics = {
