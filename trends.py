@@ -7,18 +7,8 @@ import pandas as pd
 import numpy as np
 
 
-def trends(datamart_id, sourcetype, source_engine, date_columns, dates_filter_dict, Significant_dimensions, derived_measures_dict, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, df_list_last12months, df_relationship, rename_dim_meas, significance_score, max_month, max_date, df_version_number, cnxn, cursor):
+def trends(datamart_id, sourcetype, source_engine, dim_allowed_for_derived_metrics, date_columns, dates_filter_dict, Significant_dimensions, derived_measures_dict, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, df_list_last12months, df_relationship, rename_dim_meas, significance_score, max_month, max_date, df_version_number, cnxn, cursor):
     print('--TRENDS--')
-    dim_allowed_for_derived_metrics = {
-     'Markdown %': [dim for dims in Significant_dimensions.values() for dim in dims],
-     'ASP': [dim for dims in Significant_dimensions.values() for dim in dims],
-     'Stock Cover': [dim for dims in Significant_dimensions.values() for dim in dims],
-     'ATV': [dim for dim in Significant_dimensions['Location_Dist']
-             if dim in ['Store Name', 'Region', 'Business', 'Mall Name', 'Territory']],
-     'UPT': [dim for dim in Significant_dimensions['Location_Dist']
-             if dim in ['Store Name', 'Region', 'Business', 'Mall Name', 'Territory']],
- }
-
     
     tags_list, related_fields_list, string_list, df_actual_list, cut_off_list, meas_list, charttitle_list,chartsubtitle_list, xAxisTitle_list, yAxisTitle_list, importance_list = [],[],[],[],[],[],[],[],[],[],[]
     # dim_table = 'Location_Dist'
@@ -26,8 +16,8 @@ def trends(datamart_id, sourcetype, source_engine, date_columns, dates_filter_di
     # meas = 'Markdown %'
     for dim_table, dim_list in Significant_dimensions.items():
         for dim in dim_list:
-            # for meas in list(derived_measures_dict.keys()):
-             for meas in ['Markdown %', 'ASP', 'ATV', 'UPT']:
+            for meas in list(derived_measures_dict.keys()):
+            #  for meas in ['Markdown %', 'ASP', 'ATV', 'UPT']:
                 if dim in dim_allowed_for_derived_metrics[meas]:
                     print(f'dim:{dim}, meas:{meas}')
                     start_of_last_12_months, start_of_month = calculate_month_dates(max_date)

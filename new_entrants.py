@@ -44,6 +44,7 @@ def new_entrants(datamart_id, sourcetype, source_engine, dim, meas, dim_table, d
             chartFooterTitle = 'Showing last 12 months'
             
             insight_code = 'New Entrants#' + dim + '#' + dim_value + '#' + meas
+            
             version_num = 0
             df_version_num_filtered = df_version_number[df_version_number['InsightCode'] == insight_code] 
             tags = ''
@@ -56,7 +57,7 @@ def new_entrants(datamart_id, sourcetype, source_engine, dim, meas, dim_table, d
                 importance = df_version_num_filtered['Importance'].iloc[0] + 10
                 chartFooterTitle = chartFooterTitle + ' (Version: '+str(version_num) + ')'
                 tags = dim + '|' + dim_value + '|' + meas + '|' + 'New Entrant' + '|' + first_non_zero_row['Year-Month'] + '|' + 'Month' + '|' + 'Version: ' + str(version_num)
-            
+
             xAxisTitle = rename_variables(xAxisTitle, rename_dim_meas)
             yAxisTitle = rename_variables(yAxisTitle, rename_dim_meas)
             chart_title = rename_variables(chart_title, rename_dim_meas)
@@ -66,8 +67,6 @@ def new_entrants(datamart_id, sourcetype, source_engine, dim, meas, dim_table, d
             
             data = LineChart(df_new_entrant,[meas],[], xAxisTitle, yAxisTitle, chart_title, chartSubTitle, chartFooterTitle, '', non_highlight_color = '#B0CBFF', highlight_color = '#3862FF')
             related_fields = dim  + ' : ' + dim_value + ' | ' + 'measure : ' + meas + ' | ' + 'function : New Entrant'
-            
-            string = b_tag_open + dim + ' : ' + dim_value + b_tag_close + ' is ' + new_entrant_text + ' from the Month ' + b_tag_open + first_non_zero_row['Year-Month'] + b_tag_close
-            
+            string = b_tag_open + dim + ' : ' + dim_value + b_tag_close + ' is ' + new_entrant_text + ' from the Month ' + b_tag_open + str(first_non_zero_row['Year-Month']) + b_tag_close
             string = rename_variables(string, rename_dim_meas)
             # insert_insights(datamart_id, string, str(data), 'Slope', 'Line', str(related_fields), importance, tags, 'New Entrants', 'Insight', cnxn, cursor, insight_code, version_num)

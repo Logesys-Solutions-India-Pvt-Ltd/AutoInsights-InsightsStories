@@ -8,6 +8,7 @@ import numpy as np
 
 def stories_x_times(sourcetype, source_engine, datamart_id, date_columns, dates_filter_dict, derived_measures_dict, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, Significant_dimensions, meas, df_list_ly, df_list_ty, df_relationship, rename_dim_meas, significance_score, importance, cnxn, cursor):
     row_index = 0
+    is_ratio = False
     df_stories_xtimes = pd.DataFrame(columns=['String','X Times','Value','Dimension'])
     
     if sourcetype == 'xlsx':

@@ -624,7 +624,7 @@ def get_groupby_data(sourcetype, source_engine, df_sql_table_names, df_sql_meas_
 
         # Same table logic
         if meas_table_name == dim_table_name:
-            if sourcetype == 'table':                
+            if sourcetype == 'table':       
                 if meas_table_name not in ty_start_date_dict.keys() or date_columns[meas_table_name] in meas_filter:
                     df_to_use = 'AllData'
                 
@@ -1081,7 +1081,6 @@ def parent_get_group_data(sourcetype, source_engine, dim_col, meas, date_columns
             else: 
                 merge_on = [dim_col] if extra_groupby_col is None else [extra_groupby_col, dim_col]
                 df_final = pd.merge(df_final, df_grouped[key], on=merge_on).rename(columns={meas: key})
-#             print(f'df_final:{df_final}')
             # Replace the key in the formula, with the dataframe containing the calculated values 
             final_formula = final_formula.replace(key, f"df_final['{key}']")
 
@@ -1109,7 +1108,6 @@ def parent_get_group_data(sourcetype, source_engine, dim_col, meas, date_columns
             df_derived_measure = eval(final_formula)
     except ZeroDivisionError:
         df_derived_measure = 0  # Assign a default value
-#     print(f'df_derived_measure:{df_derived_measure}')
 
     
         

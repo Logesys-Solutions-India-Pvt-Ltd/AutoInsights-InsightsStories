@@ -16,6 +16,7 @@ def insights_generator(event):
     # datamart_id = "68F4413C-FD9A-11EF-BA6C-2CEA7F154E8D" ## Timesquare
     # datamart_id = "6AA6BCAA-258A-11F0-A1AD-2CEA7F154E8D" ## JMBaxi
 
+    # datamart_id = "7F2C4256-3449-447A-B1CC-FAE49431BF7C"
     ########## Establish Logesys Database Connection ##########
     cnxn, cursor, logesys_engine = sql_connect()
     count_tables_in_datamart_query = f"""
@@ -183,10 +184,13 @@ def insights_generator(event):
         insights_to_skip = ['Trends', 'Outliers', 'Monthly Anomalies', 'Weekly Anomalies']
 
         for dim_table, dim_list in Significant_dimensions.items():
+            print(f'dim_table:{dim_table}')
             for dim in dim_list:
+                print(f'dim:{dim}')
                 for meas in list(derived_measures_dict.keys()):
+                    print(f'meas:{meas}')
                     if dim in dim_allowed_for_derived_metrics[meas]:
-                        print(f"dim_table:{dim_table}, dim:{dim}, meas:{meas}")
+                        print('Allowed')
                         for insight_name, insight_function in insight_functions.items():
                             if insight_name in insights_to_skip:
                                 continue
@@ -205,16 +209,16 @@ def insights_generator(event):
 
         for insight_name, insight_function in insight_functions.items():
             if insight_name == 'Trends':
-                insight_function(datamart_id, source_type, source_engine, date_columns, dates_filter_dict, Significant_dimensions, derived_measures_dict, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, df_list_last12months, df_relationship, rename_dim_meas, significance_score, max_month, max_date, df_version_number, cnxn, cursor)
+                insight_function(datamart_id, source_type, source_engine, dim_allowed_for_derived_metrics, date_columns, dates_filter_dict, Significant_dimensions, derived_measures_dict, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, df_list_last12months, df_relationship, rename_dim_meas, significance_score, max_month, max_date, df_version_number, cnxn, cursor)
                 print(f"Executed: {insight_name}")
             elif insight_name == 'Monthly Anomalies':
-                insight_function(datamart_id, source_type, source_engine, date_columns, dates_filter_dict, Significant_dimensions, derived_measures_dict, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, df_list_last12months, df_relationship, rename_dim_meas, significance_score, max_month, max_date, df_version_number, cnxn, cursor)
+                insight_function(datamart_id, source_type, source_engine, dim_allowed_for_derived_metrics, date_columns, dates_filter_dict, Significant_dimensions, derived_measures_dict, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, df_list_last12months, df_relationship, rename_dim_meas, significance_score, max_month, max_date, df_version_number, cnxn, cursor)
                 print(f"Executed: {insight_name}")
             elif insight_name == 'Weekly Anomalies':
-                insight_function(datamart_id, source_type, source_engine, date_columns, dates_filter_dict, Significant_dimensions, derived_measures_dict, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, df_list_last52weeks, df_relationship, rename_dim_meas, significance_score, max_month, max_date, df_version_number, cnxn, cursor)
+                insight_function(datamart_id, source_type, source_engine, dim_allowed_for_derived_metrics, date_columns, dates_filter_dict, Significant_dimensions, derived_measures_dict, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, df_list_last52weeks, df_relationship, rename_dim_meas, significance_score, max_month, max_date, df_version_number, cnxn, cursor)
                 print(f"Executed: {insight_name}")
             elif insight_name == 'Outliers':
-                insight_function(datamart_id, source_type, source_engine, date_columns, dates_filter_dict, Significant_dimensions, derived_measures_dict, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, df_relationship, df_list_ly, df_list_ty, rename_dim_meas, significance_score, max_year, max_month, outliers_dates, df_version_number, cnxn, cursor)
+                insight_function(datamart_id, source_type, source_engine, dim_allowed_for_derived_metrics, date_columns, dates_filter_dict, Significant_dimensions, derived_measures_dict, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, df_relationship, df_list_ly, df_list_ty, rename_dim_meas, significance_score, max_year, max_month, outliers_dates, df_version_number, cnxn, cursor)
                 print(f"Executed: {insight_name}")
 
         return {
