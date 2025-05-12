@@ -14,32 +14,44 @@ import boto3
 def insights_generator(event):
     datamart_id = event.get('datamart_id')
     # datamart_id = "68F4413C-FD9A-11EF-BA6C-2CEA7F154E8D" ## Timesquare
-    # datamart_id = "5C8A4096-25B7-11F0-92B1-3CE9F73E436E" ## JMBaxi
-    df_relationship_path = 'Relationship Table Dist.xlsx'
+    # datamart_id = "6AA6BCAA-258A-11F0-A1AD-2CEA7F154E8D" ## JMBaxi
 
-    if df_relationship_path != '':
-        df_relationship = read_data(df_relationship_path, type='xlsx')
-    else:
+    ########## Establish Logesys Database Connection ##########
+    cnxn, cursor, logesys_engine = sql_connect()
+    count_tables_in_datamart_query = f"""
+                                    SELECT COUNT(*) AS table_count
+                                    FROM m_datamart_tables 
+                                    WHERE DataMartId = '{datamart_id}'"""
+    count_tables_in_datamart = pd.read_sql(count_tables_in_datamart_query, cnxn)
+    count_tables_in_datamart = count_tables_in_datamart['table_count'].iloc[0]
+
+    if count_tables_in_datamart == 1:
         df_relationship = pd.DataFrame()
+    else:
+        df_relationship_query = f"""
+                                SELECT * FROM relationship_table 
+                                WHERE datamartid = '{datamart_id}'"""
+        
+    # df_relationship_path = 'Relationship Table Dist.xlsx'
+
+    # if df_relationship_path != '':
+    #     df_relationship = read_data(df_relationship_path, type='xlsx')
+    # else:
+        # df_relationship = pd.DataFrame()
 
     start_month = 1
     end_month = 12
-    
-    ########## Establish Logesys Database Connection ##########
-    cnxn, cursor, logesys_engine = sql_connect()
+
     try:
-        print(f'datamart_id:{datamart_id}')
         print('Process started.')
-        
         
         ########## Get the selected insights #########
         selected_insights_query = f"""
                                 SELECT selected_insights FROM insight_settings WHERE datamartid = '{datamart_id}'"""
         cursor.execute(selected_insights_query)
-        cnxn.commit()
         selected_insights_list = cursor.fetchone()
         selected_insights = json.loads(selected_insights_list[0])
-        print(selected_insights)  
+        print(f'Insights selected for {datamart_id}: {selected_insights}')  
         
         ########## Get client's credentials from the database ##########
         tables_info, common_credentials = get_datamart_source_credentials(datamart_id, logesys_engine)

@@ -2,6 +2,7 @@ from sqlalchemy import create_engine, text
 from dateutil.relativedelta import relativedelta
 from FinalCommon import *
 import json
+import re
 import pandas as pd
 
 
@@ -62,6 +63,55 @@ def get_datamart_source_credentials(datamart_id, logesys_engine):
         }
     
     return tables_info, common_credentials
+
+
+def json_creation(datamartId, cursor):
+    metrics = cursor.execute(f"SELECT MetricName FROM derived_metrics WHERE DataMartID = '{datamartId}'").fetchall()
+    formulae = cursor.execute(f"SELECT Formula FROM derived_metrics WHERE DataMartID = '{datamartId}'").fetchall()
+    func_map = {
+        "SUM": "sum()",
+        "AVERAGE": "mean()",
+        "MAX": "max()",
+        "MIN": "min()",
+        "COUNT": "count()"
+    }
+
+    # Main function to convert a formula to JSON
+    def basic_json_conversion(metric, dax_str):
+        dax_str = dax_str.strip()
+        if dax_str.startswith("="):
+            dax_str = dax_str[1:]
+
+        result = {metric: {"Formula": dax_str}}
+
+        # Use regex to extract function calls like SUM(t_sales.markdown)
+        pattern = r"(SUM|AVERAGE|COUNT)\(\s*([\w\.\s]+\(?[\w\s]*\)?)\s*\)\.?([\w]*)"
+        matches = re.findall(pattern, dax_str)
+
+        for func_name, table_column, filterMatch in matches:
+            if func_name not in func_map:
+                continue
+            filterName = ""
+            table_name, column_name = table_column.split('.')
+            operand = f"{func_name}({table_column})"
+            py_formula = f"{table_name}['{column_name}'].{func_map[func_name]}"
+
+            if filterMatch == "filter":
+                filterName = "Sales_Auto_Insights_Dist['Posting Date'] >= (Sales_Auto_Insights_Dist['Posting Date'].max() - pd.Timedelta(days=30))"
+                py_formula = f"{table_name}[{filterName}][{column_name}].{func_map[func_name]}"
+            result[metric][operand] = {
+                "Formula": py_formula,
+                "Table": table_name,
+                "Column": column_name,
+                "Filter": filterName,
+                "Function": func_map[func_name]
+            }
+
+        return json.dumps(result, indent=2)
+    result = {}
+    for i in range(0,len(metrics)):
+        result.update(json.loads(basic_json_conversion(metrics[i].MetricName, formulae[i].Formula)))
+    return json.dumps(result, indent = 2)
 
 
 # def significant_fields(cursor, source_engine, datamart_id, table_id, 
