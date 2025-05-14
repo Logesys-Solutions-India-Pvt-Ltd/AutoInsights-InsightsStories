@@ -40,7 +40,7 @@ def LineChart(data, highlight_columns, non_highlight_columns, xAxisTitle = '' , 
         ChartData = ChartData + nh_columns + no_markers + dashed_line + ',"color":"' + non_highlight_color + '"}' 
     if len(non_highlight_columns) == 0:
         ChartData = ChartData[:-2]
-    ChartData = ChartData + '}' + xAxisTitle_start + xAxisTitle + xAxisTitle_end + yAxisTitle_start + yAxisTitle + yAxisTitle_end + chartTitle_start + chart_title + chartTitle_end + chartSubTitle_start + chartSubTitle + chartSubTitle_end + chartFooterTitle_start + chartFooterTitle + chartFooterTitle_end 
+    ChartData = ChartData + '}}' + xAxisTitle_start + xAxisTitle + xAxisTitle_end + yAxisTitle_start + yAxisTitle + yAxisTitle_end + chartTitle_start + chart_title + chartTitle_end + chartSubTitle_start + chartSubTitle + chartSubTitle_end + chartFooterTitle_start + chartFooterTitle + chartFooterTitle_end 
     return ChartData
 
 
@@ -110,23 +110,23 @@ def ScatterChart(data, scatter_columns, line_columns, meas='', xAxisTitle='', yA
 
 
 def ComboChart(df, bar_columns , dashed_line_columns, solid_line_columns = [], xAxisTitle = '' , yAxisTitle = '', chart_title = '', chartSubTitle = '', chartFooterTitle = '', yAxisTitleRight = '', scatter_columns = []):
-    chartSubTitle = chartSubTitle.replace(r'"','\\"')
-    chart_title = chart_title.replace(r'"','\\"')
-    chartFooterTitle = chartFooterTitle.replace(r'"','\\"')
+    # chartSubTitle = chartSubTitle.replace(r'"','\\"')
+    # chart_title = chart_title.replace(r'"','\\"')
+    # chartFooterTitle = chartFooterTitle.replace(r'"','\\"')
     ChartData = data_string + df.to_json() + ', '+ config
     for b_column in bar_columns:
-        b_column = b_column.replace(r'"','\\"')
+        # b_column = b_column.replace(r'"','\\"')
         ChartData = ChartData + b_column + bar_false + ',"'
     for l_column in dashed_line_columns:
-        l_column = l_column.replace(r'"','\\"')
+        # l_column = l_column.replace(r'"','\\"')
         ChartData = ChartData + l_column + dashed_line_false[:-1] + ',"'
     for l_column in solid_line_columns:
-        l_column = l_column.replace(r'"','\\"')
+        # l_column = l_column.replace(r'"','\\"')
         ChartData = ChartData + l_column + solid_line_true[:-1] + ',"'
     for s_column in scatter_columns:
-        s_column = s_column.replace(r'"','\\"')
+        # s_column = s_column.replace(r'"','\\"')
         ChartData = ChartData + s_column + scatter_false + '}' + ',"'
-    ChartData = ChartData[:-2] + '}'
+    ChartData = ChartData[:-2] + '}}'
     if len(scatter_columns) > 0:
         scatter = scattered_true
     else:
@@ -135,51 +135,99 @@ def ComboChart(df, bar_columns , dashed_line_columns, solid_line_columns = [], x
     return ChartData
 
 
-def waterfallChart(dim, meas, DiffVal, xAxisTitle='', yAxisTitle='', chart_title='', chartSubTitle='', chartFooterTitle='', ty_meas=None, ly_meas=None):
-    # Sanitize strings
-    chartSubTitle = chartSubTitle.replace(r'"', '\\"')
-    chart_title = chart_title.replace(r'"', '\\"')
-    chartFooterTitle = chartFooterTitle.replace(r'"', '\\"')
-
-    waterfall_data = pd.DataFrame(DiffVal)  # Start with the DiffVal DataFrame
-    waterfall_data.columns = [meas] #rename the column to meas
-
-    # Create DataFrames for "Last Year" and "This Year"
-    ly_df = pd.DataFrame({meas: ly_meas, meas + '2': ''}, index=['Last Year'])
-    ty_df = pd.DataFrame({meas: ty_meas, meas + '2': ''}, index=['This Year'])
-
-    # Concatenate the DataFrames
-    waterfall_data = pd.concat([ly_df, waterfall_data, ty_df])
-    waterfall_data = round(waterfall_data, 2) #round the data
-
-    waterfall_data[meas + '2'] = waterfall_data[meas].shift(1).fillna(0) #use shift and fillna
-    waterfall_data[meas].iloc[-1] = 0 #set the last row to 0
-
-    interchange1 = waterfall_data.loc['This Year', meas + '2']
-    interchange2 = waterfall_data.loc['This Year', meas]
-    waterfall_data.loc['This Year', meas] = interchange1
-    waterfall_data.loc['This Year', meas + '2'] = interchange2
-
-    ly_value = waterfall_data.loc['Last Year', meas + '2']
-    ty_value = waterfall_data.loc['This Year', meas + '2']
-
-    minimum_value = min(ly_value, ty_value) / 2 if not pd.isna(min(ly_value, ty_value)) else 0
-    minimum_value = 0 if pd.isna(minimum_value) else minimum_value #handle nan
-
-    waterfall_data[meas] = waterfall_data[meas].apply(lambda x: round(x, 2))
-    waterfall_data[meas + '2'] = waterfall_data[meas + '2'].apply(lambda x: round(x, 2))
-
-    waterfall_data[meas + '1'] = waterfall_data[meas]
-    waterfall_data[meas + '3'] = waterfall_data[meas + '2']
-    waterfall_data = waterfall_data[[meas, meas + '1', meas + '2', meas + '3']]
-    waterfall_data.columns = ['0', '1', '2', '3']
-
-    waterfall_json = {'data': waterfall_data.to_dict(orient='records')} #create the json
-
-    # Construct the final JSON string
-    chart_data = json.dumps(waterfall_json) #use json.dumps
-    final_json = f'{data_string}{chart_data}, {config}{meas}{waterfall_false}{dynamicTooltip_true}{xAxisTitle_start}{xAxisTitle}{xAxisTitle_end}{yAxisTitle_start}{yAxisTitle}{yAxisTitle_end}{chartTitle_start}{chart_title}{chartTitle_end}{chartSubTitle_start}{chartSubTitle}{chartSubTitle_end}{raising_color}{falling_color}{min_value}{minimum_value}{chartFooterTitle_start}{chartFooterTitle}{chartFooterTitle_end}'
-    return final_json
+def waterfallChart(dim, meas, DiffVal, xAxisTitle = '' , yAxisTitle = '', chart_title = '', chartSubTitle = '', chartFooterTitle = '',ty_meas = None, ly_meas = None):
+    # Escape quotes in titles
+    chartSubTitle = chartSubTitle.replace(r'"', r'\"')
+    chart_title = chart_title.replace(r'"', r'\"')
+    chartFooterTitle = chartFooterTitle.replace(r'"', r'\"')
+    
+    # Create waterfall DataFrame
+    waterfall = DiffVal.copy()
+    
+    # Create DataFrame with Last Year and This Year data
+    last_year_df = pd.DataFrame({meas: ly_meas, meas + '2': ''}, index=['Last Year'])
+    this_year_df = pd.DataFrame({meas: ty_meas}, index=['This Year'])
+    
+    # Combine DataFrames using pd.concat instead of append
+    waterfall = pd.concat([last_year_df, waterfall, this_year_df])
+    waterfall = round(waterfall, 2)
+    
+    # Calculate cumulative sums
+    waterfall[meas] = waterfall[meas].cumsum()
+    waterfall[meas + '2'].iloc[0] = 0
+    
+    # Set up intermediate values
+    for i in range(0, len(waterfall) - 1):
+        waterfall[meas + '2'].iloc[i+1] = waterfall.iloc[i][meas]
+    
+    # Set the last value of the first column to 0
+    waterfall[meas].iloc[-1] = 0
+    
+    # Reorder columns
+    waterfall = waterfall[[meas + '2', meas]]
+    waterfall.columns = [meas, meas + '2']
+    
+    # Interchange values for 'This Year'
+    interchange1 = waterfall.loc['This Year'][meas+'2']
+    interchange2 = waterfall.loc['This Year'][meas]
+    waterfall[meas].loc['This Year'] = interchange1
+    waterfall[meas+'2'].loc['This Year'] = interchange2
+    
+    # Calculate minimum value for chart scaling
+    ly_value = waterfall[meas + '2'].loc['Last Year']
+    ty_value = waterfall[meas + '2'].loc['This Year']
+    
+    if ly_value < ty_value:
+        minimum_value = ly_value / 2
+    else:
+        minimum_value = ty_value / 2
+        
+    if str(minimum_value) == 'nan':
+        minimum_value = 0
+    
+    # Round values
+    waterfall[meas] = waterfall[meas].apply(lambda x: round(x, 2))
+    waterfall[meas + '2'] = waterfall[meas + '2'].apply(lambda x: round(x, 2))
+    
+    # Create columns 1 and 3 as copies of 0 and 2
+    waterfall[meas + '1'] = waterfall[meas]
+    waterfall[meas + '3'] = waterfall[meas + '2']
+    
+    # Reorder columns and rename
+    waterfall = waterfall[[meas, meas + '1', meas + '2', meas + '3']]
+    waterfall.columns = ['0', '1', '2', '3']
+    
+    # Create JSON structure
+    data_json = {}
+    data_json[meas] = waterfall.to_dict('index')
+    
+    # Create config structure
+    config_json = {
+        "chartConfig": {
+            meas: {
+                "type": "waterfall",
+                "rightAxis": False,
+                "dynamicTooltip": True
+            }
+        },
+        "xAxisTitle": xAxisTitle,
+        "yAxisTitle": yAxisTitle,
+        "chartTitle": chart_title,
+        "chartSubTitle": chartSubTitle,
+        "risingColor": "#1A9901",
+        "fallingColor": "#AD0404",
+        "minValue": minimum_value,
+        "chartFooterTitle": chartFooterTitle
+    }
+    
+    # Combine data and config into final structure
+    final_json = {
+        "data": data_json,
+        "config": config_json
+    }
+    
+    # Convert to JSON string
+    return json.dumps(final_json)
 
 
 def BarChart(df, bar_columns, xAxisTitle = '' , yAxisTitle = '', chart_title = '', chartSubTitle = '', chartFooterTitle = ''):
@@ -192,6 +240,6 @@ def BarChart(df, bar_columns, xAxisTitle = '' , yAxisTitle = '', chart_title = '
         ChartData = ChartData + b_column + bar_false
 #     ChartData = ChartData + '"'   
 #     ChartData = ChartData[:-1] 
-    ChartData = ChartData + '}'
+    ChartData = ChartData + '}}'
     ChartData = ChartData + xAxisTitle_start + xAxisTitle + xAxisTitle_end + yAxisTitle_start + yAxisTitle + yAxisTitle_end + chartTitle_start + chart_title + chartTitle_end + chartSubTitle_start + chartSubTitle + chartSubTitle_end + chartFooterTitle_start + chartFooterTitle + chartFooterTitle_end 
     return ChartData

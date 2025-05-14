@@ -168,12 +168,12 @@ def rename_columns(df, df_metadata):
 #     else:
 #         return df
 
-def chart_index_styling(df, index, column, average='empty', avg_color='#FF0000', def_color='#FEE2B5', highlight_color='#FF9E00'):
-    df.loc[(df.index.isin(index)), column] = '{\\\"data\\\":' + df[(df.index.isin(index))][column].astype(str) + ', \\\"style\\\": \"color:' + highlight_color + '\"}'
-    df.loc[~(df.index.isin(index)), column] = '{\\\"data\\\":' + df[~(df.index.isin(index))][column].astype(str) + ', \\\"style\\\": \"color:' + def_color + '\"}'
-    if average != 'empty':
-        df.loc[(df.index.isin(index)), average] = '{\\\"data\\\":' + df.loc[(df.index.isin(index)), average].astype(str) + ', \\\"style\\\": \"color:' + avg_color + '\"}'
-        df.loc[~(df.index.isin(index)), average] = '{\\\"data\\\":' + df.loc[~(df.index.isin(index)), average].astype(str) + ', \\\"style\\\": \"color:' + avg_color + '\"}'
+def chart_index_styling(df, index, column, average = 'empty', avg_color = '#FF0000', def_color = '#FEE2B5', highlight_color = '#FF9E00'):    
+    df.loc[(df.index.isin(index)), column] = '{\"data\":' + df[(df.index.isin(index))][column].astype(str) + ', \"style\": "color:' +  highlight_color + '"}'
+    df.loc[~(df.index.isin(index)), column] = '{\"data\":' + df[~(df.index.isin(index))][column].astype(str) + ', \"style\": "color:' +  def_color + '"}'
+    if(average != 'empty'):
+        df.loc[(df.index.isin(index)), average] = '{\"data\":' + df.loc[(df.index.isin(index)), average].astype(str) + ', \"style\": "color:' +  avg_color + '"}'
+        df.loc[~(df.index.isin(index)), average]  = '{\"data\":' + df.loc[~(df.index.isin(index)), average].astype(str)  + ', \"style\": "color:' +  avg_color + '"}'
     return df
 
 def human_format(num):
