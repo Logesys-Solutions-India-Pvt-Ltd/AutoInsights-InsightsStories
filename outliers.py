@@ -184,7 +184,8 @@ def outliers(datamart_id, sourcetype, source_engine, dim_allowed_for_derived_met
                     subtitle = rename_variables(subtitle, rename_dim_meas)
                     
                     data = ComboChart(df_actual, [meas + ' Gr %'] , ['Average Gr %'], [], xAxis , yAxis, title, subtitle, chartFooterTitle)
-                    # insert_insights(datamart_id, string, data, val, 'Combo', str(related_fields), importance , tags, 'Outlier', 'Insight', cnxn, cursor, insight_code, version_num)
+                    cnxn, cursor, logesys_engine = sql_connect()
+                    insert_insights(datamart_id, string, data, val, 'Combo', str(related_fields), importance , tags, 'Outlier', 'Insight', cnxn, cursor, insight_code, version_num)
                     temp_count += 1
             elif j > 0:  
                 if (zscore > zscore_val and zscore <= zscore_val + diff) or (zscore < -zscore_val and zscore >= -zscore_val - diff):
@@ -197,7 +198,8 @@ def outliers(datamart_id, sourcetype, source_engine, dim_allowed_for_derived_met
                     subtitle = rename_variables(subtitle, rename_dim_meas)
                     
                     data = ComboChart(df_actual, [meas + ' Gr %'] , ['Average Gr %'], [], xAxis , yAxis, title, subtitle, chartFooterTitle)
-                    # insert_insights(datamart_id, string, data, val, 'Combo', str(related_fields), importance , tags, 'Outlier', 'Insight', cnxn, cursor, insight_code, version_num)
+                    cnxn, cursor, logesys_engine = sql_connect()
+                    insert_insights(datamart_id, string, data, val, 'Combo', str(related_fields), importance , tags, 'Outlier', 'Insight', cnxn, cursor, insight_code, version_num)
                     temp_count += 1
         count = count + temp_count
         print(f'count:{count}\n\n')

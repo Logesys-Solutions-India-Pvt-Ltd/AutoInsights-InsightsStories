@@ -69,4 +69,6 @@ def new_entrants(datamart_id, sourcetype, source_engine, dim, meas, dim_table, d
             related_fields = dim  + ' : ' + dim_value + ' | ' + 'measure : ' + meas + ' | ' + 'function : New Entrant'
             string = b_tag_open + dim + ' : ' + dim_value + b_tag_close + ' is ' + new_entrant_text + ' from the Month ' + b_tag_open + str(first_non_zero_row['Year-Month']) + b_tag_close
             string = rename_variables(string, rename_dim_meas)
-            # insert_insights(datamart_id, string, str(data), 'Slope', 'Line', str(related_fields), importance, tags, 'New Entrants', 'Insight', cnxn, cursor, insight_code, version_num)
+
+            cnxn, cursor, logesys_engine = sql_connect()
+            insert_insights(datamart_id, string, str(data), 'Slope', 'Line', str(related_fields), importance, tags, 'New Entrants', 'Insight', cnxn, cursor, insight_code, version_num)

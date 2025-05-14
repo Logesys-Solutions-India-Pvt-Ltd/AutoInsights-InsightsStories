@@ -100,12 +100,11 @@ def hi_pots(datamart_id, sourcetype, source_engine, derived_measures_dict, deriv
         
         related_fields_list = "#|#".join(related_fields_list)
         
-        
-        ### Renaming ###
         string = rename_variables(string, rename_dim_meas)
         xAxisTitle = rename_variables(xAxisTitle, rename_dim_meas)
         yAxisTitle = rename_variables(yAxisTitle, rename_dim_meas)
         chart_title = rename_variables(chart_title, rename_dim_meas)
         tags = rename_variables(tags, rename_dim_meas)
-        ## Renaming ###
-#         insert_insights(datamart_id, str(string), str(df_data), 'X Times', 'Combo', str(related_fields_list), importance,tags, 'Hi-Pots', 'Insight', cnxn, cursor, insight_code, version_num)
+        cnxn, cursor, logesys_engine = sql_connect()
+        
+        insert_insights(datamart_id, str(string), str(df_data), 'X Times', 'Combo', str(related_fields_list), importance,tags, 'Hi-Pots', 'Insight', cnxn, cursor, insight_code, version_num)

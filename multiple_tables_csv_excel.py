@@ -504,7 +504,7 @@ def df_others(sourcetype, source_engine, df_data, split, df_to_use, dim, meas, d
 # #     df_others_value.index.name = dim
 
 #     # Concatenate main and "others" data
-# #     return pd.concat([df_main, df_others_value])
+# #     return pd.concat([df_main, df_others_valFue])
     return df_data, len(others_filter), others_value
 
 
@@ -734,7 +734,6 @@ def get_groupby_data(sourcetype, source_engine, df_sql_table_names, df_sql_meas_
                 meas_formula = f"df_to_use['{meas_table_name}']{filter_clause}{group_by_clause}['{meas_col}']{f'.{meas_function}' if meas_function else ''}"
                 meas_formula = meas_formula.replace("df_list", "df_to_use")
                 return {}, meas_formula
-
         # Different table logic
         meas_key_col = df_relationship.loc[
                     ((df_relationship['file 1'] == meas_table_name) & (df_relationship['file 2'] == dim_table_name)) |
@@ -990,8 +989,8 @@ def parent_get_group_data(sourcetype, source_engine, dim_col, meas, date_columns
         function = value['Function']
         
         if dim_col in ['Month-Day', 'Week', 'Month', 'Quarter']:
-            dim_table = table
-            # dim_table = table.split('[')[1].split(']')[0].strip("'")
+            # dim_table = table
+            dim_table = table.split('[')[1].split(']')[0].strip("'")
         # If True, we calculate count of rows, unique values and count of unique values for mentioned column
         if other_operation:
             df_calculated, formula = get_groupby_data(sourcetype, source_engine, df_sql_table_names, df_sql_meas_functions,

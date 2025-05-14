@@ -3,6 +3,8 @@ from datetime import datetime
 from initializer_functions import *
 from multiple_tables_csv_excel import *
 from Stories.stories_call import stories_call
+from Playlist.playlist_call import playlist_call
+from DataOverview.data_overview_call import data_overview_call
 import os
 import pandas as pd
 import numpy as np
@@ -13,11 +15,13 @@ import boto3
 
 def insights_generator(event):
     datamart_id = event.get('datamart_id')
-    # datamart_id = "68F4413C-FD9A-11EF-BA6C-2CEA7F154E8D" ## Timesquare
-    # datamart_id = "6AA6BCAA-258A-11F0-A1AD-2CEA7F154E8D" ## JMBaxi
+    engine_id = event.get('engine_id')
+# datamart_id = "68F4413C-FD9A-11EF-BA6C-2CEA7F154E8D" ## Timesquare
+# datamart_id = "6AA6BCAA-258A-11F0-A1AD-2CEA7F154E8D" ## JMBaxi- old
 
-    # datamart_id = "7F2C4256-3449-447A-B1CC-FAE49431BF7C"
-    ########## Establish Logesys Database Connection ##########
+# engine_id = 'BA2ACCBB-31B4-11EB-9A5D-A85E45BE6945'
+# datamart_id = "7F2C4256-3449-447A-B1CC-FAE49431BF7C" ## Vessel Visit testing datamart
+
     cnxn, cursor, logesys_engine = sql_connect()
     count_tables_in_datamart_query = f"""
                                     SELECT COUNT(*) AS table_count
@@ -126,14 +130,14 @@ def insights_generator(event):
         ### JM Baxi ###
         dim_allowed_for_derived_metrics = {
             'MOVES': [dim for dims in Significant_dimensions.values() for dim in dims],
-            'NCR': [dim for dims in Significant_dimensions.values() for dim in dims]
+            'NCR': [dim for dims in Significant_dimensions.values() for dim in dims],
+            'Crane Productivity': [dim for dims in Significant_dimensions.values() for dim in dims]
         }
         ### JM Baxi ###
 
 
         # # ########## Dates calculations for Outliers ##########
         outliers_dates = calculate_periodic_dates_for_outliers(source_type, source_engine, date_columns, df_sql_table_names, df_list, df_list_ty, df_list_ly)
-
 
         # ######### Significance Score ##########
         significance_score = significance_engine_sql(source_engine, df_sql_table_names, df_sql_meas_functions, Significant_dimensions, Significant_measures, df_relationship)
@@ -144,11 +148,10 @@ def insights_generator(event):
         rename_dim_meas = rename_fields(datamart_id, rename_dim_meas, cnxn, cursor)
         print(f'rename_dim_meas:\n{rename_dim_meas}')
 
-        ################################################## Stories Call ###########################################
         stories_call(source_type, source_engine, datamart_id, date_columns, dates_filter_dict, derived_measures_dict, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, Significant_dimensions, df_list_ly, df_list_ty, df_relationship, rename_dim_meas, significance_score, cnxn, cursor)
         print('Stories generated.')
-        ################################################## Insights Call ##########################################
 
+        ################################################## Insights Call ##########################################
         insightcode_sql = "SELECT InsightCode, MAX(VersionNumber) AS VersionNumber, MAX(Importance) AS Importance FROM tt_insights WHERE datamartid = '" + str(datamart_id) + "' GROUP BY InsightCode"
         df_version_number = pd.read_sql(insightcode_sql, cnxn)
 
@@ -220,6 +223,12 @@ def insights_generator(event):
             elif insight_name == 'Outliers':
                 insight_function(datamart_id, source_type, source_engine, dim_allowed_for_derived_metrics, date_columns, dates_filter_dict, Significant_dimensions, derived_measures_dict, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, df_relationship, df_list_ly, df_list_ty, rename_dim_meas, significance_score, max_year, max_month, outliers_dates, df_version_number, cnxn, cursor)
                 print(f"Executed: {insight_name}")
+
+        playlist_call(datamart_id, engine_id, Significant_dimensions, df_sql_table_names, cnxn, cursor)
+        print('Playlist generated')
+
+        data_overview_call(source_type, source_engine, dim_allowed_for_derived_metrics, datamart_id, date_columns, dates_filter_dict, outliers_dates, derived_measures_dict, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, Significant_dimensions, df_list, df_list_ly, df_list_ty, df_relationship, rename_dim_meas, significance_score, max_year, max_month, cnxn, cursor)
+        print('Data Overview generated')
 
         return {
             "status": "success",

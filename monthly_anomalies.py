@@ -121,7 +121,8 @@ def monthly_anomalies(datamart_id, sourcetype, source_engine, dim_allowed_for_de
                     tags = rename_variables(tags, rename_dim_meas)
                     
                     data = LineChart(df_actual, [meas], [], xAxis, yAxis, title, subtitle, chartFooterTitle, non_highlight_color='#B0CBFF', highlight_color='#3862FF')
-                    # insert_insights(datamart_id, str(string), str(data), 'Related Measures', 'Line', str(related_fields), importance, tags, 'Monthly Anomalies', 'Insight', cnxn, cursor, insight_code, version_num)
+                    cnxn, cursor, logesys_engine = sql_connect()
+                    insert_insights(datamart_id, str(string), str(data), 'Related Measures', 'Line', str(related_fields), importance, tags, 'Monthly Anomalies', 'Insight', cnxn, cursor, insight_code, version_num)
                     temp_count += 1
             elif j > 0:  
                 if (zscore > zscore_val and zscore <= zscore_val + diff) or (zscore < -zscore_val and zscore >= -zscore_val - diff):                    
@@ -132,7 +133,8 @@ def monthly_anomalies(datamart_id, sourcetype, source_engine, dim_allowed_for_de
                     tags = rename_variables(tags, rename_dim_meas)
                     
                     data = LineChart(df_actual, [meas], [], xAxis, yAxis, title, subtitle, chartFooterTitle, non_highlight_color='#B0CBFF', highlight_color='#3862FF')
-                    # insert_insights(datamart_id, str(string), str(data), 'Related Measures', 'Line', str(related_fields), importance, tags, 'Monthly Anomalies', 'Insight', cnxn, cursor, insight_code, version_num)
+                    cnxn, cursor, logesys_engine = sql_connect()
+                    insert_insights(datamart_id, str(string), str(data), 'Related Measures', 'Line', str(related_fields), importance, tags, 'Monthly Anomalies', 'Insight', cnxn, cursor, insight_code, version_num)
                     temp_count += 1
         count = count + temp_count
         print(f'count:{count}\n\n')
