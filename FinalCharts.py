@@ -135,51 +135,51 @@ def ComboChart(df, bar_columns , dashed_line_columns, solid_line_columns = [], x
     return ChartData
 
 
-def waterfallChart(dim, meas, DiffVal, xAxisTitle = '' , yAxisTitle = '', chart_title = '', chartSubTitle = '', chartFooterTitle = '',ty_meas = None, ly_meas = None):
-    chartSubTitle = chartSubTitle.replace(r'"','\\"')
-    chart_title = chart_title.replace(r'"','\\"')
-    chartFooterTitle = chartFooterTitle.replace(r'"','\\"')
-    waterfall = pd.DataFrame()
-    waterfall =  (DiffVal)
+def waterfallChart(dim, meas, DiffVal, xAxisTitle='', yAxisTitle='', chart_title='', chartSubTitle='', chartFooterTitle='', ty_meas=None, ly_meas=None):
+    # Sanitize strings
+    chartSubTitle = chartSubTitle.replace(r'"', '\\"')
+    chart_title = chart_title.replace(r'"', '\\"')
+    chartFooterTitle = chartFooterTitle.replace(r'"', '\\"')
 
-    waterfall = round(pd.DataFrame({meas : ly_meas , meas + '2' : ''} , index=['Last Year']).append(waterfall.append(pd.DataFrame({meas : ty_meas} , index=['This Year']))),2)
-    waterfall[meas] = waterfall[meas].cumsum().to_frame()
+    waterfall_data = pd.DataFrame(DiffVal)  # Start with the DiffVal DataFrame
+    waterfall_data.columns = [meas] #rename the column to meas
 
-    waterfall[meas + '2'].iloc[0] = 0
-    for i in range(0,waterfall[meas].count()-1):    
-        waterfall[meas + '2'].iloc[i+1] = waterfall.iloc[i][meas]
-    waterfall[meas].iloc[waterfall[meas].count()-1] = 0
-    waterfall = waterfall[[meas + '2',meas]]
-    waterfall.columns = [meas , meas + '2']
+    # Create DataFrames for "Last Year" and "This Year"
+    ly_df = pd.DataFrame({meas: ly_meas, meas + '2': ''}, index=['Last Year'])
+    ty_df = pd.DataFrame({meas: ty_meas, meas + '2': ''}, index=['This Year'])
 
-    interchange1 = waterfall.loc['This Year'][meas+'2']
-    interchange2 = waterfall.loc['This Year'][meas]
-    waterfall[meas].loc['This Year'] = interchange1
-    waterfall[meas+'2'].loc['This Year'] = interchange2
+    # Concatenate the DataFrames
+    waterfall_data = pd.concat([ly_df, waterfall_data, ty_df])
+    waterfall_data = round(waterfall_data, 2) #round the data
 
-    ly_value = waterfall[meas + '2'].loc['Last Year']
-    ty_value = waterfall[meas + '2'].loc['This Year']
+    waterfall_data[meas + '2'] = waterfall_data[meas].shift(1).fillna(0) #use shift and fillna
+    waterfall_data[meas].iloc[-1] = 0 #set the last row to 0
 
-    if ly_value < ty_value:
-        minimum_value = ly_value/2
-    else:
-        minimum_value = ty_value/2
-#     print(minimum_value)
-    if str(minimum_value) == 'nan':
-        minimum_value = 0
+    interchange1 = waterfall_data.loc['This Year', meas + '2']
+    interchange2 = waterfall_data.loc['This Year', meas]
+    waterfall_data.loc['This Year', meas] = interchange1
+    waterfall_data.loc['This Year', meas + '2'] = interchange2
 
-    waterfall[meas] = waterfall[meas].apply(lambda x: round(x,2))
-    waterfall[meas + '2'] = waterfall[meas + '2'].apply(lambda x: round(x,2))
+    ly_value = waterfall_data.loc['Last Year', meas + '2']
+    ty_value = waterfall_data.loc['This Year', meas + '2']
 
-    waterfall[meas + '1'] = waterfall[meas]
-    waterfall[meas + '3'] = waterfall[meas + '2']
-    waterfall = waterfall[[meas,meas + '1' , meas + '2',meas + '3']]
-    waterfall.columns = ['0','1','2','3']
+    minimum_value = min(ly_value, ty_value) / 2 if not pd.isna(min(ly_value, ty_value)) else 0
+    minimum_value = 0 if pd.isna(minimum_value) else minimum_value #handle nan
 
-    waterfall = '{"' + meas + '": ' + str(waterfall.T.to_json()) + '}'
+    waterfall_data[meas] = waterfall_data[meas].apply(lambda x: round(x, 2))
+    waterfall_data[meas + '2'] = waterfall_data[meas + '2'].apply(lambda x: round(x, 2))
 
-    waterfall = data_string + waterfall + ', '+ config + meas + waterfall_false + dynamicTooltip_true + xAxisTitle_start + xAxisTitle + xAxisTitle_end + yAxisTitle_start + yAxisTitle + yAxisTitle_end + chartTitle_start + chart_title + chartTitle_end + chartSubTitle_start + chartSubTitle + chartSubTitle_end +raising_color +  falling_color + min_value + str(minimum_value) + chartFooterTitle_start + chartFooterTitle + chartFooterTitle_end 
-    return waterfall
+    waterfall_data[meas + '1'] = waterfall_data[meas]
+    waterfall_data[meas + '3'] = waterfall_data[meas + '2']
+    waterfall_data = waterfall_data[[meas, meas + '1', meas + '2', meas + '3']]
+    waterfall_data.columns = ['0', '1', '2', '3']
+
+    waterfall_json = {'data': waterfall_data.to_dict(orient='records')} #create the json
+
+    # Construct the final JSON string
+    chart_data = json.dumps(waterfall_json) #use json.dumps
+    final_json = f'{data_string}{chart_data}, {config}{meas}{waterfall_false}{dynamicTooltip_true}{xAxisTitle_start}{xAxisTitle}{xAxisTitle_end}{yAxisTitle_start}{yAxisTitle}{yAxisTitle_end}{chartTitle_start}{chart_title}{chartTitle_end}{chartSubTitle_start}{chartSubTitle}{chartSubTitle_end}{raising_color}{falling_color}{min_value}{minimum_value}{chartFooterTitle_start}{chartFooterTitle}{chartFooterTitle_end}'
+    return final_json
 
 
 def BarChart(df, bar_columns, xAxisTitle = '' , yAxisTitle = '', chart_title = '', chartSubTitle = '', chartFooterTitle = ''):
