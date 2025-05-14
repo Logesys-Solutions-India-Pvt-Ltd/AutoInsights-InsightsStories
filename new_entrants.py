@@ -56,7 +56,7 @@ def new_entrants(datamart_id, sourcetype, source_engine, dim, meas, dim_table, d
                 version_num += 1
                 importance = df_version_num_filtered['Importance'].iloc[0] + 10
                 chartFooterTitle = chartFooterTitle + ' (Version: '+str(version_num) + ')'
-                tags = dim + '|' + dim_value + '|' + meas + '|' + 'New Entrant' + '|' + first_non_zero_row['Year-Month'] + '|' + 'Month' + '|' + 'Version: ' + str(version_num)
+                tags = dim + '|' + dim_value + '|' + meas + '|' + 'New Entrant' + '|' + str(first_non_zero_row['Year-Month']) + '|' + 'Month' + '|' + 'Version: ' + str(version_num)
 
             xAxisTitle = rename_variables(xAxisTitle, rename_dim_meas)
             yAxisTitle = rename_variables(yAxisTitle, rename_dim_meas)

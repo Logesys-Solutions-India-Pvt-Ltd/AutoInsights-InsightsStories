@@ -63,5 +63,5 @@ def data_overview_area(source_type, source_engine, datamart_id, date_columns, da
     chart_title = meas + ' by ' + pdim
     # engine = azure_sql_database_connect(source_username, source_password, source_server, source_database)
     cnxn, cursor, logesys_engine = sql_connect()
-    # insert_summary(datamart_id, data, 'data_overview_Area', 'Area', section_id, pdim, meas, cnxn, cursor)
+    insert_summary(datamart_id, data, 'data_overview_area', 'Area', section_id, pdim, meas, cnxn, cursor)
     

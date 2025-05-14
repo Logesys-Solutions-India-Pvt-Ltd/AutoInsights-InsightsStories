@@ -97,7 +97,7 @@ def hi_pots(datamart_id, sourcetype, source_engine, derived_measures_dict, deriv
 
         df_data.rename(columns={meas: f'{meas}'}, inplace=True)
         df_data = ComboChart(df_data, [f'{meas}'], ['Average'], [], xAxisTitle, yAxisTitle, chart_title,chartSubTitle, chartFooterTitle)
-        
+        print(f'df_data:\n{df_data}')
         related_fields_list = "#|#".join(related_fields_list)
         
         string = rename_variables(string, rename_dim_meas)

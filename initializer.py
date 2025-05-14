@@ -6,6 +6,7 @@ from Stories.stories_call import stories_call
 from Playlist.playlist_call import playlist_call
 from DataOverview.data_overview_call import data_overview_call
 import os
+import sys
 import pandas as pd
 import numpy as np
 import importlib
@@ -146,10 +147,9 @@ def insights_generator(event):
         ########### Getting Display Names ##########
         rename_dim_meas = {}
         rename_dim_meas = rename_fields(datamart_id, rename_dim_meas, cnxn, cursor)
-        print(f'rename_dim_meas:\n{rename_dim_meas}')
 
-        stories_call(source_type, source_engine, datamart_id, date_columns, dates_filter_dict, derived_measures_dict, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, Significant_dimensions, df_list_ly, df_list_ty, df_relationship, rename_dim_meas, significance_score, cnxn, cursor)
-        print('Stories generated.')
+        # stories_call(source_type, source_engine, datamart_id, date_columns, dates_filter_dict, derived_measures_dict, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, Significant_dimensions, df_list_ly, df_list_ty, df_relationship, rename_dim_meas, significance_score, cnxn, cursor)
+        # print('Stories generated.')
 
         ################################################## Insights Call ##########################################
         insightcode_sql = "SELECT InsightCode, MAX(VersionNumber) AS VersionNumber, MAX(Importance) AS Importance FROM tt_insights WHERE datamartid = '" + str(datamart_id) + "' GROUP BY InsightCode"
@@ -224,7 +224,7 @@ def insights_generator(event):
                 insight_function(datamart_id, source_type, source_engine, dim_allowed_for_derived_metrics, date_columns, dates_filter_dict, Significant_dimensions, derived_measures_dict, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, df_relationship, df_list_ly, df_list_ty, rename_dim_meas, significance_score, max_year, max_month, outliers_dates, df_version_number, cnxn, cursor)
                 print(f"Executed: {insight_name}")
 
-        playlist_call(datamart_id, engine_id, Significant_dimensions, df_sql_table_names, cnxn, cursor)
+        playlist_call(datamart_id, engine_id, source_engine, Significant_dimensions, df_sql_table_names, cnxn, cursor)
         print('Playlist generated')
 
         data_overview_call(source_type, source_engine, dim_allowed_for_derived_metrics, datamart_id, date_columns, dates_filter_dict, outliers_dates, derived_measures_dict, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, Significant_dimensions, df_list, df_list_ly, df_list_ty, df_relationship, rename_dim_meas, significance_score, max_year, max_month, cnxn, cursor)
@@ -237,7 +237,18 @@ def insights_generator(event):
         }
 
     except Exception as e:
-        error_message = f"Error in insights_generator: {e}"
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        file_name = exc_tb.tb_frame.f_code.co_filename
+        line_number = exc_tb.tb_lineno
+
+        # To get the origin of the exception, we need to go to the last frame in the traceback
+        while exc_tb.tb_next:
+            exc_tb = exc_tb.tb_next
+
+        original_file_name = exc_tb.tb_frame.f_code.co_filename
+        original_line_number = exc_tb.tb_lineno
+
+        error_message = f"Error in insights_generator: {e} (originally from file '{original_file_name}' at line {original_line_number})"
         print(error_message)
         return {"status": "error", "message": error_message}
 

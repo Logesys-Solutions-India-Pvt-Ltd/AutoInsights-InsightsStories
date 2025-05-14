@@ -1,7 +1,7 @@
 from Playlist.playlist_def import *
 
 
-def playlist_call(datamart_id, engine_id, Significant_dimensions, df_sql_table_names, cnxn, cursor):
+def playlist_call(datamart_id, engine_id, source_engine, Significant_dimensions, df_sql_table_names, cnxn, cursor):
     dim_unique_values_dict = {}
     for df_name, cols in Significant_dimensions.items():
         tablename = df_sql_table_names[df_name]
@@ -10,7 +10,7 @@ def playlist_call(datamart_id, engine_id, Significant_dimensions, df_sql_table_n
                 distinct_dim_val_query = f"""
                                 SELECT DISTINCT [{col}] FROM [dbo].[{tablename}]
                                 """
-                df_unique_values = query_on_table(distinct_dim_val_query)
+                df_unique_values = query_on_table(distinct_dim_val_query, source_engine)
                 dim_unique_values_dict[col] = list(df_unique_values[col])
     
 

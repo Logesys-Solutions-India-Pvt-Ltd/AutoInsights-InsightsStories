@@ -20,7 +20,7 @@ def data_overview_pie(source_type, source_engine, datamart_id, date_columns, dat
         section_id = 3
         # engine = azure_sql_database_connect(source_username, source_password, source_server, source_database)
         cnxn, cursor, logesys_engine = sql_connect()
-        # insert_summary(datamart_id, data, 'data_overview_pie', 'Donut', section_id, dim, meas, cnxn, cursor)
+        insert_summary(datamart_id, data, 'data_overview_pie', 'Donut', section_id, dim, meas, cnxn, cursor)
     else:
         data_overview_bar(source_type, source_engine, datamart_id, date_columns, dates_filter_dict, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, dim, meas, dim_table, df_list_ty, df_relationship, cnxn, cursor)
 
@@ -62,4 +62,4 @@ def data_overview_bar(source_type, source_engine, datamart_id, date_columns, dat
     
     # engine = azure_sql_database_connect(source_username, source_password, source_server, source_database)
     cnxn, cursor, logesys_engine = sql_connect()
-    # insert_summary(datamart_id, df_data, 'data_overview_bar', 'Combo', section_id, dim, meas, cnxn, cursor)
+    insert_summary(datamart_id, df_data, 'data_overview_bar', 'Combo', section_id, dim, meas, cnxn, cursor)

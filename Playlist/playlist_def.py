@@ -3,6 +3,7 @@ from FinalCommon import *
 from FinalParameters import *
 from FinalCharts import *
 import pandas as pd
+import sys
 
 
 def playlist(df_insights):
@@ -16,7 +17,7 @@ def playlist(df_insights):
 
         df_insights = pd.DataFrame()
         for i in range(0,len(tag_list)):
-            df_insights = df_insights.append(pd.DataFrame({'Tags' : tag_list[i] , 'Group' : group[i]}))
+            df_insights = pd.concat([df_insights, pd.DataFrame({'Tags': tag_list[i], 'Group': group[i]})], ignore_index=True)
 
         tag_count = df_insights.groupby(['Tags', 'Group']).size().reset_index(name='Count')
         tag_count = tag_count.sort_values(by='Count', ascending=False).reset_index(drop=True)
@@ -27,7 +28,12 @@ def playlist(df_insights):
 
         return tag_dataframe
     except Exception as e:
-        print(f'Exception in playlist:{e}')
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        file_name = exc_tb.tb_frame.f_code.co_filename
+        line_number = exc_tb.tb_lineno
+        error_message = f"Error in playlist: {e} in file '{file_name}' at line {line_number}"
+        print(error_message)
+        return pd.DataFrame()
 
 
 def playlist_category(datamart_id, engine_id, sql, category, dim_unique_values_dict, cnxn, cursor, limit = 25):
@@ -75,7 +81,11 @@ def playlist_category(datamart_id, engine_id, sql, category, dim_unique_values_d
                             ,[GroupId]) VALUES (?,?,?,?,?,?)''' , (playlist_id, datamart_id, pl_string, tag_dataframe.loc[i]['Tags'],category, groupid))
                 cursor.commit()
             except Exception as e:
-                print(f'Exception in playlist_category:{e}')
+                exc_type, exc_obj, exc_tb = sys.exc_info()
+                file_name = exc_tb.tb_frame.f_code.co_filename
+                line_number = exc_tb.tb_lineno
+                error_message = f"Error in playlist_category: {e} in file '{file_name}' at line {line_number}"
+                print(error_message)
 
 
 def trending(datamart_id, engine_id, sql, dim_unique_values_dict, cnxn, cursor):
@@ -84,4 +94,11 @@ def trending(datamart_id, engine_id, sql, dim_unique_values_dict, cnxn, cursor):
         limit = 3
         playlist_category(datamart_id, engine_id, sql, category, dim_unique_values_dict, cnxn, cursor)
     except Exception as e:
-        print(f'Exception in trending:{e}')
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        file_name = exc_tb.tb_frame.f_code.co_filename
+        line_number = exc_tb.tb_lineno
+        error_message = f"Error in trending: {e} in file '{file_name}' at line {line_number}"
+        print(error_message)
+
+
+        
