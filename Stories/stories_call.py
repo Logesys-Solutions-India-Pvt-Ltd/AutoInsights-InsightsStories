@@ -22,7 +22,7 @@ def stories_call():
     rename_dim_meas = constants.RENAME_DIM_MEAS
     significance_score = constants.SIGNIFICANCE_SCORE
     cnxn = constants.CNXN
-    cursor = constants.cursor
+    cursor = constants.CURSOR
 
     print('Generating stories.')
     importance = 1
