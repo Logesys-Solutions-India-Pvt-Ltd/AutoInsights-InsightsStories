@@ -38,7 +38,7 @@ def insights_call():
     significance_score = constants.SIGNIFICANCE_SCORE
     df_version_number = constants.DF_VERSION_NUMBER
     cnxn = constants.CNXN
-    cursor = constants.cursor
+    cursor = constants.CURSOR
     
     
     for dim_table, dim_list in Significant_dimensions.items():
