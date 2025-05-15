@@ -1,7 +1,16 @@
 from Playlist.playlist_def import *
+import constants
 
-
-def playlist_call(datamart_id, engine_id, source_engine, Significant_dimensions, df_sql_table_names, cnxn, cursor):
+def playlist_call():
+    datamart_id = constants.DATAMART_ID
+    engine_id = constants.ENGINE_ID
+    source_engine = constants.SOURCE_ENGINE
+    Significant_dimensions = constants.SIGNIFICANT_DIMENSIONS
+    df_sql_table_names = constants.DF_SQL_TABLE_NAMES
+    cnxn = constants.CNXN
+    cursor = constants.CURSOR
+    
+    
     dim_unique_values_dict = {}
     for df_name, cols in Significant_dimensions.items():
         tablename = df_sql_table_names[df_name]

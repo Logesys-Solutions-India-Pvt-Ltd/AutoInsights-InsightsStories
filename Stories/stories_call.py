@@ -1,11 +1,29 @@
 from Stories.stories_avg_cy_ly import stories_avg_cy_ly
 from Stories.stories_x_times import stories_x_times
 from Stories.stories_rank_cy_ly import stories_rank_cy_ly
-
+import constants
 
 ################################################## Stories Call ##########################################
 
-def stories_call(source_type, source_engine, datamart_id, date_columns, dates_filter_dict, derived_measures_dict, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, Significant_dimensions, df_list_ly, df_list_ty, df_relationship, rename_dim_meas, significance_score, cnxn, cursor):
+def stories_call():
+    source_type = constants.SOURCE_TYPE
+    source_engine = constants.SOURCE_ENGINE
+    datamart_id = constants.DATAMART_ID
+    date_columns = constants.DATE_COLUMNS
+    dates_filter_dict = constants.DATES_FILTER_DICT
+    derived_measures_dict = constants.DERIVED_MEASURES_DICT
+    derived_measures_dict_expanded = constants.DERIVED_MEASURES_DICT_EXPANDED
+    df_sql_table_names = constants.DF_SQL_TABLE_NAMES
+    df_sql_meas_functions = constants.DF_SQL_MEAS_FUNCTIONS
+    Significant_dimensions = constants.SIGNIFICANT_DIMENSIONS
+    df_list_ly = constants.DF_LIST_LY
+    df_list_ty = constants.DF_LIST_TY
+    df_relationship = constants.DF_RELATIONSHIP
+    rename_dim_meas = constants.RENAME_DIM_MEAS
+    significance_score = constants.SIGNIFICANCE_SCORE
+    cnxn = constants.CNXN
+    cursor = constants.cursor
+
     print('Generating stories.')
     importance = 1
     for meas in list(derived_measures_dict.keys()):
