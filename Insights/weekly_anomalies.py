@@ -117,7 +117,7 @@ def weekly_anomalies(datamart_id, sourcetype, source_engine, dim_allowed_for_der
                     
                     data = LineChart(df_actual, [meas], [], xAxisTitle, yAxisTitle, title, subtitle, chartFooterTitle, non_highlight_color='#B0CBFF', highlight_color='#3862FF')
                     cnxn, cursor, logesys_engine = sql_connect()
-                    insert_insights(datamart_id, str(string), str(data), 'Related Measures', 'Line', str(related_fields), importance, tags, 'Weekly Anomalies', 'Insight', cnxn, cursor, insight_code, version_num)
+                    # insert_insights(datamart_id, str(string), str(data), 'Related Measures', 'Line', str(related_fields), importance, tags, 'Weekly Anomalies', 'Insight', cnxn, cursor, insight_code, version_num)
                     temp_count += 1
             elif j > 0:  
                 if (zscore > zscore_val and zscore <= zscore_val + diff) or (zscore < -zscore_val and zscore >= -zscore_val - diff):
@@ -130,7 +130,7 @@ def weekly_anomalies(datamart_id, sourcetype, source_engine, dim_allowed_for_der
                     
                     data = LineChart(df_actual, [meas], [], xAxisTitle, yAxisTitle, title, subtitle, chartFooterTitle, non_highlight_color='#B0CBFF', highlight_color='#3862FF')
                     cnxn, cursor, logesys_engine = sql_connect()
-                    insert_insights(datamart_id, str(string), str(data), 'Related Measures', 'Line', str(related_fields), importance, tags, 'Weekly Anomalies', 'Insight', cnxn, cursor, insight_code, version_num)
+                    # insert_insights(datamart_id, str(string), str(data), 'Related Measures', 'Line', str(related_fields), importance, tags, 'Weekly Anomalies', 'Insight', cnxn, cursor, insight_code, version_num)
                     temp_count += 1
         count = count + temp_count
         # count = 50, 90, 170

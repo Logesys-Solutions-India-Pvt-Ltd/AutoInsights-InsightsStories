@@ -142,7 +142,7 @@ def trends(datamart_id, sourcetype, source_engine, dim_allowed_for_derived_metri
                 temp_count += 1
                 # engine = azure_sql_database_connect(source_username, source_password, source_server, source_database)
                 cnxn, cursor, logesys_engine = sql_connect()
-                insert_insights(datamart_id, string, str(data), 'Slope', 'Line', str(related_fields), importance, tags, 'Trends', 'Insight', cnxn, cursor, insight_code, version_num)
+                # insert_insights(datamart_id, string, str(data), 'Slope', 'Line', str(related_fields), importance, tags, 'Trends', 'Insight', cnxn, cursor, insight_code, version_num)
         count = count + temp_count
         # count = 50, 90, 170
         print(f'count:{count}\n')

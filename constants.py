@@ -1,26 +1,35 @@
-start_month = 1
-end_month = 12
-
-df_sql_meas_functions = {
-    'sum()': 'SUM',
-    'mean()': 'AVG'
-}
-
-rename_dim_meas = {
-    'CRANE_MINS': 'Crane Mins',
-    'BERTH_MINS': 'Berth Mins',
-    'TEUS': 'TEUs',
-    'BERTH_PROD': 'Berth Prod',
-    'VESSEL_NAME': 'Vessel Name',
-    'SERVICE_ID': 'Service ID'
-}
-
-# dim_allowed_for_derived_metrics = {
-#      'Markdown %': [dim for dims in Significant_dimensions.values() for dim in dims],
-#      'ASP': [dim for dims in Significant_dimensions.values() for dim in dims],
-#      'Stock Cover': [dim for dims in Significant_dimensions.values() for dim in dims],
-#      'ATV': [dim for dim in Significant_dimensions['df_location_master']
-#              if dim in ['Store Name', 'Region', 'Business', 'Mall Name', 'Territory']],
-#      'UPT': [dim for dim in Significant_dimensions['df_location_master']
-#              if dim in ['Store Name', 'Region', 'Business', 'Mall Name', 'Territory']],
-#  }
+ENGINE_ID = None
+DATAMART_ID = None
+START_MONTH = None
+END_MONTH = None
+CNXN = None
+CURSOR = None
+LOGESYS_ENGINE = None
+SOURCE_ENGINE = None
+DF_RELATIONSHIP = None
+SELECTED_INSIGHTS = None
+DERIVED_MEASURES_DICT = None
+DERIVED_MEASURES_DICT_EXPANDED = None
+DF_SQL_TABLE_NAMES = None
+DF_SQL_MEAS_FUNCTIONS = None
+SIGNIFICANT_DIMENSIONS = None
+SIGNIFICANT_MEASURES = None
+DATE_COLUMNS = None
+DATES_FILTER_DICT = None
+OUTLIERS_DATES = None
+DF_LIST = None
+DF_LIST_LY = None
+DF_LIST_TY = None
+DF_LIST_LAST12MONTHS = None
+DF_LIST_LAST52WEEKS = None
+MAX_MONTH = None
+MAX_YEAR = None
+MAX_DATE = None
+SIGNIFICANCE_SCORE = None
+RENAME_DIM_MEAS = None
+DF_VERSION_NUMBER = None
+INSIGHTS_TO_SKIP = ['Trends', 'Outliers', 'Monthly Anomalies', 'Weekly Anomalies']
+DIM_ALLOWED_FOR_DERIVED_METRICS = None
+SOURCE_TYPE = None
+S3_CLIENT = None
+S3_BUCKET_DERIVED_MEAS_FORMULA = "auto-insights-ask-db-cred-formula"

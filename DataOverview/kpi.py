@@ -48,7 +48,7 @@ def data_overview_kpi(source_type, source_engine, datamart_id, meas, date_column
         kpi = '{"data":{"Primary_kpi" : {"title" : "' + str(primary_kpi_title) + '","value" : "' + str(primary_kpi_value) + '","color" : "' + str(primary_kpi_color) + '"},"Sub_kpi" : {"Icon" : "' + str(sub_kpi_icon) + '","value" : "' + str(sub_kpi_value) + '","color" : "' + str(sub_kpi_color) + '"},"Secondary_kpi" : [{"title" : "' + str(seconday_kpi_1_title) + '","value" : "' + str(seconday_kpi_1_value) + '"},{"title" : "' + str(seconday_kpi_2_title) + '","value" : "' + str(seconday_kpi_2_value) + '"}]}}'
         # engine = azure_sql_database_connect(source_username, source_password, source_server, source_database)
         cnxn, cursor, logesys_engine = sql_connect()
-        insert_summary(datamart_id, kpi, 'DataOverview_KPI_YTD', 'KPI', section_id, '', meas, cnxn, cursor)
+        # insert_summary(datamart_id, kpi, 'DataOverview_KPI_YTD', 'KPI', section_id, '', meas, cnxn, cursor)
     else:
         print('YTD growth : NA')
     
@@ -93,7 +93,7 @@ def data_overview_kpi(source_type, source_engine, datamart_id, meas, date_column
         section_id = 2.2
         # engine = azure_sql_database_connect(source_username, source_password, source_server, source_database)
         cnxn, cursor, logesys_engine = sql_connect()
-        insert_summary(datamart_id, kpi, 'DataOverview_KPI_MTD', 'KPI', section_id, '', meas, cnxn, cursor)
+        # insert_summary(datamart_id, kpi, 'DataOverview_KPI_MTD', 'KPI', section_id, '', meas, cnxn, cursor)
     else:
         print('MTD growth : NA')
         
@@ -135,6 +135,6 @@ def data_overview_kpi(source_type, source_engine, datamart_id, meas, date_column
         section_id = 2.3
         # engine = azure_sql_database_connect(source_username, source_password, source_server, source_database)
         cnxn, cursor, logesys_engine = sql_connect()
-        insert_summary(datamart_id, kpi, 'DataOverview_KPI_3Month', 'KPI', section_id, '', meas, cnxn, cursor)
+        # insert_summary(datamart_id, kpi, 'DataOverview_KPI_3Month', 'KPI', section_id, '', meas, cnxn, cursor)
     else:
         print('3 month growth : NA')

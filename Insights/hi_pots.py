@@ -106,4 +106,4 @@ def hi_pots(datamart_id, sourcetype, source_engine, derived_measures_dict, deriv
         tags = rename_variables(tags, rename_dim_meas)
         cnxn, cursor, logesys_engine = sql_connect()
         
-        insert_insights(datamart_id, str(string), str(df_data), 'X Times', 'Combo', str(related_fields_list), importance,tags, 'Hi-Pots', 'Insight', cnxn, cursor, insight_code, version_num)
+        # insert_insights(datamart_id, str(string), str(df_data), 'X Times', 'Combo', str(related_fields_list), importance,tags, 'Hi-Pots', 'Insight', cnxn, cursor, insight_code, version_num)

@@ -161,4 +161,4 @@ def movements(datamart_id, sourcetype, source_engine, derived_measures_dict, der
         ### Renaming ###
         # engine = azure_sql_database_connect(source_username, source_password, source_server, source_database)
         cnxn, cursor, logesys_engine = sql_connect()
-        insert_insights(datamart_id, str(string), str(df_data), 'Avg CY vs LY', 'Combo', str(related_fields_list), importance, tags, 'Movements', 'Insight', cnxn, cursor, insight_code, version_num)
+        # insert_insights(datamart_id, str(string), str(df_data), 'Avg CY vs LY', 'Combo', str(related_fields_list), importance, tags, 'Movements', 'Insight', cnxn, cursor, insight_code, version_num)

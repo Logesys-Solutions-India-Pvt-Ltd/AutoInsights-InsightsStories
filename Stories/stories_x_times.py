@@ -73,4 +73,4 @@ def stories_x_times(sourcetype, source_engine, datamart_id, date_columns, dates_
         tags = rename_variables(tags, rename_dim_meas)
         story_data = rename_variables(story_data, rename_dim_meas)
         
-        insert_insights(datamart_id, string, story_data, 'X Times', 'SVG x times', related_fields_list, importance, tags, 'Story', 'story', cnxn, cursor, insight_code, version_num)         
+        # insert_insights(datamart_id, string, story_data, 'X Times', 'SVG x times', related_fields_list, importance, tags, 'Story', 'story', cnxn, cursor, insight_code, version_num)         
