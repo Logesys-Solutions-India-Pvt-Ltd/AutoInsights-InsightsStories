@@ -7,6 +7,66 @@ import pandas as pd
 import numpy as np
 
 
+
+def get_datamart_source_credentials(datamart_id, logesys_engine):
+    """
+    Get source credentials for all tables in a datamart.
+    
+    Parameters:
+    datamart_id - ID of the datamart
+    engine - SQLAlchemy engine for database connection
+    
+    Returns:
+    Dictionary with table information and credentials structured by table name
+    """
+    query_source_creds = f"""
+        SELECT
+            TableName,
+            TableId,
+            SourceType,
+            FilePath,
+            UserName,
+            Password
+        FROM m_datamart_tables
+        WHERE DataMartId = '{datamart_id}'
+    """
+    
+    source_creds_df = pd.read_sql_query(query_source_creds, logesys_engine)
+    
+    # Create a dictionary to store credentials by table name
+    tables_info = {}
+    
+    # Common credentials for the datamart (assuming they're the same)
+    common_credentials = {
+        'file_path': source_creds_df.iloc[0]['FilePath'] if not source_creds_df.empty else None,
+        'username': source_creds_df.iloc[0]['UserName'] if not source_creds_df.empty else None,
+        'password': source_creds_df.iloc[0]['Password'] if not source_creds_df.empty else None,
+        'source_type': source_creds_df.iloc[0]['SourceType'] if not source_creds_df.empty else None
+    }
+    
+    # Create entries for each table
+    for _, row in source_creds_df.iterrows():
+        table_id = row['TableId']
+        if hasattr(table_id, 'hex'):  # Check if it has a hex attribute (UUID objects do)
+            table_id = str(table_id)
+        elif isinstance(table_id, str) and 'UUID(' in table_id and ')' in table_id:
+            # For string representation of UUID, extract the value
+            import re
+            match = re.search(r'UUID\("(.+?)"\)', table_id)
+            if match:
+                table_id = match.group(1)
+        tables_info[row['TableName']] = {
+            'table_id': table_id,
+            'file_path': row['FilePath'],
+            'source_type': row['SourceType'],
+            # Include common credentials as well
+            'username': row['UserName'],
+            'password': row['Password']
+        }
+    
+    return tables_info, common_credentials
+
+
 def connect_to_db(table, query, source_engine, col_description_dict):
     try:
         with source_engine.connect() as connection:
@@ -81,8 +141,6 @@ def build_summary_query(table_name):
 
 def ask_summary_generator(event):
     datamart_id = event.get('datamart_id')
-    organisation_name = event.get('organisation_name')
-
     s3_summary_bucket = "auto-insights-ask-19-march-2025"
     s3_client = boto3.client('s3')
 
@@ -98,7 +156,7 @@ def ask_summary_generator(event):
             FROM m_datamart_tables 
             WHERE DataMartId = '{datamart_id}'
         """
-    
+
     table_df = pd.read_sql_query(query_table, logesys_engine)
 
     for idx, row in table_df.iterrows():
@@ -123,25 +181,14 @@ def ask_summary_generator(event):
             result_col_desc = pd.read_sql_query(query_col_desc, logesys_engine)
             col_description_dict = {row[0]: row[1] for row in result_col_desc.itertuples(index=False, name=None)}
 
-            ## Retrieve client's DB credentials
+            ########## Get client's credentials from the database ##########
+            tables_info, common_credentials = get_datamart_source_credentials(datamart_id, logesys_engine)
 
-            # source_username = "tlssqladmin"
-            # source_password = "Logesys@2025"
-            # source_server = "sqlsrv-tlsretail-dev.database.windows.net"
-            # source_database = "SQLDB-TLSRETAIL-DEV"
-
-            s3_creds_bucket = "auto-insights-ask-db-cred-formula"
-            s3_creds_key = f"{organisation_name}_credentials.json"
-
-            response = s3_client.get_object(Bucket=s3_creds_bucket, Key=s3_creds_key)
-        
-            content = response['Body'].read().decode('utf-8')
-            credentials = json.loads(content)
-            source_server = credentials['server']
-            source_database = credentials['database']
-            source_username = credentials['username']
-            source_password = credentials['password']
-
+            file_path = common_credentials['file_path']
+            source_server, source_database = file_path.split("//")
+            source_username = common_credentials['username']
+            source_password = common_credentials['password']
+            source_type = common_credentials['source_type']
             source_engine = create_engine(f"mssql+pymssql://{source_username}:{source_password.replace('@', '%40')}@{source_server}/{source_database}")
 
             json_output = connect_to_db(table, query, source_engine, col_description_dict)
@@ -156,6 +203,7 @@ def ask_summary_generator(event):
         }
 
     except Exception as e:
+        print(f"Error processing data: {str(e)}")
         return {
             'statusCode': 500,
             'body': json.dumps(f"Error processing data: {str(e)}")
