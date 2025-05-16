@@ -7,10 +7,30 @@ from FinalParameters import *
 from FinalCharts import *
 import pandas as pd
 import numpy as np
+import constants
 
 
-def weekly_anomalies(datamart_id, sourcetype, source_engine, dim_allowed_for_derived_metrics, date_columns, dates_filter_dict, Significant_dimensions, derived_measures_dict, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, df_list_last52weeks, df_relationship, rename_dim_meas, significance_score, max_month, max_date, df_version_number, cnxn, cursor):
+def weekly_anomalies():
     print('--WEEKLY ANOMALIES--')
+    datamart_id = constants.DATAMART_ID
+    source_type = constants.SOURCE_TYPE
+    source_engine = constants.SOURCE_ENGINE
+    date_columns = constants.DATE_COLUMNS
+    dates_filter_dict = constants.DATES_FILTER_DICT
+    max_date = constants.MAX_DATE
+    Significant_dimensions = constants.SIGNIFICANT_DIMENSIONS
+    rename_dim_meas = constants.RENAME_DIM_MEAS
+    derived_measures_dict = constants.DERIVED_MEASURES_DICT
+    derived_measures_dict_expanded = constants.DERIVED_MEASURES_DICT_EXPANDED
+    dim_allowed_for_derived_metrics = constants.DIM_ALLOWED_FOR_DERIVED_METRICS
+    df_list_last52weeks = constants.DF_LIST_LAST52WEEKS
+    df_relationship = constants.DF_RELATIONSHIP
+    df_sql_table_names = constants.DF_SQL_TABLE_NAMES
+    df_sql_meas_functions = constants.DF_SQL_MEAS_FUNCTIONS
+    significance_score = constants.SIGNIFICANCE_SCORE
+    df_version_number = constants.DF_VERSION_NUMBER
+    cnxn = constants.CNXN
+    cursor = constants.CURSOR
     
     tags_list, related_fields_list, string_list, df_actual_list, zscore_list, meas_list, charttitle_list,chartsubtitle_list, xAxisTitle_list, yAxisTitle_list = [],[],[],[],[],[],[],[],[],[]
     
@@ -26,21 +46,21 @@ def weekly_anomalies(datamart_id, sourcetype, source_engine, dim_allowed_for_der
                     converted_current_week = current_week.strftime("%d-%m-%Y")
 
                     is_ratio=False
-                    if sourcetype == 'xlsx':
+                    if source_type == 'xlsx':
                         all_years_setting = df_list_last52weeks
-                    elif sourcetype == 'table':
+                    elif source_type == 'table':
                         all_years_setting = 'Last52Weeks'
-                    df_weekly_data = parent_get_group_data(sourcetype, source_engine, dim, meas, date_columns, dates_filter_dict, dim_table, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, df_relationship, all_years_setting, is_ratio, is_total=False, is_others=False, extra_groupby_col='Year-Week')
+                    df_weekly_data = parent_get_group_data(source_type, source_engine, dim, meas, date_columns, dates_filter_dict, dim_table, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, df_relationship, all_years_setting, is_ratio, is_total=False, is_others=False, extra_groupby_col='Year-Week')
                     df_weekly_data = df_weekly_data.sort_values('Year-Week')
                     df_weekly_data[meas].fillna(0, inplace = True)
                     df_weekly_data.replace([np.inf, -np.inf], 0, inplace=True)
 
-                    all_combinations_dict = parent_get_group_data(sourcetype, source_engine, dim, meas, date_columns, dates_filter_dict, dim_table, derived_measures_dict_expanded, df_sql_table_names, 
+                    all_combinations_dict = parent_get_group_data(source_type, source_engine, dim, meas, date_columns, dates_filter_dict, dim_table, derived_measures_dict_expanded, df_sql_table_names, 
                                                              df_sql_meas_functions, df_relationship, all_years_setting, is_ratio, is_total=False, is_others=False, 
                                                              extra_groupby_col=None, other_operation_column='Year-Week', other_operation=True)  
-                    if sourcetype == 'xlsx':
+                    if source_type == 'xlsx':
                         all_combinations = list(all_combinations_dict['unique_values'][0])
-                    elif sourcetype == 'table':
+                    elif source_type == 'table':
                         all_combinations = all_combinations_dict['unique_values'][0].split(', ')
 
                     combinations_df = pd.DataFrame(all_combinations, columns=['Year-Week'])
@@ -117,7 +137,7 @@ def weekly_anomalies(datamart_id, sourcetype, source_engine, dim_allowed_for_der
                     
                     data = LineChart(df_actual, [meas], [], xAxisTitle, yAxisTitle, title, subtitle, chartFooterTitle, non_highlight_color='#B0CBFF', highlight_color='#3862FF')
                     cnxn, cursor, logesys_engine = sql_connect()
-                    # insert_insights(datamart_id, str(string), str(data), 'Related Measures', 'Line', str(related_fields), importance, tags, 'Weekly Anomalies', 'Insight', cnxn, cursor, insight_code, version_num)
+                    insert_insights(datamart_id, str(string), str(data), 'Related Measures', 'Line', str(related_fields), importance, tags, 'Weekly Anomalies', 'Insight', cnxn, cursor, insight_code, version_num)
                     temp_count += 1
             elif j > 0:  
                 if (zscore > zscore_val and zscore <= zscore_val + diff) or (zscore < -zscore_val and zscore >= -zscore_val - diff):
@@ -130,7 +150,7 @@ def weekly_anomalies(datamart_id, sourcetype, source_engine, dim_allowed_for_der
                     
                     data = LineChart(df_actual, [meas], [], xAxisTitle, yAxisTitle, title, subtitle, chartFooterTitle, non_highlight_color='#B0CBFF', highlight_color='#3862FF')
                     cnxn, cursor, logesys_engine = sql_connect()
-                    # insert_insights(datamart_id, str(string), str(data), 'Related Measures', 'Line', str(related_fields), importance, tags, 'Weekly Anomalies', 'Insight', cnxn, cursor, insight_code, version_num)
+                    insert_insights(datamart_id, str(string), str(data), 'Related Measures', 'Line', str(related_fields), importance, tags, 'Weekly Anomalies', 'Insight', cnxn, cursor, insight_code, version_num)
                     temp_count += 1
         count = count + temp_count
         # count = 50, 90, 170

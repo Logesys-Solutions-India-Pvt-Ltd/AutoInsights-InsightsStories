@@ -4,29 +4,51 @@ from FinalParameters import *
 from FinalCharts import *
 import pandas as pd
 import numpy as np
+import constants
 
 
-def movements(datamart_id, sourcetype, source_engine, derived_measures_dict, derived_measures_dict_expanded,  df_sql_table_names, df_sql_meas_functions, df_relationship, rename_dim_meas, dim, meas, date_columns, dates_filter_dict, df_list_ly, df_list_ty, dim_table, df_version_number, significance_score, cnxn, cursor):
+def movements(dim_table, dim, meas):
     print('--MOVEMENTS--')
+
+    datamart_id = constants.DATAMART_ID
+    source_type = constants.SOURCE_TYPE
+    source_engine = constants.SOURCE_ENGINE
+    date_columns = constants.DATE_COLUMNS
+    dates_filter_dict = constants.DATES_FILTER_DICT
+    rename_dim_meas = constants.RENAME_DIM_MEAS
+    derived_measures_dict = constants.DERIVED_MEASURES_DICT
+    derived_measures_dict_expanded = constants.DERIVED_MEASURES_DICT_EXPANDED
+    df_list_ly = constants.DF_LIST_LY
+    df_list_ty = constants.DF_LIST_TY
+    df_relationship = constants.DF_RELATIONSHIP
+    df_sql_table_names = constants.DF_SQL_TABLE_NAMES
+    df_sql_meas_functions = constants.DF_SQL_MEAS_FUNCTIONS
+    significance_score = constants.SIGNIFICANCE_SCORE
+    df_version_number = constants.DF_VERSION_NUMBER
+    cnxn = constants.CNXN
+    cursor = constants.CURSOR
+
+
+
     split = 10
     related_fields_list = []
     is_ratio = False
     df_data = pd.DataFrame()
     df_others_value = pd.DataFrame()
 
-    if sourcetype == 'xlsx':
+    if source_type == 'xlsx':
         this_year_setting, last_year_setting = df_list_ty, df_list_ly
-    elif sourcetype == 'table':
+    elif source_type == 'table':
         this_year_setting, last_year_setting = 'ThisYear', 'LastYear'
         
 #     df_ThisYearDimMean = ThisYear.groupby([dim])[meas].sum().to_frame()
 #    df_data = parent_get_group_data(sourcetype, source_engine, dim, meas, date_columns, dates_filter_dict, dim_table, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, df_relationship, this_year_setting, is_ratio, is_total=False, is_others=False, outliers_val=None)   
 
-    df_ThisYearDimMean = parent_get_group_data(sourcetype, source_engine, dim, meas, date_columns, dates_filter_dict, dim_table, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, df_relationship, this_year_setting, is_ratio, is_total=False, is_others=False, outliers_val=None) 
+    df_ThisYearDimMean = parent_get_group_data(source_type, source_engine, dim, meas, date_columns, dates_filter_dict, dim_table, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, df_relationship, this_year_setting, is_ratio, is_total=False, is_others=False, outliers_val=None) 
     df_ThisYearDimMean = df_ThisYearDimMean.reset_index()
     
 #     df_LastYearDimMean = LastYear.groupby([dim])[meas].sum().to_frame()
-    df_LastYearDimMean = parent_get_group_data(sourcetype, source_engine, dim, meas, date_columns, dates_filter_dict, dim_table, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, df_relationship, last_year_setting, is_ratio, is_total=False,is_others=False, outliers_val=None) 
+    df_LastYearDimMean = parent_get_group_data(source_type, source_engine, dim, meas, date_columns, dates_filter_dict, dim_table, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, df_relationship, last_year_setting, is_ratio, is_total=False,is_others=False, outliers_val=None) 
     df_LastYearDimMean = df_LastYearDimMean.reset_index()
     
     df_data = pd.merge(
@@ -54,8 +76,8 @@ def movements(datamart_id, sourcetype, source_engine, derived_measures_dict, der
     df_data = df_data.sort_values(by = 'Abs Growth%', ascending = False)
     
 
-    df_data, others_count_ty, others_value_ty = df_others(sourcetype, source_engine, df_data, split, this_year_setting, dim, meas, date_columns, dates_filter_dict, dim_table, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, df_relationship, is_ratio, is_total=False)
-    df_data, others_count_ly, others_value_ly = df_others(sourcetype, source_engine, df_data, split, last_year_setting, dim, meas, date_columns, dates_filter_dict, dim_table, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, df_relationship, is_ratio, is_total=False)
+    df_data, others_count_ty, others_value_ty = df_others(source_type, source_engine, df_data, split, this_year_setting, dim, meas, date_columns, dates_filter_dict, dim_table, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, df_relationship, is_ratio, is_total=False)
+    df_data, others_count_ly, others_value_ly = df_others(source_type, source_engine, df_data, split, last_year_setting, dim, meas, date_columns, dates_filter_dict, dim_table, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, df_relationship, is_ratio, is_total=False)
     df_data = df_data.head(split)
     
     if not (others_count_ty == 0 and others_count_ly == 0):
@@ -161,4 +183,4 @@ def movements(datamart_id, sourcetype, source_engine, derived_measures_dict, der
         ### Renaming ###
         # engine = azure_sql_database_connect(source_username, source_password, source_server, source_database)
         cnxn, cursor, logesys_engine = sql_connect()
-        # insert_insights(datamart_id, str(string), str(df_data), 'Avg CY vs LY', 'Combo', str(related_fields_list), importance, tags, 'Movements', 'Insight', cnxn, cursor, insight_code, version_num)
+        insert_insights(datamart_id, str(string), str(df_data), 'Avg CY vs LY', 'Combo', str(related_fields_list), importance, tags, 'Movements', 'Insight', cnxn, cursor, insight_code, version_num)

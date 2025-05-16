@@ -3,7 +3,7 @@ from datetime import datetime
 from initializer_functions import *
 from multiple_tables_csv_excel import *
 from Stories.stories_call import stories_call
-from Insights.insights_call import insights_call
+from Insights.insights_call import insights_call_threaded
 from Playlist.playlist_call import playlist_call
 from DataOverview.data_overview_call import data_overview_call
 import os
@@ -22,8 +22,8 @@ def insights_generator(event):
     # datamart_id = "68F4413C-FD9A-11EF-BA6C-2CEA7F154E8D" ## Timesquare
     # datamart_id = "6AA6BCAA-258A-11F0-A1AD-2CEA7F154E8D" ## JMBaxi- old
 
-    # engine_id = 'BA2ACCBB-31B4-11EB-9A5D-A85E45BE6945'
-    # datamart_id= "7F2C4256-3449-447A-B1CC-FAE49431BF7C" ## Vessel Visit testing datamart
+    # constants.ENGINE_ID = 'BA2ACCBB-31B4-11EB-9A5D-A85E45BE6945'
+    # constants.DATAMART_ID = "7F2C4256-3449-447A-B1CC-FAE49431BF7C" ## Vessel Visit testing datamart
 
     constants.CNXN, constants.CURSOR, constants.LOGESYS_ENGINE = sql_connect()
     count_tables_in_datamart_query = f"""
@@ -122,14 +122,14 @@ def insights_generator(event):
         
         # # ########## Dates calculations for Outliers ##########
         constants.OUTLIERS_DATES = calculate_periodic_dates_for_outliers(constants.SOURCE_TYPE, constants.SOURCE_ENGINE, 
-                                                               constants.DATE_COLUMNS, constants.DF_SQL_TABLE_NAMES, 
-                                                               constants.DF_LIST, 
-                                                               constants.DF_LIST_TY, constants.DF_LIST_LY)
+                                                                constants.DATE_COLUMNS, constants.DF_SQL_TABLE_NAMES, 
+                                                                constants.DF_LIST, 
+                                                                constants.DF_LIST_TY, constants.DF_LIST_LY)
 
         # ######### Significance Score ##########
         constants.SIGNIFICANCE_SCORE = significance_engine_sql(constants.SOURCE_ENGINE, constants.DF_SQL_TABLE_NAMES, 
-                                                     constants.DF_SQL_MEAS_FUNCTIONS, constants.SIGNIFICANT_DIMENSIONS, 
-                                                     constants.SIGNIFICANT_MEASURES, constants.DF_RELATIONSHIP)
+                                                        constants.DF_SQL_MEAS_FUNCTIONS, constants.SIGNIFICANT_DIMENSIONS, 
+                                                        constants.SIGNIFICANT_MEASURES, constants.DF_RELATIONSHIP)
         print('Significance score assigned to dimensions and metrics.')
 
         ########### Getting Display Names ##########
@@ -165,7 +165,8 @@ def insights_generator(event):
         stories_call()
         print('Stories generated.')    
 
-        insights_call()
+        # insights_call()
+        insights_call_threaded()
         print('Insights generated')
 
         playlist_call()

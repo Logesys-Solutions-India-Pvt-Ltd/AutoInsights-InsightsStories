@@ -4,10 +4,30 @@ from FinalParameters import *
 from FinalCharts import *
 import pandas as pd
 import numpy as np
+import constants
 
 
-def rank_analysis(datamart_id, sourcetype, source_engine, derived_measures_dict, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, df_relationship, rename_dim_meas, df_list_ty, df_list_ly, dim_table, dim, meas, date_columns, dates_filter_dict, df_version_number, cnxn, cursor):
+def rank_analysis(dim_table, dim, meas):
     print('--RANK ANALYSIS--')
+
+    datamart_id = constants.DATAMART_ID
+    source_type = constants.SOURCE_TYPE
+    source_engine = constants.SOURCE_ENGINE
+    date_columns = constants.DATE_COLUMNS
+    dates_filter_dict = constants.DATES_FILTER_DICT
+    rename_dim_meas = constants.RENAME_DIM_MEAS
+    derived_measures_dict = constants.DERIVED_MEASURES_DICT
+    derived_measures_dict_expanded = constants.DERIVED_MEASURES_DICT_EXPANDED
+    df_list_ly = constants.DF_LIST_LY
+    df_list_ty = constants.DF_LIST_TY
+    df_relationship = constants.DF_RELATIONSHIP
+    df_sql_table_names = constants.DF_SQL_TABLE_NAMES
+    df_sql_meas_functions = constants.DF_SQL_MEAS_FUNCTIONS
+    significance_score = constants.SIGNIFICANCE_SCORE
+    df_version_number = constants.DF_VERSION_NUMBER
+    cnxn = constants.CNXN
+    cursor = constants.CURSOR
+
     is_ratio = False
     all_df_non_empty = True
     meas_table_list = []
@@ -29,19 +49,19 @@ def rank_analysis(datamart_id, sourcetype, source_engine, derived_measures_dict,
 #             break
             
     if all_df_non_empty:
-        if sourcetype == 'xlsx':
+        if source_type == 'xlsx':
             this_year_setting, last_year_setting = df_list_ty, df_list_ly
-        elif sourcetype == 'table':
+        elif source_type == 'table':
             this_year_setting, last_year_setting = 'ThisYear', 'LastYear'
 
-        df_ThisYear = parent_get_group_data(sourcetype, source_engine, dim, meas, date_columns, dates_filter_dict, dim_table, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, df_relationship, this_year_setting, is_ratio, is_total=False, is_others=False, outliers_val=None)   
+        df_ThisYear = parent_get_group_data(source_type, source_engine, dim, meas, date_columns, dates_filter_dict, dim_table, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, df_relationship, this_year_setting, is_ratio, is_total=False, is_others=False, outliers_val=None)   
         df_ThisYear = df_ThisYear.sort_values(by=meas, ascending=False)
         df_ThisYear.replace([np.inf, -np.inf], 0, inplace=True)
         df_ThisYear.fillna(0, inplace = True)
         df_ThisYear['This Year'] = df_ThisYear[meas].rank(ascending=False).astype(int)
         df_ThisYear.drop(meas, axis=1, inplace=True)
 
-        df_LastYear = parent_get_group_data(sourcetype, source_engine, dim, meas, date_columns, dates_filter_dict, dim_table, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, df_relationship, last_year_setting, is_ratio, is_total=False, is_others=False, outliers_val=None)   
+        df_LastYear = parent_get_group_data(source_type, source_engine, dim, meas, date_columns, dates_filter_dict, dim_table, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, df_relationship, last_year_setting, is_ratio, is_total=False, is_others=False, outliers_val=None)   
         df_LastYear = df_LastYear.sort_values(by=meas, ascending=False)
         df_LastYear.replace([np.inf, -np.inf], 0, inplace=True)
         df_LastYear.fillna(0, inplace = True)
@@ -118,4 +138,4 @@ def rank_analysis(datamart_id, sourcetype, source_engine, derived_measures_dict,
                 ### Renaming ###
                 # engine = azure_sql_database_connect(source_username, source_password, source_server, source_database)
                 cnxn, cursor, logesys_engine = sql_connect()
-                # insert_insights(datamart_id, str(string), str(df_data), 'Rank CY vs LY', 'Rank', str(related_fields_list), importance, tags, 'Rank Analysis', 'Insight', cnxn, cursor, insight_code, version_num)
+                insert_insights(datamart_id, str(string), str(df_data), 'Rank CY vs LY', 'Rank', str(related_fields_list), importance, tags, 'Rank Analysis', 'Insight', cnxn, cursor, insight_code, version_num)

@@ -4,10 +4,34 @@ from FinalParameters import *
 from FinalCharts import *
 import pandas as pd
 import numpy as np
+import constants
 
 
-def delta_analysis(datamart_id, sourcetype, source_engine, dim, meas, date_columns, dates_filter_dict, derived_measures_dict, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, df_relationship, rename_dim_meas, df_list, df_list_ty, df_list_ly, dim_table, df_version_number, cnxn, cursor):
+def delta_analysis(dim_table, dim, meas):
     print('--DELTA ANALYSIS--')
+
+    datamart_id = constants.DATAMART_ID
+    source_type = constants.SOURCE_TYPE
+    source_engine = constants.SOURCE_ENGINE
+    date_columns = constants.DATE_COLUMNS
+    dates_filter_dict = constants.DATES_FILTER_DICT
+    rename_dim_meas = constants.RENAME_DIM_MEAS
+    derived_measures_dict = constants.DERIVED_MEASURES_DICT
+    derived_measures_dict_expanded = constants.DERIVED_MEASURES_DICT_EXPANDED
+    df_list = constants.DF_LIST
+    df_list_ly = constants.DF_LIST_LY
+    df_list_ty = constants.DF_LIST_TY
+    df_relationship = constants.DF_RELATIONSHIP
+    df_sql_table_names = constants.DF_SQL_TABLE_NAMES
+    df_sql_meas_functions = constants.DF_SQL_MEAS_FUNCTIONS
+    significance_score = constants.SIGNIFICANCE_SCORE
+    df_version_number = constants.DF_VERSION_NUMBER
+    cnxn = constants.CNXN
+    cursor = constants.CURSOR
+
+
+
+
     is_ratio = False
     all_df_non_empty = True
     meas_table_list = []
@@ -31,18 +55,18 @@ def delta_analysis(datamart_id, sourcetype, source_engine, dim, meas, date_colum
         tags = dim +'|' + meas + '|' 
         related_fields_list = []
         
-        if sourcetype == 'xlsx':
+        if source_type == 'xlsx':
             this_year_setting, last_year_setting = df_list_ty, df_list_ly
-        elif sourcetype == 'table':
+        elif source_type == 'table':
             this_year_setting, last_year_setting = 'ThisYear', 'LastYear'
 
 #         df_ThisYearDimVal = ThisYear.groupby([dim])[meas].sum().rename('This Year').to_frame()
-        df_ThisYearDimVal = parent_get_group_data(sourcetype, source_engine, dim, meas, date_columns, dates_filter_dict, dim_table, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, df_relationship, this_year_setting, is_ratio=False, is_total=False, is_others=False, outliers_val=None)
+        df_ThisYearDimVal = parent_get_group_data(source_type, source_engine, dim, meas, date_columns, dates_filter_dict, dim_table, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, df_relationship, this_year_setting, is_ratio=False, is_total=False, is_others=False, outliers_val=None)
         df_ThisYearDimVal = df_ThisYearDimVal.rename(columns={meas: 'This Year'})
         df_ThisYearDimVal.replace([np.inf, -np.inf], 0, inplace=True)
 
 #         df_LastYearDimVal = LastYear.groupby([dim])[meas].sum().rename('Last Year').to_frame()
-        df_LastYearDimVal = parent_get_group_data(sourcetype, source_engine, dim, meas, date_columns, dates_filter_dict, dim_table, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, df_relationship, last_year_setting, is_ratio=False, is_total=False, is_others=False, outliers_val=None)
+        df_LastYearDimVal = parent_get_group_data(source_type, source_engine, dim, meas, date_columns, dates_filter_dict, dim_table, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, df_relationship, last_year_setting, is_ratio=False, is_total=False, is_others=False, outliers_val=None)
         df_LastYearDimVal = df_LastYearDimVal.rename(columns={meas: 'Last Year'})
         df_LastYearDimVal.replace([np.inf, -np.inf], 0, inplace=True)
         
@@ -52,10 +76,10 @@ def delta_analysis(datamart_id, sourcetype, source_engine, dim, meas, date_colum
 
 # #         ly_meas = LastYear[meas].sum()
 #       ly_meas = parent_get_group_data(sourcetype, source_engine, '', meas, date_columns, dates_filter_dict, '', derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, df_relationship, last_year_setting, is_ratio=True, is_total=True, is_others=False, outliers_val=None)
-        ly_meas = parent_get_group_data(sourcetype, source_engine, '', meas, date_columns, dates_filter_dict, '',  derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, df_relationship, last_year_setting, True, True, False, None)
+        ly_meas = parent_get_group_data(source_type, source_engine, '', meas, date_columns, dates_filter_dict, '',  derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, df_relationship, last_year_setting, True, True, False, None)
 
 # #         ty_meas = ThisYear[meas].sum()
-        ty_meas = parent_get_group_data(sourcetype, source_engine, '', meas, date_columns, dates_filter_dict, '',  derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, df_relationship, this_year_setting, True, True, False, None)
+        ty_meas = parent_get_group_data(source_type, source_engine, '', meas, date_columns, dates_filter_dict, '',  derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, df_relationship, this_year_setting, True, True, False, None)
         
         df_diff_val = pd.merge(df_LastYearDimVal, df_ThisYearDimVal, left_index = True, right_index = True, how = 'outer').fillna(0)
         df_diff_val[meas] = df_diff_val['This Year'] - df_diff_val['Last Year']
@@ -63,15 +87,15 @@ def delta_analysis(datamart_id, sourcetype, source_engine, dim, meas, date_colum
         df_diff_val.sort_values(by = meas, ascending = False, inplace = True)
         df_diff_val.replace([np.inf, -np.inf], 0, inplace=True)
         
-        if sourcetype == 'xlsx':
+        if source_type == 'xlsx':
             all_years_setting = df_list
-        elif sourcetype == 'table':
+        elif source_type == 'table':
             all_years_setting = 'AllYears'
 
         df_diff_val_positive = df_diff_val[df_diff_val[meas] >= 0]
         # Only calculate others if rows > split+2
         if df_diff_val_positive.shape[0] > split+2:
-            df_diff_val_positive, others_count, others_value = df_others(sourcetype, source_engine, df_diff_val_positive, split, all_years_setting, dim, meas, date_columns, dates_filter_dict, dim_table, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, df_relationship, is_ratio, is_total=False)
+            df_diff_val_positive, others_count, others_value = df_others(source_type, source_engine, df_diff_val_positive, split, all_years_setting, dim, meas, date_columns, dates_filter_dict, dim_table, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, df_relationship, is_ratio, is_total=False)
             df_diff_val_positive = df_diff_val_positive.iloc[:split]
             df_diff_val_positive.loc[f"{others_count} Others (+)"] = others_value
         else:
@@ -84,7 +108,7 @@ def delta_analysis(datamart_id, sourcetype, source_engine, dim, meas, date_colum
 
         # Only calculate others if rows > split+2
         if df_diff_val_negative.shape[0] > split+2:
-            df_diff_val_negative, others_count, others_value = df_others(sourcetype, source_engine, df_diff_val_negative, split, all_years_setting, dim, meas, date_columns, dates_filter_dict, dim_table, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, df_relationship, is_ratio, is_total=False)
+            df_diff_val_negative, others_count, others_value = df_others(source_type, source_engine, df_diff_val_negative, split, all_years_setting, dim, meas, date_columns, dates_filter_dict, dim_table, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, df_relationship, is_ratio, is_total=False)
             df_diff_val_negative = df_diff_val_negative.iloc[:split]
             df_diff_val_negative.loc[f"{others_count} Others (-)"] = others_value
         else:
@@ -133,4 +157,4 @@ def delta_analysis(datamart_id, sourcetype, source_engine, dim, meas, date_colum
         related_fields_list = "#|#".join(related_fields_list)
         # engine = azure_sql_database_connect(source_username, source_password, source_server, source_database)
         cnxn, cursor, logesys_engine = sql_connect()
-        # insert_insights(datamart_id, string_list, str(waterfall), 'Avg CY vs LY', 'Waterfall', str(related_fields_list), importance, tags, 'Delta Analysis', 'Insight', cnxn, cursor, insight_code, version_num)
+        insert_insights(datamart_id, string_list, str(waterfall), 'Avg CY vs LY', 'Waterfall', str(related_fields_list), importance, tags, 'Delta Analysis', 'Insight', cnxn, cursor, insight_code, version_num)

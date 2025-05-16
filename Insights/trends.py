@@ -5,11 +5,32 @@ from FinalParameters import *
 from FinalCharts import *
 import pandas as pd
 import numpy as np
+import constants
 
 
-def trends(datamart_id, sourcetype, source_engine, dim_allowed_for_derived_metrics, date_columns, dates_filter_dict, Significant_dimensions, derived_measures_dict, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, df_list_last12months, df_relationship, rename_dim_meas, significance_score, max_month, max_date, df_version_number, cnxn, cursor):
+def trends():
     print('--TRENDS--')
-    
+    datamart_id = constants.DATAMART_ID
+    source_type = constants.SOURCE_TYPE
+    source_engine = constants.SOURCE_ENGINE
+    date_columns = constants.DATE_COLUMNS
+    dates_filter_dict = constants.DATES_FILTER_DICT
+    max_date = constants.MAX_DATE
+    Significant_dimensions = constants.SIGNIFICANT_DIMENSIONS
+    rename_dim_meas = constants.RENAME_DIM_MEAS
+    derived_measures_dict = constants.DERIVED_MEASURES_DICT
+    derived_measures_dict_expanded = constants.DERIVED_MEASURES_DICT_EXPANDED
+    dim_allowed_for_derived_metrics = constants.DIM_ALLOWED_FOR_DERIVED_METRICS
+    df_list_last12months = constants.DF_LIST_LAST12MONTHS
+    df_relationship = constants.DF_RELATIONSHIP
+    df_sql_table_names = constants.DF_SQL_TABLE_NAMES
+    df_sql_meas_functions = constants.DF_SQL_MEAS_FUNCTIONS
+    significance_score = constants.SIGNIFICANCE_SCORE
+    df_version_number = constants.DF_VERSION_NUMBER
+    cnxn = constants.CNXN
+    cursor = constants.CURSOR
+
+
     tags_list, related_fields_list, string_list, df_actual_list, cut_off_list, meas_list, charttitle_list,chartsubtitle_list, xAxisTitle_list, yAxisTitle_list, importance_list = [],[],[],[],[],[],[],[],[],[],[]
     # dim_table = 'Location_Dist'
     # dim = 'Store Name'
@@ -24,12 +45,12 @@ def trends(datamart_id, sourcetype, source_engine, dim_allowed_for_derived_metri
                     start_of_last_12_months = start_of_last_12_months.strftime("%d-%m-%Y")
                     start_of_month = start_of_month.strftime("%d-%m-%Y")
                     is_ratio=False
-                    if sourcetype == 'xlsx':
+                    if source_type == 'xlsx':
                         all_years_setting = df_list_last12months
-                    elif sourcetype == 'table':
+                    elif source_type == 'table':
                         all_years_setting = 'Last12Months'
 
-                    df_data = parent_get_group_data(sourcetype, source_engine, dim, meas, date_columns, dates_filter_dict, dim_table, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, df_relationship, all_years_setting, is_ratio, is_total=False, is_others=False, extra_groupby_col='Year-Month') 
+                    df_data = parent_get_group_data(source_type, source_engine, dim, meas, date_columns, dates_filter_dict, dim_table, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, df_relationship, all_years_setting, is_ratio, is_total=False, is_others=False, extra_groupby_col='Year-Month') 
                     df_data['Year-Month'] = pd.Categorical(df_data['Year-Month'], 
                                                                         categories=pd.date_range(start_of_last_12_months, max_date, freq='M').strftime('%Y-%b'),
                                                                         ordered=True)
@@ -41,12 +62,12 @@ def trends(datamart_id, sourcetype, source_engine, dim_allowed_for_derived_metri
                     cut_off = 0.7
                     all_dims = df_data[dim].unique()
 
-                    all_combinations_dict = parent_get_group_data(sourcetype, source_engine, dim, meas, date_columns, dates_filter_dict, dim_table, derived_measures_dict_expanded, df_sql_table_names, 
+                    all_combinations_dict = parent_get_group_data(source_type, source_engine, dim, meas, date_columns, dates_filter_dict, dim_table, derived_measures_dict_expanded, df_sql_table_names, 
                                                                 df_sql_meas_functions, df_relationship, all_years_setting, is_ratio, is_total=False, is_others=False, 
                                                                 extra_groupby_col=None, other_operation_column='Year-Month', other_operation=True)   
-                    if sourcetype == 'xlsx':
+                    if source_type == 'xlsx':
                         all_combinations = list(all_combinations_dict['unique_values'][0])
-                    elif sourcetype == 'table':
+                    elif source_type == 'table':
                         all_combinations = all_combinations_dict['unique_values'][0].split(', ')
                         # Convert strings to datetime objects for sorting
                         all_combinations = sorted(all_combinations, key=lambda x: datetime.strptime(x, '%Y-%b'))
@@ -142,7 +163,7 @@ def trends(datamart_id, sourcetype, source_engine, dim_allowed_for_derived_metri
                 temp_count += 1
                 # engine = azure_sql_database_connect(source_username, source_password, source_server, source_database)
                 cnxn, cursor, logesys_engine = sql_connect()
-                # insert_insights(datamart_id, string, str(data), 'Slope', 'Line', str(related_fields), importance, tags, 'Trends', 'Insight', cnxn, cursor, insight_code, version_num)
+                insert_insights(datamart_id, string, str(data), 'Slope', 'Line', str(related_fields), importance, tags, 'Trends', 'Insight', cnxn, cursor, insight_code, version_num)
         count = count + temp_count
         # count = 50, 90, 170
         print(f'count:{count}\n')

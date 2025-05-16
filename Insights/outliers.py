@@ -7,11 +7,36 @@ from FinalParameters import *
 from FinalCharts import *
 import pandas as pd
 import numpy as np
+import constants
 
 
-def outliers(datamart_id, sourcetype, source_engine, dim_allowed_for_derived_metrics, date_columns, dates_filter_dict, Significant_dimensions, derived_measures_dict, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, df_relationship, df_list_ly, df_list_ty, rename_dim_meas, significance_score, max_year, max_month, outliers_dates, df_version_number, cnxn, cursor):
+def outliers():
     print('--OUTLIERS--')
-    
+    datamart_id = constants.DATAMART_ID
+    source_type = constants.SOURCE_TYPE
+    source_engine = constants.SOURCE_ENGINE
+    date_columns = constants.DATE_COLUMNS
+    dates_filter_dict = constants.DATES_FILTER_DICT
+    outliers_dates = constants.OUTLIERS_DATES
+    max_date = constants.MAX_DATE
+    Significant_dimensions = constants.SIGNIFICANT_DIMENSIONS
+    rename_dim_meas = constants.RENAME_DIM_MEAS
+    derived_measures_dict = constants.DERIVED_MEASURES_DICT
+    derived_measures_dict_expanded = constants.DERIVED_MEASURES_DICT_EXPANDED
+    dim_allowed_for_derived_metrics = constants.DIM_ALLOWED_FOR_DERIVED_METRICS
+    df_list = constants.DF_LIST
+    df_list_ly = constants.DF_LIST_LY
+    df_list_ty = constants.DF_LIST_TY
+    df_relationship = constants.DF_RELATIONSHIP
+    df_sql_table_names = constants.DF_SQL_TABLE_NAMES
+    df_sql_meas_functions = constants.DF_SQL_MEAS_FUNCTIONS
+    significance_score = constants.SIGNIFICANCE_SCORE
+    df_version_number = constants.DF_VERSION_NUMBER
+    cnxn = constants.CNXN
+    cursor = constants.CURSOR
+
+
+
     tags_list, related_fields_final_list, string_final_list, df_actual_list, growth_list, meas_list, charttitle_list,chartsubtitle_list, xAxisTitle_list, yAxisTitle_list = [],[],[],[],[],[],[],[], [], []
     importance_list, val_list = [], []
     outlier = 2
@@ -35,48 +60,48 @@ def outliers(datamart_id, sourcetype, source_engine, dim_allowed_for_derived_met
                     for val, importance in zip(['Week On Week', 'Month On Month', 'Rolling 3 Months', 'MTD', 'YTD'], [220, 209, 198, 187, 176]):  
                         print(f'Val:{val}')
                         if val == 'MTD':
-                            if sourcetype == 'xlsx':
+                            if source_type == 'xlsx':
                                 this_period_setting, last_period_setting = df_list_ty.copy(), df_list_ly.copy()
                                 modified_val_this_period, modified_val_last_period = 'ThisPeriodMTD', 'LastPeriodMTD'
-                            elif sourcetype == 'table':
+                            elif source_type == 'table':
                                 this_period_setting, last_period_setting = 'ThisPeriodMTD', 'LastPeriodMTD'
                                 modified_val_this_period, modified_val_last_period = val, val
                         elif val == 'Rolling 3 Months':
-                            if sourcetype == 'xlsx':
+                            if source_type == 'xlsx':
                                 this_period_setting, last_period_setting = df_list_ty.copy(), df_list_ly.copy()
                                 modified_val_this_period, modified_val_last_period = 'ThisPeriodR3M', 'LastPeriodR3M'
-                            elif sourcetype == 'table':
+                            elif source_type == 'table':
                                 this_period_setting, last_period_setting = 'ThisPeriodR3M', 'LastPeriodR3M'
                                 modified_val_this_period, modified_val_last_period = val, val
                         elif val == 'YTD':
-                            if sourcetype == 'xlsx':
+                            if source_type == 'xlsx':
                                 this_period_setting, last_period_setting = df_list_ty.copy(), df_list_ly.copy()
                                 modified_val_this_period, modified_val_last_period = 'ThisPeriodYTD', 'LastPeriodYTD'
-                            elif sourcetype == 'table':
+                            elif source_type == 'table':
                                 this_period_setting, last_period_setting = 'ThisPeriodYTD', 'LastPeriodYTD'
                                 modified_val_this_period, modified_val_last_period = val, val
                         elif val == 'Week On Week':
-                            if sourcetype == 'xlsx':
+                            if source_type == 'xlsx':
                                 this_period_setting, last_period_setting = df_list_ty.copy(), df_list_ly.copy()
                                 modified_val_this_period, modified_val_last_period = 'ThisPeriodWeekOnWeek', 'LastPeriodWeekOnWeek'
-                            elif sourcetype == 'table':
+                            elif source_type == 'table':
                                 this_period_setting, last_period_setting = 'ThisPeriodWeekOnWeek', 'LastPeriodWeekOnWeek'
                                 modified_val_this_period, modified_val_last_period = val, val
                         elif val == 'Month On Month':
-                            if sourcetype == 'xlsx':
+                            if source_type == 'xlsx':
                                 this_period_setting, last_period_setting = df_list_ty.copy(), df_list_ly.copy()
                                 modified_val_this_period, modified_val_last_period = 'ThisPeriodMonthOnMonth', 'LastPeriodMonthOnMonth'
-                            elif sourcetype == 'table':
+                            elif source_type == 'table':
                                 this_period_setting, last_period_setting = 'ThisPeriodMonthOnMonth', 'LastPeriodMonthOnMonth'
                                 modified_val_this_period, modified_val_last_period = val, val
 
-                        df_this_period = parent_get_group_data(sourcetype, source_engine, dim, meas, date_columns, dates_filter_dict, dim_table, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, df_relationship, this_period_setting, is_ratio, is_total=False, is_others=False, outliers_val=modified_val_this_period, outliers_dates=outliers_dates)
+                        df_this_period = parent_get_group_data(source_type, source_engine, dim, meas, date_columns, dates_filter_dict, dim_table, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, df_relationship, this_period_setting, is_ratio, is_total=False, is_others=False, outliers_val=modified_val_this_period, outliers_dates=outliers_dates)
                         df_this_period.index = df_this_period.index.map(lambda x: 'Blank' if x is None else x)
                         df_this_period.rename(columns = {meas : meas + ' Gr %'}, inplace = True)
                         df_this_period.sort_values(by = meas + ' Gr %', ascending = False, inplace = True)
                         df_this_period.replace([np.inf, -np.inf], 0, inplace=True)
                         
-                        df_last_period = parent_get_group_data(sourcetype, source_engine, dim, meas, date_columns, dates_filter_dict, dim_table, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, df_relationship, last_period_setting, is_ratio, is_total=False, is_others=False, outliers_val=modified_val_last_period, outliers_dates=outliers_dates)
+                        df_last_period = parent_get_group_data(source_type, source_engine, dim, meas, date_columns, dates_filter_dict, dim_table, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, df_relationship, last_period_setting, is_ratio, is_total=False, is_others=False, outliers_val=modified_val_last_period, outliers_dates=outliers_dates)
                         df_last_period.index = df_last_period.index.map(lambda x: 'Blank' if x is None else x)
                         df_last_period.rename(columns = {meas : meas + ' Gr %'}, inplace = True)
                         df_last_period.sort_values(by = meas + ' Gr %', ascending = False, inplace = True)
@@ -185,7 +210,7 @@ def outliers(datamart_id, sourcetype, source_engine, dim_allowed_for_derived_met
                     
                     data = ComboChart(df_actual, [meas + ' Gr %'] , ['Average Gr %'], [], xAxis , yAxis, title, subtitle, chartFooterTitle)
                     cnxn, cursor, logesys_engine = sql_connect()
-                    # insert_insights(datamart_id, string, data, val, 'Combo', str(related_fields), importance , tags, 'Outlier', 'Insight', cnxn, cursor, insight_code, version_num)
+                    insert_insights(datamart_id, string, data, val, 'Combo', str(related_fields), importance , tags, 'Outlier', 'Insight', cnxn, cursor, insight_code, version_num)
                     temp_count += 1
             elif j > 0:  
                 if (zscore > zscore_val and zscore <= zscore_val + diff) or (zscore < -zscore_val and zscore >= -zscore_val - diff):
@@ -199,7 +224,7 @@ def outliers(datamart_id, sourcetype, source_engine, dim_allowed_for_derived_met
                     
                     data = ComboChart(df_actual, [meas + ' Gr %'] , ['Average Gr %'], [], xAxis , yAxis, title, subtitle, chartFooterTitle)
                     cnxn, cursor, logesys_engine = sql_connect()
-                    # insert_insights(datamart_id, string, data, val, 'Combo', str(related_fields), importance , tags, 'Outlier', 'Insight', cnxn, cursor, insight_code, version_num)
+                    insert_insights(datamart_id, string, data, val, 'Combo', str(related_fields), importance , tags, 'Outlier', 'Insight', cnxn, cursor, insight_code, version_num)
                     temp_count += 1
         count = count + temp_count
         print(f'count:{count}\n\n')

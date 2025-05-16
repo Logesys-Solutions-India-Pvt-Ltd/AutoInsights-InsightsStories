@@ -73,13 +73,13 @@ def playlist_category(datamart_id, engine_id, sql, category, dim_unique_values_d
             try:
                 groupid = group_df[group_df['GroupName'] == group].index[0]
                 playlist_id = uuid.uuid1()
-                # cursor.execute('''INSERT INTO tt_playlist ([PlayListId]
-                #             ,[DatamartId]
-                #             ,[PlayListName]
-                #             ,[Tags]
-                #             ,[Category]
-                #             ,[GroupId]) VALUES (?,?,?,?,?,?)''' , (playlist_id, datamart_id, pl_string, tag_dataframe.loc[i]['Tags'],category, groupid))
-                # cursor.commit()
+                cursor.execute('''INSERT INTO tt_playlist ([PlayListId]
+                            ,[DatamartId]
+                            ,[PlayListName]
+                            ,[Tags]
+                            ,[Category]
+                            ,[GroupId]) VALUES (?,?,?,?,?,?)''' , (playlist_id, datamart_id, pl_string, tag_dataframe.loc[i]['Tags'],category, groupid))
+                cursor.commit()
             except Exception as e:
                 exc_type, exc_obj, exc_tb = sys.exc_info()
                 file_name = exc_tb.tb_frame.f_code.co_filename

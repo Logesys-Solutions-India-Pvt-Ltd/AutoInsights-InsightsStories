@@ -4,28 +4,46 @@ from FinalParameters import *
 from FinalCharts import *
 import pandas as pd
 import numpy as np
+import constants
 
-# def hi_pots():
-#     print("You have entered the hi_pots function.")
 
-def hi_pots(datamart_id, sourcetype, source_engine, derived_measures_dict, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, df_relationship, rename_dim_meas, dim, meas, date_columns, dates_filter_dict, df_list_ty, dim_table, df_version_number, cnxn, cursor):
+def hi_pots(dim_table, dim, meas):
     print('--HI POTS--')
+
+    datamart_id = constants.DATAMART_ID
+    source_type = constants.SOURCE_TYPE
+    source_engine = constants.SOURCE_ENGINE
+    date_columns = constants.DATE_COLUMNS
+    dates_filter_dict = constants.DATES_FILTER_DICT
+    rename_dim_meas = constants.RENAME_DIM_MEAS
+    derived_measures_dict = constants.DERIVED_MEASURES_DICT
+    derived_measures_dict_expanded = constants.DERIVED_MEASURES_DICT_EXPANDED
+    df_list_ty = constants.DF_LIST_TY
+    df_relationship = constants.DF_RELATIONSHIP
+    df_sql_table_names = constants.DF_SQL_TABLE_NAMES
+    df_sql_meas_functions = constants.DF_SQL_MEAS_FUNCTIONS
+    df_version_number = constants.DF_VERSION_NUMBER
+    cnxn = constants.CNXN
+    cursor = constants.CURSOR
+
+
+
     related_fields_list = []
     split = 10
     is_ratio = False    
     df_others_value = pd.DataFrame()
     
-    if sourcetype == 'xlsx':
+    if source_type == 'xlsx':
         this_year_setting = df_list_ty
-    elif sourcetype == 'table':
+    elif source_type == 'table':
         this_year_setting = 'ThisYear'
     
 # #     df_data = ThisYear.groupby([dim])[meas].mean().to_frame()
-    df_data = parent_get_group_data(sourcetype, source_engine, dim, meas, date_columns, dates_filter_dict, dim_table, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, df_relationship, this_year_setting, is_ratio, is_total=False, is_others=False, outliers_val=None)   
+    df_data = parent_get_group_data(source_type, source_engine, dim, meas, date_columns, dates_filter_dict, dim_table, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, df_relationship, this_year_setting, is_ratio, is_total=False, is_others=False, outliers_val=None)   
     df_data.sort_values(by = meas, ascending=False, inplace=True)
                                         # df_others(sourcetype, source_engine, df_data, split, df_to_use, dim, meas, date_columns, dates_filter_dict, dim_table, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, df_relationship, is_ratio, is_total):
 
-    df_data, others_count, others_value = df_others(sourcetype, source_engine, df_data, split, this_year_setting, dim, meas, date_columns, dates_filter_dict, dim_table, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions,df_relationship, is_ratio, False)   
+    df_data, others_count, others_value = df_others(source_type, source_engine, df_data, split, this_year_setting, dim, meas, date_columns, dates_filter_dict, dim_table, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions,df_relationship, is_ratio, False)   
     df_data = df_data.head(split)
     
     
@@ -45,7 +63,7 @@ def hi_pots(datamart_id, sourcetype, source_engine, derived_measures_dict, deriv
                 is_ratio = True
 #     average = round(ThisYear[meas].mean(), 2)
     if is_ratio:
-        average = parent_get_group_data(sourcetype, source_engine, '', meas, date_columns, dates_filter_dict, '', derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, df_relationship, this_year_setting, is_ratio = True, is_total = False,is_others=False, outliers_val=None) 
+        average = parent_get_group_data(source_type, source_engine, '', meas, date_columns, dates_filter_dict, '', derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, df_relationship, this_year_setting, is_ratio = True, is_total = False,is_others=False, outliers_val=None) 
     else:
         average = df_data[meas].mean()
 
@@ -106,4 +124,4 @@ def hi_pots(datamart_id, sourcetype, source_engine, derived_measures_dict, deriv
         tags = rename_variables(tags, rename_dim_meas)
         cnxn, cursor, logesys_engine = sql_connect()
         
-        # insert_insights(datamart_id, str(string), str(df_data), 'X Times', 'Combo', str(related_fields_list), importance,tags, 'Hi-Pots', 'Insight', cnxn, cursor, insight_code, version_num)
+        insert_insights(datamart_id, str(string), str(df_data), 'X Times', 'Combo', str(related_fields_list), importance,tags, 'Hi-Pots', 'Insight', cnxn, cursor, insight_code, version_num)

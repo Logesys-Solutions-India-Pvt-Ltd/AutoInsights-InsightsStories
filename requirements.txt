@@ -1,4 +1,5 @@
 pandas
+threading
 scikit-learn
 scipy
 numpy
