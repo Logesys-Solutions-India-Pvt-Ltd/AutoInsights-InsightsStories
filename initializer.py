@@ -3,7 +3,7 @@ from datetime import datetime
 from initializer_functions import *
 from multiple_tables_csv_excel import *
 from Stories.stories_call import stories_call
-from Insights.insights_call import insights_call_threaded
+from Insights.insights_call import insights_call, insights_call_threaded
 from Playlist.playlist_call import playlist_call
 from DataOverview.data_overview_call import data_overview_call
 import os
@@ -165,8 +165,8 @@ def insights_generator(event):
         stories_call()
         print('Stories generated.')    
 
-        # insights_call()
-        insights_call_threaded()
+        insights_call()
+        # insights_call_threaded()
         print('Insights generated')
 
         playlist_call()
