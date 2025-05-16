@@ -142,68 +142,127 @@ def get_relationship_column(df_relationship, table1_name, table2_name, column_na
     return result.iloc[0] if not result.empty else None
 
 
-def handle_no_dimension(source_type, source_engine,  meas_table, meas_col, meas_filter, meas_function, df_to_use):
-    """Handles cases with no dimension provided."""
-    formula = ""
-    if source_type == 'xlsx':
-        if meas_filter:
-            formula = f"df_to_use['{meas_table}'][{meas_filter}]['{meas_col}']"
+# def handle_no_dimension(source_type, source_engine,  meas_table, meas_col, meas_filter, meas_function, df_to_use):
+#     """Handles cases with no dimension provided."""
+#     formula = ""
+#     if source_type == 'xlsx':
+#         if meas_filter:
+#             formula = f"df_to_use['{meas_table}'][{meas_filter}]['{meas_col}']"
+#         else:
+#             formula = f"df_to_use['{meas_table}']['{meas_col}']"
+#         if meas_function:
+#             formula = f"{meas_function}({formula})"
+#         try:
+#             result = eval(formula)
+#             return pd.DataFrame({meas_col: [result]}), formula
+#         except Exception as e:
+#             print(f"Error in _handle_no_dimension: {e}")
+#             return pd.DataFrame({meas_col: [None]}), formula
+#     elif source_type == 'table':
+#         query = f"SELECT {meas_function}([{meas_col}]) FROM [dbo].[{meas_table}] {meas_filter if meas_filter else ''}"
+#         try:
+#             df = pd.read_sql_query(query, source_engine)
+#             return df, query
+#         except Exception as e:
+#             print(f"Error executing SQL query: {query}. Error: {e}")
+#             return pd.DataFrame(), query # important to return query
+
+#     return pd.DataFrame(), formula  # Default empty return, should not be reached.
+
+def handle_no_dimension(source_type, source_engine, meas_table_name, meas_col, meas_filter, meas_function, 
+                        df_to_use, date_columns, date_ranges, df_sql_table_names, df_sql_meas_functions):
+    if source_type == 'table':
+        sourcetable = df_sql_table_names[meas_table_name]
+        meas_operation = df_sql_meas_functions[meas_function]
+        where_clause = ""
+        if df_to_use != 'AllData':
+            start_period, end_period = get_date_period(date_ranges, df_to_use, meas_table_name)
+            date_column = date_columns.get(meas_table_name)
+            if start_period and end_period and date_column:
+                where_clause = f"WHERE [{date_column}] BETWEEN CONVERT(DATETIME, '{start_period}', 105) AND CONVERT(DATETIME, '{end_period}', 105)"
         else:
-            formula = f"df_to_use['{meas_table}']['{meas_col}']"
-        if meas_function:
-            formula = f"{meas_function}({formula})"
-        try:
-            result = eval(formula)
-            return pd.DataFrame({meas_col: [result]}), formula
-        except Exception as e:
-            print(f"Error in _handle_no_dimension: {e}")
-            return pd.DataFrame({meas_col: [None]}), formula
-    elif source_type == 'table':
-        query = f"SELECT {meas_function}([{meas_col}]) FROM [dbo].[{meas_table}] {meas_filter if meas_filter else ''}"
-        try:
-            df = pd.read_sql_query(query, source_engine)
-            return df, query
-        except Exception as e:
-            print(f"Error executing SQL query: {query}. Error: {e}")
-            return pd.DataFrame(), query # important to return query
-
-    return pd.DataFrame(), formula  # Default empty return, should not be reached.
-
-
-def process_same_table_groupby(source_type, source_engine, meas_table_name, dim_col, date_columns, meas_filter, df_sql_table_names,
-                               df_sql_meas_functions, meas_col, meas_function, date_ranges, df_to_use, key, 
-                               is_others, others_filter=None, extra_groupby_col=None):
-    
-    """Handles grouping when the measure and dimension are in the same table."""
-    date_column = date_columns.get(meas_table_name)
-    table_name = f"[dbo].[{df_sql_table_names[meas_table_name]}]"
-    formula = ""
-    if source_type == 'xlsx':
-         if extra_groupby_col:
-            formula = f"df_to_use['{meas_table_name}'].groupby(['{extra_groupby_col}','{dim_col}'])['{meas_col}'].{meas_function}()"
-         else:
-            formula = f"df_to_use['{meas_table_name}'].groupby(['{dim_col}'])['{meas_col}'].{meas_function}()"
-         return eval(formula), formula
-    elif source_type == 'table':
-        select_clause = f"{dim_col}, {meas_function}([{meas_col}]) as {key}"
-        groupby_clause = f"GROUP BY {dim_col}"
-        where_clause = f"WHERE 1=1"  # Start with a neutral condition
-
+            where_clause = get_all_data_time_filter(meas_table_name, date_columns, meas_filter, df_sql_table_names)
         if meas_filter:
-            where_clause += f" AND {meas_filter}"
-        if extra_groupby_col:
-            select_clause = f"{extra_groupby_col}, " + select_clause
-            groupby_clause = f"{extra_groupby_col}, " + groupby_clause
-
-        query = f"SELECT {select_clause} FROM {table_name} {where_clause} {groupby_clause}"
+            where_clause += f" AND {meas_filter}" if where_clause else f"WHERE {meas_filter}"
+        query = f"SELECT {meas_function}([{meas_col}]) FROM [dbo].[{sourcetable}] {where_clause}"
         try:
             df = query_on_table(query, source_engine)
             return df, query
         except Exception as e:
+            print(f"Error executing SQL query: {query}. Error: {e}")
+            return pd.DataFrame(), query
+        
+
+# def process_same_table_groupby(source_type, source_engine, meas_table_name, dim_col, date_columns, meas_filter, df_sql_table_names,
+#                                df_sql_meas_functions, meas_col, meas_function, date_ranges, df_to_use, key, 
+#                                is_others, others_filter=None, extra_groupby_col=None):
+    
+#     """Handles grouping when the measure and dimension are in the same table."""
+#     date_column = date_columns.get(meas_table_name)
+#     table_name = f"[dbo].[{df_sql_table_names[meas_table_name]}]"
+#     formula = ""
+#     if source_type == 'xlsx':
+#          if extra_groupby_col:
+#             formula = f"df_to_use['{meas_table_name}'].groupby(['{extra_groupby_col}','{dim_col}'])['{meas_col}'].{meas_function}()"
+#          else:
+#             formula = f"df_to_use['{meas_table_name}'].groupby(['{dim_col}'])['{meas_col}'].{meas_function}()"
+#          return eval(formula), formula
+#     elif source_type == 'table':
+#         select_clause = f"{dim_col}, {meas_function}([{meas_col}]) as {key}"
+#         groupby_clause = f"GROUP BY {dim_col}"
+#         where_clause = f"WHERE 1=1"  # Start with a neutral condition
+
+#         if meas_filter:
+#             where_clause += f" AND {meas_filter}"
+#         if extra_groupby_col:
+#             select_clause = f"{extra_groupby_col}, " + select_clause
+#             groupby_clause = f"{extra_groupby_col}, " + groupby_clause
+
+#         query = f"SELECT {select_clause} FROM {table_name} {where_clause} {groupby_clause}"
+#         try:
+#             df = query_on_table(query, source_engine)
+#             return df, query
+#         except Exception as e:
+#             print(e)
+#             return pd.DataFrame(), query
+
+#     return pd.DataFrame(), formula
+
+
+def process_same_table_groupby(source_type, source_engine, meas_table_name, dim_col, date_columns, meas_filter, df_sql_table_names,
+                              df_sql_meas_functions, meas_col, meas_function, date_ranges, df_to_use, key, 
+                              is_others, others_filter=None, extra_groupby_col=None):
+    if source_type == 'table':
+        table_name = f"[dbo].[{df_sql_table_names[meas_table_name]}]"
+        meas_operation = df_sql_meas_functions.get(meas_function, meas_function)
+        where_clause = ""
+        if df_to_use != 'AllData':
+            start_period, end_period = get_date_period(date_ranges, df_to_use, meas_table_name)
+            date_column = date_columns.get(meas_table_name)
+            if start_period and end_period and date_column:
+                where_clause = f"WHERE [{date_column}] BETWEEN CONVERT(DATETIME, '{start_period}', 105) AND CONVERT(DATETIME, '{end_period}', 105)"
+        else:
+            where_clause = get_all_data_time_filter(meas_table_name, date_columns, meas_filter, df_sql_table_names)
+        if others_filter and is_others:
+            quoted_values = [safe_sql_string(val) for val in others_filter]
+            others_filter_clause = f"AND [{dim_col}] IN ({', '.join(quoted_values)})"
+            where_clause += f" {others_filter_clause}" if where_clause else f"WHERE {others_filter_clause[4:]}"
+        if meas_filter:
+            where_clause += f" AND {meas_filter}" if where_clause else f"WHERE {meas_filter}"
+        groupby_clause = f"GROUP BY [{dim_col}]" if not extra_groupby_col else f"GROUP BY [{extra_groupby_col}], [{dim_col}]"
+        select_clause = f"[{dim_col}], {meas_operation}([{meas_col}]) AS [{key}]" if not extra_groupby_col else f"[{extra_groupby_col}], [{dim_col}], {meas_operation}([{meas_col}]) AS [{key}]"
+        query = f"SELECT {select_clause} FROM {table_name} {where_clause} {groupby_clause}"
+        try:
+            df = query_on_table(query, source_engine)
+            if not is_others:
+                df[key] = df[key].astype(float).round(2)
+                df.set_index([extra_groupby_col, dim_col] if extra_groupby_col else dim_col, inplace=True)
+                df = df[df.index != '']
+            return df, query
+        except Exception as e:
             print(e)
             return pd.DataFrame(), query
-
-    return pd.DataFrame(), formula
+    
 
 
 def process_different_table_groupby_xlsx(df_to_use, meas_table_name, dim_table, dim_col, meas_col, df_relationship, 
@@ -229,72 +288,138 @@ def process_different_table_groupby_xlsx(df_to_use, meas_table_name, dim_table, 
 
 
 
+# def process_different_table_groupby_table(source_engine, meas_table_name, dim_table, dim_col, meas_col, df_relationship, 
+#                                           date_columns, meas_filter, meas_function, 
+#                                           df_sql_table_names, df_sql_meas_functions, date_ranges, df_to_use,
+#                                           key, is_others, others_filter=None, extra_groupby_col=None):
+#     """Handles grouping when measure and dimension are in different SQL tables."""
+
+#     relationship_column_meas = get_relationship_column(df_relationship, meas_table_name, dim_table, 'column 1')
+#     relationship_column_dim = get_relationship_column(df_relationship, meas_table_name, dim_table, 'column 2')
+
+#     meas_table_name_sql = f"[dbo].[{df_sql_table_names[meas_table_name]}]"
+#     dim_table_name_sql = f"[dbo].[{df_sql_table_names[dim_table]}]"
+#     alias_meas_table = "t1"
+#     alias_dim_table = "t2"
+
+#     select_clause = f"{alias_dim_table}.[{dim_col}], {df_sql_meas_functions.get(meas_function, meas_function)}({alias_meas_table}.[{meas_col}]) as {key}"
+#     from_clause = f"FROM {meas_table_name_sql} as {alias_meas_table} INNER JOIN {dim_table_name_sql} as {alias_dim_table} ON {alias_meas_table}.[{relationship_column_meas}] = {alias_dim_table}.[{relationship_column_dim}]"
+#     where_clause = "WHERE 1=1"  # Start with a neutral condition
+#     groupby_clause = f"GROUP BY {alias_dim_table}.[{dim_col}]"
+
+#     if meas_filter:
+#         where_clause += f" AND {alias_meas_table}.{meas_filter}"
+#     if extra_groupby_col:
+#         select_clause = f"{alias_dim_table}.{extra_groupby_col}, " + select_clause
+#         groupby_clause = f"{alias_dim_table}.{extra_groupby_col}, " + groupby_clause
+
+#     query = f"SELECT {select_clause} {from_clause} {where_clause} {groupby_clause}"
+#     try:
+#         df = query_on_table(query, source_engine)
+#         return df, query
+#     except Exception as e:
+#         print(e)
+#         return pd.DataFrame(), query
+
+
 def process_different_table_groupby_table(source_engine, meas_table_name, dim_table, dim_col, meas_col, df_relationship, 
-                                          date_columns, meas_filter, meas_function, 
-                                          df_sql_table_names, df_sql_meas_functions, date_ranges, df_to_use,
-                                          key, is_others, others_filter=None, extra_groupby_col=None):
-    """Handles grouping when measure and dimension are in different SQL tables."""
-
-    relationship_column_meas = get_relationship_column(df_relationship, meas_table_name, dim_table, 'column 1')
-    relationship_column_dim = get_relationship_column(df_relationship, meas_table_name, dim_table, 'column 2')
-
-    meas_table_name_sql = f"[dbo].[{df_sql_table_names[meas_table_name]}]"
-    dim_table_name_sql = f"[dbo].[{df_sql_table_names[dim_table]}]"
-    alias_meas_table = "t1"
-    alias_dim_table = "t2"
-
-    select_clause = f"{alias_dim_table}.[{dim_col}], {df_sql_meas_functions.get(meas_function, meas_function)}({alias_meas_table}.[{meas_col}]) as {key}"
-    from_clause = f"FROM {meas_table_name_sql} as {alias_meas_table} INNER JOIN {dim_table_name_sql} as {alias_dim_table} ON {alias_meas_table}.[{relationship_column_meas}] = {alias_dim_table}.[{relationship_column_dim}]"
-    where_clause = "WHERE 1=1"  # Start with a neutral condition
-    groupby_clause = f"GROUP BY {alias_dim_table}.[{dim_col}]"
-
+                                         date_columns, meas_filter, meas_function, df_sql_table_names, df_sql_meas_functions, 
+                                         date_ranges, df_to_use, key, is_others, others_filter=None, extra_groupby_col=None):
+    meas_sourcetable = f"[dbo].[{df_sql_table_names[meas_table_name]}]"
+    dim_sourcetable = f"[dbo].[{df_sql_table_names[dim_table]}]"
+    meas_key_col = get_relationship_column(df_relationship, meas_table_name, dim_table, 'column 1')
+    dim_key_col = get_relationship_column(df_relationship, meas_table_name, dim_table, 'column 2')
+    meas_operation = df_sql_meas_functions.get(meas_function, meas_function)
+    alias_meas_table, alias_dim_table = 't1', 't2'
+    where_clause = ""
+    if df_to_use != 'AllData':
+        start_period, end_period = get_date_period(date_ranges, df_to_use, meas_table_name)
+        date_column = date_columns.get(meas_table_name)
+        if start_period and end_period and date_column:
+            where_clause = f"WHERE {alias_meas_table}.[{date_column}] BETWEEN CONVERT(DATETIME, '{start_period}', 105) AND CONVERT(DATETIME, '{end_period}', 105)"
+    else:
+        where_clause = get_all_data_time_filter(meas_table_name, date_columns, meas_filter, df_sql_table_names)
+    if others_filter and is_others:
+        quoted_values = [safe_sql_string(val) for val in others_filter]
+        others_filter_clause = f"AND {alias_dim_table}.[{dim_col}] IN ({', '.join(quoted_values)})"
+        where_clause += f" {others_filter_clause}" if where_clause else f"WHERE {others_filter_clause[4:]}"
     if meas_filter:
-        where_clause += f" AND {alias_meas_table}.{meas_filter}"
-    if extra_groupby_col:
-        select_clause = f"{alias_dim_table}.{extra_groupby_col}, " + select_clause
-        groupby_clause = f"{alias_dim_table}.{extra_groupby_col}, " + groupby_clause
-
-    query = f"SELECT {select_clause} {from_clause} {where_clause} {groupby_clause}"
+        where_clause += f" AND {alias_meas_table}.{meas_filter}" if where_clause else f"WHERE {alias_meas_table}.{meas_filter}"
+    groupby_clause = f"GROUP BY {alias_dim_table}.[{dim_col}]" if not extra_groupby_col else f"GROUP BY {alias_meas_table}.[{extra_groupby_col}], {alias_dim_table}.[{dim_col}]"
+    select_clause = f"{alias_dim_table}.[{dim_col}], {meas_operation}({alias_meas_table}.[{meas_col}]) AS [{key}]" if not extra_groupby_col else f"{alias_meas_table}.[{extra_groupby_col}], {alias_dim_table}.[{dim_col}], {meas_operation}({alias_meas_table}.[{meas_col}]) AS [{key}]"
+    query = f"SELECT {select_clause} FROM {meas_sourcetable} AS {alias_meas_table} INNER JOIN {dim_sourcetable} AS {alias_dim_table} ON {alias_meas_table}.[{meas_key_col}] = {alias_dim_table}.[{dim_key_col}] {where_clause} {groupby_clause}"
     try:
         df = query_on_table(query, source_engine)
+        df[key] = pd.to_numeric(df[key], errors='coerce').fillna(0).round(2)
+        if not is_others:
+            df.set_index([extra_groupby_col, dim_col] if extra_groupby_col else dim_col, inplace=True)
+            df = df[df.index != '']
         return df, query
     except Exception as e:
-        print(e)
+        print(f"Error executing query: {query}. Error: {e}")
         return pd.DataFrame(), query
 
 
+# def process_other_operation(source_type, df_to_use, meas_table_name, meas_filter, other_operation_column,
+#                             source_engine, date_ranges, date_columns, df_sql_table_names):
+#     """Handles 'other' operations like counting unique values or rows."""
+#     date_column = date_columns.get(meas_table_name)
+#     table_name = f"[dbo].[{df_sql_table_names[meas_table_name]}]"
+#     formula = ""
+#     if source_type == 'xlsx':
+#         if meas_filter:
+#             formula = f"df_to_use['{meas_table_name}'][{meas_filter}]['{other_operation_column}']"
+#         else:
+#             formula = f"df_to_use['{meas_table_name}']['{other_operation_column}']"
+
+#         unique_values = df_to_use[meas_table_name][other_operation_column].unique()
+#         count_unique = len(unique_values)
+#         all_values = df_to_use[meas_table_name][other_operation_column]
+#         count_all = len(all_values)
+#         return pd.DataFrame({
+#             'unique_values': [unique_values],
+#             'count_unique': [count_unique],
+#             'count_all': [count_all]
+#         }), formula
+#     elif source_type == 'table':
+#         query = f"SELECT COUNT(DISTINCT [{other_operation_column}]) as count_unique, COUNT([{other_operation_column}]) as count_all FROM {table_name} {meas_filter if meas_filter else ''}"
+#         try:
+
+#             df = query_on_table(query, source_engine)
+#             df['unique_values'] = [pd.read_sql_query(f"SELECT DISTINCT {other_operation_column} from {table_name} {meas_filter if meas_filter else ''}", source_engine)[other_operation_column].tolist()]
+#             return df, query
+#         except Exception as e:
+#             print(e)
+#             return pd.DataFrame(), query
+#     return pd.DataFrame(), formula
+
+
 def process_other_operation(source_type, df_to_use, meas_table_name, meas_filter, other_operation_column,
-                            source_engine, date_ranges, date_columns, df_sql_table_names):
-    """Handles 'other' operations like counting unique values or rows."""
-    date_column = date_columns.get(meas_table_name)
-    table_name = f"[dbo].[{df_sql_table_names[meas_table_name]}]"
-    formula = ""
-    if source_type == 'xlsx':
+                           source_engine, date_ranges, date_columns, df_sql_table_names):
+    if source_type == 'table':
+        table_name = f"[dbo].[{df_sql_table_names[meas_table_name]}]"
+        date_column = date_columns.get(meas_table_name)
+        start_period, end_period = get_date_period(date_ranges, df_to_use, meas_table_name)
+        where_clause = f"WHERE [{date_column}] BETWEEN CONVERT(DATETIME, '{start_period}', 105) AND CONVERT(DATETIME, '{end_period}', 105)" if start_period and end_period and date_column else ""
         if meas_filter:
-            formula = f"df_to_use['{meas_table_name}'][{meas_filter}]['{other_operation_column}']"
-        else:
-            formula = f"df_to_use['{meas_table_name}']['{other_operation_column}']"
-
-        unique_values = df_to_use[meas_table_name][other_operation_column].unique()
-        count_unique = len(unique_values)
-        all_values = df_to_use[meas_table_name][other_operation_column]
-        count_all = len(all_values)
-        return pd.DataFrame({
-            'unique_values': [unique_values],
-            'count_unique': [count_unique],
-            'count_all': [count_all]
-        }), formula
-    elif source_type == 'table':
-        query = f"SELECT COUNT(DISTINCT [{other_operation_column}]) as count_unique, COUNT([{other_operation_column}]) as count_all FROM {table_name} {meas_filter if meas_filter else ''}"
+            where_clause += f" AND {meas_filter}" if where_clause else f"WHERE {meas_filter}"
+        query = f"""
+            WITH UniqueValues AS (
+                SELECT DISTINCT [{other_operation_column}] AS unique_values
+                FROM {table_name}
+                {where_clause}
+            )
+            SELECT 
+                (SELECT STRING_AGG(CAST(unique_values AS NVARCHAR(MAX)), ', ') FROM UniqueValues) AS unique_values, 
+                (SELECT COUNT(*) FROM UniqueValues) AS count_unique,
+                (SELECT COUNT(*) FROM {table_name} {where_clause}) AS count_rows
+        """
         try:
-
             df = query_on_table(query, source_engine)
-            df['unique_values'] = [pd.read_sql_query(f"SELECT DISTINCT {other_operation_column} from {table_name} {meas_filter if meas_filter else ''}", source_engine)[other_operation_column].tolist()]
             return df, query
         except Exception as e:
-            print(e)
+            print(f"Error executing query: {query}. Error: {e}")
             return pd.DataFrame(), query
-    return pd.DataFrame(), formula
 
 
 def query_on_table(query, source_engine):
@@ -318,21 +443,32 @@ def get_groupby_data(source_type, source_engine, df_sql_table_names, df_sql_meas
 
     date_ranges = extract_date_ranges(dates_filter_dict, outliers_dates)
     meas_table_name = meas_table.split('[')[1].split(']')[0].strip("'") if '[' in meas_table else meas_table
-
+    dim_table_name = dim_table
 
     if not other_operation:
         if source_type == 'xlsx' or (source_type == 'table' and (is_ratio or is_total or (not dim_table and not dim_col))):
-            return handle_no_dimension(source_type, source_engine, meas_table, meas_col, meas_filter, meas_function, df_to_use)
-
+            return handle_no_dimension(source_type, source_engine, meas_table_name, meas_col, meas_filter, meas_function, 
+                                       df_to_use, date_columns, date_ranges, df_sql_table_names, df_sql_meas_functions)
+                                       
         elif meas_table_name == dim_table:
-            return process_same_table_groupby(source_type, source_engine, meas_table_name, dim_col, date_columns, meas_filter, df_sql_table_names, df_sql_meas_functions, meas_col, meas_function, date_ranges, df_to_use, key, is_others, others_filter, extra_groupby_col)
+            return process_same_table_groupby(source_type, source_engine, meas_table_name, dim_col, date_columns, 
+                                              meas_filter, df_sql_table_names, df_sql_meas_functions, meas_col,
+                                              meas_function, date_ranges, df_to_use, key, 
+                                              is_others, others_filter, extra_groupby_col)
         else:
             if source_type == 'xlsx':
-                return process_different_table_groupby_xlsx(df_to_use, meas_table_name, dim_table, dim_col, meas_col, df_relationship, meas_filter, meas_function, is_others, extra_groupby_col)
+                return process_different_table_groupby_xlsx(df_to_use, meas_table_name, dim_table, dim_col, meas_col,
+                                                            df_relationship, meas_filter, meas_function, is_others,
+                                                            extra_groupby_col)
             elif source_type == 'table':
-                return process_different_table_groupby_table(source_engine, meas_table_name, dim_table, dim_col, meas_col, df_relationship, date_columns, meas_filter, meas_function, df_sql_table_names, df_sql_meas_functions, date_ranges, df_to_use, key, is_others, others_filter, extra_groupby_col)
+                return process_different_table_groupby_table(source_engine, meas_table_name, dim_table, dim_col, 
+                                                             meas_col, df_relationship, date_columns, meas_filter, 
+                                                             meas_function, df_sql_table_names, df_sql_meas_functions, 
+                                                             date_ranges, df_to_use, key, is_others, others_filter, 
+                                                             extra_groupby_col)
     elif other_operation:
-        return process_other_operation(source_type, df_to_use, meas_table_name, meas_filter, other_operation_column, source_engine, date_ranges, date_columns, df_sql_table_names)
+        return process_other_operation(source_type, df_to_use, meas_table_name, meas_filter, other_operation_column,
+                                        source_engine, date_ranges, date_columns, df_sql_table_names)
     return pd.DataFrame(), '' # Added to avoid the "Missing return statement" error.
 
 
