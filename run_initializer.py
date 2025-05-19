@@ -12,7 +12,7 @@ CORS(app)
 
 def stop_gunicorn():
     """
-    Stops the Gunicorn master process.  This should be called after the
+    Stops the Gunicorn master process.  This should be called after 
     application has finished processing its task and sent the response.
     """
     server_pid = os.getppid()  # Get the parent process ID (Gunicorn master)
