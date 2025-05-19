@@ -165,8 +165,8 @@ def insights_generator(event):
         stories_call()
         print('Stories generated.')    
 
-        # insights_call()
-        insights_call_threaded()
+        insights_call()
+        # insights_call_threaded()
         print('Insights generated')
 
         playlist_call()

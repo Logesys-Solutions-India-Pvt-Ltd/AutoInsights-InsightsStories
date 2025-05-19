@@ -257,10 +257,12 @@ def metadata_generator(event):
 
     ########## Establish Logesys Database Connection ##########
     cnxn, cursor, logesys_engine = sql_connect()
-    
-    # datamart_id = "68F4413C-FD9A-11EF-BA6C-2CEA7F154E8D"
-    # table_id = "664493B1-FF38-11EF-BD32-2CEA7F154E8D"
-    # refresh = 'True'
+
+    datamart_id = "7F2C4256-3449-447A-B1CC-FAE49431BF7C"
+    table_id = "9F504F27-4383-4FCA-9DCA-2860484A4047"
+    refresh = 'False'
+
+
 
     try:
         username = "lsdbadmin"
@@ -335,7 +337,7 @@ def metadata_generator(event):
                 source_engine = create_engine(f"mssql+pymssql://{source_username}:{source_password.replace('@', '%40')}@{source_server}/{source_database}")
                 json_output = connect_to_db(table_name, source_engine)
                 json_output_str = json.dumps(json_output)
- 
+
             # Inserting metadata into m_datamart_metadata table
             df_metadata_initial = get_metadata_json(table_name, json_output_str)
             # Upload the df into m_datamart_metadata
