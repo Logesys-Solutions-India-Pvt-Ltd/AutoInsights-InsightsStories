@@ -9,7 +9,7 @@ import constants
 
 def new_entrants(dim_table, dim, meas):
     print('--NEW ENTRANTS--')
-
+    
     datamart_id = constants.DATAMART_ID
     source_type = constants.SOURCE_TYPE
     source_engine = constants.SOURCE_ENGINE

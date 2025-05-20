@@ -3,11 +3,8 @@ from datetime import datetime, timedelta
 # from constants import *
 import pandas as pd
 import calendar
+import json
 
-
-def safe_sql_string(value):
-    """Safely quote string values for SQL by doubling apostrophes"""
-    return "'" + str(value).replace("'", "''") + "'"
 
 def query_on_table(query, source_engine):
     query = text(query)
@@ -18,6 +15,26 @@ def query_on_table(query, source_engine):
         column_names = result.keys()
         df_data = pd.DataFrame(rows, columns=column_names)
     return df_data
+
+
+def combine_formula_json(datamart_id, logesys_engine):
+    result = {}
+
+    update_json_query = f"""
+                            SELECT JsonData
+                            FROM derived_metrics
+                            WHERE [DataMartID] = '{datamart_id}' AND [JsonData] IS NOT NULL
+                            """
+    # Use query_on_table here
+    df_json_data = query_on_table(update_json_query, logesys_engine)
+
+    # Iterate through the DataFrame to get the JsonData
+    for index, row in df_json_data.iterrows():
+        json_formula_str = row['JsonData']
+        result.update(json.loads(json_formula_str))
+
+    return json.dumps(result)
+
 
 def rename_variables(text, rename_dict):
     """
@@ -507,6 +524,10 @@ def df_others(sourcetype, source_engine, df_data, split, df_to_use, dim, meas, d
 # #     return pd.concat([df_main, df_others_valFue])
     return df_data, len(others_filter), others_value
 
+
+def safe_sql_string(value):
+    """Safely quote string values for SQL by doubling apostrophes"""
+    return "'" + str(value).replace("'", "''") + "'"
 
 def get_groupby_data(sourcetype, source_engine, df_sql_table_names, df_sql_meas_functions, df_to_use, meas_table, meas_col, meas_filter, meas_function, df_relationship, dim_table, dim_col, date_columns, dates_filter_dict, key, is_ratio, is_total, is_others, others_filter, extra_groupby_col, other_operation_column, other_operation, outliers_dates=None):
     """

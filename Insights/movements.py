@@ -9,7 +9,7 @@ import constants
 
 def movements(dim_table, dim, meas):
     print('--MOVEMENTS--')
-
+    
     datamart_id = constants.DATAMART_ID
     source_type = constants.SOURCE_TYPE
     source_engine = constants.SOURCE_ENGINE

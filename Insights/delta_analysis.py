@@ -9,7 +9,7 @@ import constants
 
 def delta_analysis(dim_table, dim, meas):
     print('--DELTA ANALYSIS--')
-
+    
     datamart_id = constants.DATAMART_ID
     source_type = constants.SOURCE_TYPE
     source_engine = constants.SOURCE_ENGINE

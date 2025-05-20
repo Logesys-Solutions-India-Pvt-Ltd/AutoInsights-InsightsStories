@@ -15,28 +15,34 @@ def insights_call():
     selected_insights = constants.SELECTED_INSIGHTS
     insights_to_skip = constants.INSIGHTS_TO_SKIP
     dim_allowed_for_derived_metrics = constants.DIM_ALLOWED_FOR_DERIVED_METRICS
+    insights_allowed_for_derived_metrics = constants.INSIGHTS_ALLOWED_FOR_DERIVED_METRICS
     derived_measures_dict = constants.DERIVED_MEASURES_DICT
     Significant_dimensions = constants.SIGNIFICANT_DIMENSIONS
     
-    for dim_table, dim_list in Significant_dimensions.items():
-            for dim in dim_list:
-                for meas in list(derived_measures_dict.keys()):
-                    if dim in dim_allowed_for_derived_metrics[meas]:
-                        for insight_name in selected_insights:
-                            if insight_name in insights_to_skip:
-                                continue
+    for meas in list(derived_measures_dict.keys()):  
+        allowed_dims_for_meas = dim_allowed_for_derived_metrics[meas]
+        allowed_insights_for_meas = insights_allowed_for_derived_metrics[meas] 
 
+        for dim_table, dim_list in Significant_dimensions.items():  
+            for dim in dim_list:  
+                if dim in allowed_dims_for_meas:  # Check if the dimension is allowed for the current measure.
+                    print(f'dim:{dim}, meas{meas}')
+                    for insight_name in selected_insights:  # Iterate through the selected insights.
+                        if insight_name in insights_to_skip:
+                            continue
+                        
+                        if insight_name in allowed_insights_for_meas:
                             if insight_name == 'Hi-Pots':
-                                hi_pots(dim_table, dim, meas)
-                            if meas != 'Stock Cover':
-                                if insight_name == 'Movements':     
-                                    movements(dim_table, dim, meas)
-                                elif insight_name == 'Rank Analysis':
-                                    rank_analysis(dim_table, dim, meas)
-                                elif insight_name == 'Delta Analysis':
-                                    delta_analysis(dim_table, dim, meas)
-                                elif insight_name == 'New Entrants':
-                                    new_entrants(dim_table, dim, meas)
+                                hi_pots(dim_table, dim, meas)  
+                            if insight_name == 'Movements':
+                                movements(dim_table, dim, meas)
+                            elif insight_name == 'Rank Analysis':
+                                rank_analysis(dim_table, dim, meas)
+                            elif insight_name == 'Delta Analysis':
+                                delta_analysis(dim_table, dim, meas)
+                            elif insight_name == 'New Entrants':
+                                new_entrants(dim_table, dim, meas)
+
 
     for insight_name in selected_insights:
         if insight_name == 'Trends':
@@ -54,6 +60,7 @@ def insights_call_threaded():
     selected_insights = constants.SELECTED_INSIGHTS
     insights_to_skip = constants.INSIGHTS_TO_SKIP
     dim_allowed_for_derived_metrics = constants.DIM_ALLOWED_FOR_DERIVED_METRICS
+    insights_allowed_for_derived_metrics = constants.INSIGHTS_ALLOWED_FOR_DERIVED_METRICS
     derived_measures_dict = constants.DERIVED_MEASURES_DICT
     Significant_dimensions = constants.SIGNIFICANT_DIMENSIONS
     threads = []

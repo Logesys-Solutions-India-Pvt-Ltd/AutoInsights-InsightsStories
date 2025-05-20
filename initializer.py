@@ -72,16 +72,30 @@ def insights_generator(event):
         constants.SOURCE_TYPE = common_credentials['source_type']
         constants.SOURCE_ENGINE = create_engine(f"mssql+pymssql://{source_username}:{source_password.replace('@', '%40')}@{source_server}/{source_database}")
 
-        ########## Get the derived measures formula from S3 bucket ##########
-        ############### Get DAX formula input from table ################
+        ########## Get the derived measures formula from derived_metrics table ##########
+        constants.DERIVED_MEASURES_DICT_EXPANDED = combine_formula_json(constants.DATAMART_ID, constants.LOGESYS_ENGINE)
+        print(f'DERIVED_MEASURES_DICT_EXPANDED:\n{constants.DERIVED_MEASURES_DICT_EXPANDED}')
+
+        # Convert the dictionary to a JSON string
+        DERIVED_MEASURES_DICT_EXPANDED_JSON_CONTENT = json.dumps(constants.DERIVED_MEASURES_DICT_EXPANDED, indent=4)
+
+        # Upload the JSON string to S3
         constants.S3_CLIENT = boto3.client('s3', region_name='us-east-1')
         s3_bucket_derived_meas_formula = constants.S3_BUCKET_DERIVED_MEAS_FORMULA
         s3_key_name_derived_meas_formula = f"{constants.DATAMART_ID.lower()}_formula.json"
-        derived_measures_dict_expanded_dict = constants.S3_CLIENT.get_object(Bucket=s3_bucket_derived_meas_formula, Key=s3_key_name_derived_meas_formula)
-        constants.DERIVED_MEASURES_DICT_EXPANDED = json.loads(derived_measures_dict_expanded_dict['Body'].read().decode('utf-8'))
-        ########## Transform expanded derived measures dictionary to a compressed format ##########
+        constants.S3_CLIENT.put_object(
+            Bucket=s3_bucket_derived_meas_formula,
+            Key=s3_key_name_derived_meas_formula,
+            Body=DERIVED_MEASURES_DICT_EXPANDED_JSON_CONTENT,
+            ContentType='application/json' 
+        )
+
+        # ########## Transform expanded derived measures dictionary to a compressed format ##########
+        constants.DERIVED_MEASURES_DICT_EXPANDED = json.loads(constants.DERIVED_MEASURES_DICT_EXPANDED)
         constants.DERIVED_MEASURES_DICT = transform_derived_measures(constants.DERIVED_MEASURES_DICT_EXPANDED)
+        
         print(f'Formulae received and processed.')
+
         constants.DF_SQL_TABLE_NAMES = create_table_name_mapping(tables_info)
 
         constants.DF_SQL_MEAS_FUNCTIONS = {
@@ -148,13 +162,36 @@ def insights_generator(event):
         # }
         # ### Timesquare ###
 
-        ### JM Baxi ###
-        constants.DIM_ALLOWED_FOR_DERIVED_METRICS = {
-            'MOVES': [dim for dims in constants.SIGNIFICANT_DIMENSIONS.values() for dim in dims],
-            'NCR': [dim for dims in constants.SIGNIFICANT_DIMENSIONS.values() for dim in dims],
-            'Crane Productivity': [dim for dims in constants.SIGNIFICANT_DIMENSIONS.values() for dim in dims]
-        }
-        ### JM Baxi ###
+
+        for meas in list(constants.DERIVED_MEASURES_DICT.keys()):
+            meas_id_query = f"""SELECT MetricID FROM derived_metrics
+                            WHERE DatamartId = '{constants.DATAMART_ID}' 
+                            AND MetricName = '{meas}'"""
+            constants.CURSOR.execute(meas_id_query)
+            meas_id_tuple = constants.CURSOR.fetchone()
+            meas_id = meas_id_tuple[0]
+
+            included_dim_query = f"""
+                                SELECT Included_Dimensions FROM metric_settings
+                                WHERE DatamartId = '{constants.DATAMART_ID}'
+                                AND MetricID = '{meas_id.upper()}'"""
+            constants.CURSOR.execute(included_dim_query)
+            included_dim_tuple = constants.CURSOR.fetchone()
+            included_dim_str = included_dim_tuple[0]
+            included_dim_list = json.loads(included_dim_str)
+
+            constants.DIM_ALLOWED_FOR_DERIVED_METRICS[meas] = included_dim_list
+
+            included_insights_query = f"""
+                                SELECT Included_Insights FROM metric_settings
+                                WHERE DatamartId = '{constants.DATAMART_ID}'
+                                AND MetricID = '{meas_id.upper()}'"""
+            constants.CURSOR.execute(included_insights_query)
+            included_insights_tuple = constants.CURSOR.fetchone()
+            included_insights_str = included_insights_tuple[0]
+            included_insights_list = json.loads(included_insights_str)
+
+            constants.INSIGHTS_ALLOWED_FOR_DERIVED_METRICS[meas] = included_insights_list
 
         ########### Function Call ###########
         insightcode_sql = "SELECT InsightCode, MAX(VersionNumber) AS VersionNumber, MAX(Importance) AS Importance FROM tt_insights WHERE datamartid = '" + str(constants.DATAMART_ID) + "' GROUP BY InsightCode"
