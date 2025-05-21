@@ -368,7 +368,9 @@ def metadata_generator(event):
                                         FieldName,
                                         DisplayFieldName, 
                                         DataType,
-                                        FieldType
+                                        FieldType,
+                                        MeasureType,
+                                        Significance
                                     FROM m_datamart_metadata
                                     WHERE DataMartId = '{datamart_id}'
                                         """
