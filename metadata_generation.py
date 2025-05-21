@@ -245,7 +245,9 @@ def transform_metadata_to_json(retrieved_metadata):
             "Field Name": row['FieldName'],
             "New Name": row['DisplayFieldName'],
             "Data Type": row['DataType'],
-            "Field Type": row['FieldType']
+            "Field Type": row['FieldType'],
+            "Measure Type": row['MeasureType'],
+            "Significance": row['Significance']
         }
         metadata_list.append(metadata_item)
     output_json = {"Meta Data": metadata_list}
