@@ -8,6 +8,7 @@ import json
 import boto3
 import uuid
 import io
+import sys
 
 
 def create_metadata_json(df_top1000):
@@ -177,6 +178,7 @@ def get_metadata_json(table, json_output_str):
 
 
 def update_metadata(datamart_id, table_id, df_metadata, engine):
+    print('Entered update_metadata()')
     updated_date = datetime.now()
     field_id = 0
     for i in range(0,len(df_metadata['New Name'])):
@@ -258,9 +260,9 @@ def metadata_generator(event):
     ########## Establish Logesys Database Connection ##########
     cnxn, cursor, logesys_engine = sql_connect()
 
-    datamart_id = "7F2C4256-3449-447A-B1CC-FAE49431BF7C"
-    table_id = "9F504F27-4383-4FCA-9DCA-2860484A4047"
-    refresh = 'False'
+    # datamart_id = "BB158DD7-961B-463C-A78D-A41988411978"
+    # table_id = "3F44ECB1-DE3D-4254-931F-E03F81A9B367"
+    # refresh = 'False'
 
 
 
@@ -295,7 +297,7 @@ def metadata_generator(event):
         source_username = source_creds.iloc[0]['UserName']
         source_password = source_creds.iloc[0]['Password']
 
-        if source_type != 'table':
+        if source_type != 'sqlDatabase':
             file_path_json = json.loads(file_path.replace("'", '"'))
 
         query_count_metadata_rows = f"""
@@ -332,7 +334,7 @@ def metadata_generator(event):
                     json_output_str = json.dumps(json_output)
                 else:
                     raise ValueError("Invalid file path format: Azure connection string not found")
-            elif source_type == 'table':
+            elif source_type == 'sqlDatabase':
                 source_server, source_database = file_path.split('//')
                 source_engine = create_engine(f"mssql+pymssql://{source_username}:{source_password.replace('@', '%40')}@{source_server}/{source_database}")
                 json_output = connect_to_db(table_name, source_engine)
@@ -376,7 +378,18 @@ def metadata_generator(event):
             return retrieved_metadata_json
 
     except Exception as e:
-        error_message = f"Error in metadata_generator: {e}"
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        file_name = exc_tb.tb_frame.f_code.co_filename
+        line_number = exc_tb.tb_lineno
+
+        # To get the origin of the exception, we need to go to the last frame in the traceback
+        while exc_tb.tb_next:
+            exc_tb = exc_tb.tb_next
+
+        original_file_name = exc_tb.tb_frame.f_code.co_filename
+        original_line_number = exc_tb.tb_lineno
+
+        error_message = f"Error in metadata_generator: {e} (originally from file '{original_file_name}' at line {original_line_number})"
         print(error_message)
         return {"status": "error", "message": error_message}
 
