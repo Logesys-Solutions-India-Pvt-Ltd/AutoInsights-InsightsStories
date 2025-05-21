@@ -297,7 +297,7 @@ def metadata_generator(event):
         source_username = source_creds.iloc[0]['UserName']
         source_password = source_creds.iloc[0]['Password']
 
-        if source_type != 'sqlDatabase':
+        if source_type != 'table':
             file_path_json = json.loads(file_path.replace("'", '"'))
 
         query_count_metadata_rows = f"""
@@ -334,7 +334,7 @@ def metadata_generator(event):
                     json_output_str = json.dumps(json_output)
                 else:
                     raise ValueError("Invalid file path format: Azure connection string not found")
-            elif source_type == 'sqlDatabase':
+            elif source_type == 'table':
                 source_server, source_database = file_path.split('//')
                 source_engine = create_engine(f"mssql+pymssql://{source_username}:{source_password.replace('@', '%40')}@{source_server}/{source_database}")
                 json_output = connect_to_db(table_name, source_engine)
