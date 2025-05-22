@@ -314,11 +314,18 @@ def metadata_generator(event):
 
         if count_metadata_rows == 0 or refresh == 'True':
             if count_metadata_rows > 0 and refresh == 'True':
-                delete_query = text(f"DELETE FROM m_datamart_metadata WHERE datamartid = '{datamart_id}' AND tableid = '{table_id}'")
+                delete_metadata_query = text(f"DELETE FROM m_datamart_metadata WHERE datamartid = '{datamart_id}' AND tableid = '{table_id}'")
+                delete_derived_metrics_query = text(f"DELETE FROM derived_metrics WHERE datamartid = '{datamart_id}' AND tableid = '{table_id}'")
+
                 with logesys_engine.connect() as cnxn:
-                    cnxn.execute(delete_query)
+                    cnxn.execute(delete_metadata_query)
                     cnxn.commit()  
                 print(f"Deleted existing metadata for datamartid: {datamart_id}, tableid: {table_id}")
+                
+                with logesys_engine.connect() as cnxn:
+                    cnxn.execute(delete_derived_metrics_query)
+                    cnxn.commit() 
+                print(f"Deleted existing derived metrics for datamartid: {datamart_id}, tableid: {table_id}")
 
             print(f'Creating metadata for the table:{table_name}')
             if source_type == 'csv' or source_type == 'xlsx':
