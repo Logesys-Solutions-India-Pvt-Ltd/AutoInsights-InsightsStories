@@ -30,7 +30,7 @@ def trends():
     df_version_number = constants.DF_VERSION_NUMBER
     cnxn = constants.CNXN
     cursor = constants.CURSOR
-
+    logesys_engine = constants.LOGESYS_ENGINE
 
     tags_list, related_fields_list, string_list, df_actual_list, cut_off_list, meas_list, charttitle_list,chartsubtitle_list, xAxisTitle_list, yAxisTitle_list, importance_list = [],[],[],[],[],[],[],[],[],[],[]
     # dim_table = 'Location_Dist'
@@ -164,7 +164,8 @@ def trends():
                 temp_count += 1
                 # engine = azure_sql_database_connect(source_username, source_password, source_server, source_database)
                 cnxn, cursor, logesys_engine = sql_connect()
-                insert_insights(datamart_id, string, str(data), 'Slope', 'Line', str(related_fields), importance, tags, 'Trends', 'Insight', cnxn, cursor, insight_code, version_num)
+                print(f'String:\n{string}')
+                # insert_insights(datamart_id, string, str(data), 'Slope', 'Line', str(related_fields), importance, tags, 'Trends', 'Insight', cnxn, cursor, insight_code, version_num)
         count = count + temp_count
         # count = 50, 90, 170
         print(f'count:{count}\n')

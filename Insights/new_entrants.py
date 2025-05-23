@@ -28,7 +28,7 @@ def new_entrants(dim_table, dim, meas):
     df_version_number = constants.DF_VERSION_NUMBER
     cnxn = constants.CNXN
     cursor = constants.CURSOR
-
+    logesys_engine = constants.LOGESYS_ENGINE
 
     start_of_last_12_months, start_of_month = calculate_month_dates(max_date)
     start_of_last_12_months = start_of_last_12_months.strftime("%d-%m-%Y")
@@ -94,4 +94,5 @@ def new_entrants(dim_table, dim, meas):
             string = rename_variables(string, rename_dim_meas)
 
             cnxn, cursor, logesys_engine = sql_connect()
-            insert_insights(datamart_id, string, str(data), 'Slope', 'Line', str(related_fields), importance, tags, 'New Entrants', 'Insight', cnxn, cursor, insight_code, version_num)
+            print(f'String:\n{string}')
+            # insert_insights(datamart_id, string, str(data), 'Slope', 'Line', str(related_fields), importance, tags, 'New Entrants', 'Insight', cnxn, cursor, insight_code, version_num)

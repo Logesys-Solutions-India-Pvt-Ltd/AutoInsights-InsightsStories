@@ -28,7 +28,7 @@ def delta_analysis(dim_table, dim, meas):
     df_version_number = constants.DF_VERSION_NUMBER
     cnxn = constants.CNXN
     cursor = constants.CURSOR
-
+    logesys_engine = constants.LOGESYS_ENGINE
 
 
 
@@ -116,16 +116,37 @@ def delta_analysis(dim_table, dim, meas):
             others_count = 0
             others_value = 0        
         
+        ## Percentage and Units
+        is_percentage, meas_units = '', ''
+        show_in_percentage_query = f"""
+                            SELECT ShowInPercentage, Units 
+                            FROM derived_metrics
+                            WHERE DatamartId = '{datamart_id}'
+                            AND MetricName = '{meas}'
+                            """
+        
+        show_in_percentage_result = query_on_table(show_in_percentage_query, logesys_engine)
+
+        if not show_in_percentage_result.empty:
+            show_in_percentage = show_in_percentage_result['ShowInPercentage'][0]
+            if show_in_percentage:
+                is_percentage = '%'
+            
+            meas_units = show_in_percentage_result['Units'][0]
+
+
+
+
         string_list = ''
         if df_diff_val[df_diff_val[meas] >= 0].shape[0] > 0:
-            positive_string = blue_tag + 'YTD ' + meas + ' Growth: ' + b_span_tag + b_tag_open + str(df_diff_val[df_diff_val[meas] >= 0].shape[0]) + ' out of ' + str(df_diff_val.shape[0]) + ' ' + dim + b_tag_close + ' have registered positive growth. ' + b_tag_open + ', '.join(list(df_diff_val_positive[:3].index)) + b_tag_close + ' has increased the growth by ' + b_tag_open + human_format(df_diff_val_positive[:3][meas].sum()) + b_tag_close + '|'
+            positive_string = blue_tag + 'YTD ' + meas + ' Growth: ' + b_span_tag + b_tag_open + str(df_diff_val[df_diff_val[meas] >= 0].shape[0]) + ' out of ' + str(df_diff_val.shape[0]) + ' ' + dim + b_tag_close + ' have registered positive growth. ' + b_tag_open + ', '.join(list(df_diff_val_positive[:3].index)) + b_tag_close + ' has increased the growth by ' + b_tag_open + human_format(df_diff_val_positive[:3][meas].sum()) + {meas_units} + {is_percentage} + b_tag_close + '|'
             string_list = string_list + positive_string
             related_fields = ' -or- '.join([f'{dim} : {val}' for val in list(df_diff_val_positive[:3].index)]) + ' | ' + 'measure : ' + meas + ' | ' + 'functions : Story Avg CY vs LY ' + 'Increase'
 #             print({related_fields})
             related_fields_list.append(related_fields)
 
         if df_diff_val[df_diff_val[meas] < 0].shape[0] > 0:
-            negative_string = blue_tag + 'YTD ' + meas + ' Growth: ' + b_span_tag + b_tag_open + str(df_diff_val[df_diff_val[meas] < 0].shape[0]) + ' out of ' + str(df_diff_val.shape[0]) + ' ' + dim + b_tag_close + ' have registered negative growth. ' + b_tag_open + ', '.join(list(df_diff_val_negative[:3].index)) + b_tag_close + ' has decreased the growth by ' + b_tag_open + human_format(df_diff_val_negative[:3][meas].sum()) + b_tag_close
+            negative_string = blue_tag + 'YTD ' + meas + ' Growth: ' + b_span_tag + b_tag_open + str(df_diff_val[df_diff_val[meas] < 0].shape[0]) + ' out of ' + str(df_diff_val.shape[0]) + ' ' + dim + b_tag_close + ' have registered negative growth. ' + b_tag_open + ', '.join(list(df_diff_val_negative[:3].index)) + b_tag_close + ' has decreased the growth by ' + b_tag_open + human_format(df_diff_val_negative[:3][meas].sum()) +  {meas_units} + {is_percentage} + b_tag_close
             string_list = string_list + negative_string
             related_fields = ' -or- '.join([f'{dim} : {val}' for val in list(df_diff_val_negative[:3].index)]) + ' | ' + 'measure : ' + meas + ' | ' + 'functions : Story Avg CY vs LY ' + 'Decrease'
             related_fields_list.append(related_fields)
@@ -157,4 +178,6 @@ def delta_analysis(dim_table, dim, meas):
         related_fields_list = "#|#".join(related_fields_list)
         # engine = azure_sql_database_connect(source_username, source_password, source_server, source_database)
         cnxn, cursor, logesys_engine = sql_connect()
-        insert_insights(datamart_id, string_list, str(waterfall), 'Avg CY vs LY', 'Waterfall', str(related_fields_list), importance, tags, 'Delta Analysis', 'Insight', cnxn, cursor, insight_code, version_num)
+        print(f'Positive String:\n{positive_string}')
+        print(f'Negative String:\n{negative_string}')
+        # insert_insights(datamart_id, string_list, str(waterfall), 'Avg CY vs LY', 'Waterfall', str(related_fields_list), importance, tags, 'Delta Analysis', 'Insight', cnxn, cursor, insight_code, version_num)

@@ -27,7 +27,7 @@ def movements(dim_table, dim, meas):
     df_version_number = constants.DF_VERSION_NUMBER
     cnxn = constants.CNXN
     cursor = constants.CURSOR
-
+    logesys_engine = constants.LOGESYS_ENGINE
 
 
     split = 10
@@ -115,6 +115,24 @@ def movements(dim_table, dim, meas):
 
     df_temp_data = df_data[(df_data['Abs Growth%'] > 30) & (df_data.index.isin(unique_list))][0:3]
 
+    ## Percentage and Units
+    is_percentage, meas_units = '', ''
+    show_in_percentage_query = f"""
+                        SELECT ShowInPercentage, Units 
+                        FROM derived_metrics
+                        WHERE DatamartId = '{datamart_id}'
+                        AND MetricName = '{meas}'
+                        """
+    
+    show_in_percentage_result = query_on_table(show_in_percentage_query, logesys_engine)
+
+    if not show_in_percentage_result.empty:
+        show_in_percentage = show_in_percentage_result['ShowInPercentage'][0]
+        if show_in_percentage:
+            is_percentage = '%'
+        
+        meas_units = show_in_percentage_result['Units'][0]
+
     string= ''
     if shape > split + 1:
         # df_data = df_data.iloc[:-1].sort_values(by = 'Abs Growth%', ascending = False).append(df_data[-1:])
@@ -133,7 +151,11 @@ def movements(dim_table, dim, meas):
                 action = 'decreased'
                 action_description = 'Rank CY vs LY Decrease'
 
-            string = string + 'YTD ' + meas + ' in ' + b_tag_open + dim + ': ' + i + b_tag_close + ' has ' + blue_tag + action + b_span_tag + ' ' + b_tag_open + str(j) + '% ' + '(' + str(human_format(df_temp_data.loc[i]['This Year'] - df_temp_data.loc[i]['Last Year'])) + ')' + b_tag_close + ', from ' + b_tag_open + str(human_format(df_temp_data.loc[i]['Last Year'])) + b_tag_close + ' last year to ' + b_tag_open + str(human_format(df_temp_data.loc[i]['This Year'])) + b_tag_close + ' this year|'
+            if df_temp_data.loc[i]['Last Year'] == 0 or np.isinf(j):
+                j = human_format(df_temp_data.loc[i]['This Year'])
+            
+            # string = string + 'YTD ' + meas + ' in ' + b_tag_open + dim + ': ' + i + b_tag_close + ' has ' + blue_tag + action + b_span_tag + ' ' + b_tag_open + str(j) + '% ' + '(' + str(human_format(df_temp_data.loc[i]['This Year'] - df_temp_data.loc[i]['Last Year'])) + ')' + b_tag_close + ', from ' + b_tag_open + str(human_format(df_temp_data.loc[i]['Last Year'])) + b_tag_close + ' last year to ' + b_tag_open + str(human_format(df_temp_data.loc[i]['This Year'])) + b_tag_close + ' this year|'
+            string = f"{string}YTD {meas} in {dim}: {i}{b_tag_close} has {blue_tag}{action}{b_span_tag} {j}% ({human_format(df_temp_data.loc[i]['This Year'] - df_temp_data.loc[i]['Last Year'])}){b_tag_close}, from {human_format(df_temp_data.loc[i]['Last Year'])}{b_tag_close} last year to {human_format(df_temp_data.loc[i]['This Year'])}{b_tag_close} this year|"
             related_fields = dim + ' : ' + i + ' | ' + 'measure : ' + meas + ' | function : Story ' + action_description
             related_fields_list.append(related_fields)
             
@@ -183,4 +205,5 @@ def movements(dim_table, dim, meas):
         ### Renaming ###
         # engine = azure_sql_database_connect(source_username, source_password, source_server, source_database)
         cnxn, cursor, logesys_engine = sql_connect()
-        insert_insights(datamart_id, str(string), str(df_data), 'Avg CY vs LY', 'Combo', str(related_fields_list), importance, tags, 'Movements', 'Insight', cnxn, cursor, insight_code, version_num)
+        print(f'String:\n{string}')
+        # insert_insights(datamart_id, str(string), str(df_data), 'Avg CY vs LY', 'Combo', str(related_fields_list), importance, tags, 'Movements', 'Insight', cnxn, cursor, insight_code, version_num)

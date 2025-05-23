@@ -22,8 +22,8 @@ def insights_generator(event):
     # datamart_id = "68F4413C-FD9A-11EF-BA6C-2CEA7F154E8D" ## Timesquare
     # datamart_id = "6AA6BCAA-258A-11F0-A1AD-2CEA7F154E8D" ## JMBaxi- old
 
-    # constants.ENGINE_ID = 'BA2ACCBB-31B4-11EB-9A5D-A85E45BE6945'
-    # constants.DATAMART_ID = "7F2C4256-3449-447A-B1CC-FAE49431BF7C" ## Vessel Visit testing datamart
+# constants.ENGINE_ID = 'BA2ACCBB-31B4-11EB-9A5D-A85E45BE6945'
+# constants.DATAMART_ID = "7F2C4256-3449-447A-B1CC-FAE49431BF7C" ## Vessel Visit testing datamart
 
     constants.CNXN, constants.CURSOR, constants.LOGESYS_ENGINE = sql_connect()
     count_tables_in_datamart_query = f"""
@@ -74,7 +74,6 @@ def insights_generator(event):
 
         ########## Get the derived measures formula from derived_metrics table ##########
         constants.DERIVED_MEASURES_DICT_EXPANDED = combine_formula_json(constants.DATAMART_ID, constants.LOGESYS_ENGINE)
-        print(f'DERIVED_MEASURES_DICT_EXPANDED:\n{constants.DERIVED_MEASURES_DICT_EXPANDED}')
 
         # Convert the dictionary to a JSON string
         DERIVED_MEASURES_DICT_EXPANDED_JSON_CONTENT = json.dumps(constants.DERIVED_MEASURES_DICT_EXPANDED, indent=4)
@@ -192,7 +191,7 @@ def insights_generator(event):
             included_insights_list = json.loads(included_insights_str)
 
             constants.INSIGHTS_ALLOWED_FOR_DERIVED_METRICS[meas] = included_insights_list
-
+        print(f'DIM_ALLOWED_FOR_DERIVED_METRICS:{constants.DIM_ALLOWED_FOR_DERIVED_METRICS}')
         ########### Function Call ###########
         insightcode_sql = "SELECT InsightCode, MAX(VersionNumber) AS VersionNumber, MAX(Importance) AS Importance FROM tt_insights WHERE datamartid = '" + str(constants.DATAMART_ID) + "' GROUP BY InsightCode"
         constants.DF_VERSION_NUMBER = pd.read_sql(insightcode_sql, constants.CNXN)

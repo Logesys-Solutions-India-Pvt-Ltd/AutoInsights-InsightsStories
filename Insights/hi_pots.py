@@ -24,7 +24,7 @@ def hi_pots(dim_table, dim, meas):
     df_version_number = constants.DF_VERSION_NUMBER
     cnxn = constants.CNXN
     cursor = constants.CURSOR
-
+    logesys_engine = constants.LOGESYS_ENGINE
 
 
     related_fields_list = []
@@ -78,11 +78,29 @@ def hi_pots(dim_table, dim, meas):
     df_temp_data.replace([np.inf, -np.inf], 0, inplace=True)
     
 #     print(f'df_temp_data in hi pots:\n{df_temp_data}')
+    ## Percentage and Units
+    is_percentage, meas_units = '', ''
+    show_in_percentage_query = f"""
+                        SELECT ShowInPercentage, Units 
+                        FROM derived_metrics
+                        WHERE DatamartId = '{datamart_id}'
+                        AND MetricName = '{meas}'
+                        """
+    
+    show_in_percentage_result = query_on_table(show_in_percentage_query, logesys_engine)
+
+    if not show_in_percentage_result.empty:
+        show_in_percentage = show_in_percentage_result['ShowInPercentage'][0]
+        if show_in_percentage:
+            is_percentage = '%'
+        
+        meas_units = show_in_percentage_result['Units'][0]
+
     string = ''
     if df_temp_data.shape[0] > 1 and average != 0:
         for i, j in zip(df_temp_data.index, df_temp_data['X Times']):
             if i in df_data.index:
-                string += f'{meas} of {b_tag_open}{dim} : {i}{b_tag_close} is {b_tag_open}{human_format(df_temp_data.loc[i][meas])}{b_tag_close} which is {b_tag_open}{j}x{b_tag_close} the overall Average ({human_format(average)})|'
+                string += f'{meas} of {b_tag_open}{dim} : {i}{b_tag_close} is {b_tag_open}{human_format(df_temp_data.loc[i][meas])}{meas_units}{is_percentage}{b_tag_close} which is {b_tag_open}{j}x{b_tag_close} the overall Average ({human_format(average)}{meas_units})|'
                 related_fields = f'{dim} : {i} | measure : {meas} | function : Story X times'
                 related_fields_list.append(related_fields)
         df_data.fillna(0, inplace=True)
@@ -122,5 +140,5 @@ def hi_pots(dim_table, dim, meas):
         chart_title = rename_variables(chart_title, rename_dim_meas)
         tags = rename_variables(tags, rename_dim_meas)
         cnxn, cursor, logesys_engine = sql_connect()
-        
-        insert_insights(datamart_id, str(string), str(df_data), 'X Times', 'Combo', str(related_fields_list), importance,tags, 'Hi-Pots', 'Insight', cnxn, cursor, insight_code, version_num)
+        print(f'String:\n{string}')
+        # insert_insights(datamart_id, str(string), str(df_data), 'X Times', 'Combo', str(related_fields_list), importance,tags, 'Hi-Pots', 'Insight', cnxn, cursor, insight_code, version_num)

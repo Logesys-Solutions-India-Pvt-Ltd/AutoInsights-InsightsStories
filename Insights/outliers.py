@@ -35,7 +35,7 @@ def outliers():
     df_version_number = constants.DF_VERSION_NUMBER
     cnxn = constants.CNXN
     cursor = constants.CURSOR
-
+    logesys_engine = constants.LOGESYS_ENGINE
 
 
     tags_list, related_fields_final_list, string_final_list, df_actual_list, growth_list, meas_list, charttitle_list,chartsubtitle_list, xAxisTitle_list, yAxisTitle_list = [],[],[],[],[],[],[],[], [], []
@@ -211,7 +211,7 @@ def outliers():
                     
                     data = ComboChart(df_actual, [meas + ' Gr %'] , ['Average Gr %'], [], xAxis , yAxis, title, subtitle, chartFooterTitle)
                     cnxn, cursor, logesys_engine = sql_connect()
-                    insert_insights(datamart_id, string, data, val, 'Combo', str(related_fields), importance , tags, 'Outlier', 'Insight', cnxn, cursor, insight_code, version_num)
+                    # insert_insights(datamart_id, string, data, val, 'Combo', str(related_fields), importance , tags, 'Outlier', 'Insight', cnxn, cursor, insight_code, version_num)
                     temp_count += 1
             elif j > 0:  
                 if (zscore > zscore_val and zscore <= zscore_val + diff) or (zscore < -zscore_val and zscore >= -zscore_val - diff):
@@ -225,7 +225,8 @@ def outliers():
                     
                     data = ComboChart(df_actual, [meas + ' Gr %'] , ['Average Gr %'], [], xAxis , yAxis, title, subtitle, chartFooterTitle)
                     cnxn, cursor, logesys_engine = sql_connect()
-                    insert_insights(datamart_id, string, data, val, 'Combo', str(related_fields), importance , tags, 'Outlier', 'Insight', cnxn, cursor, insight_code, version_num)
+                    print(f'String:\n{string}')
+                    # insert_insights(datamart_id, string, data, val, 'Combo', str(related_fields), importance , tags, 'Outlier', 'Insight', cnxn, cursor, insight_code, version_num)
                     temp_count += 1
         count = count + temp_count
         print(f'count:{count}\n\n')

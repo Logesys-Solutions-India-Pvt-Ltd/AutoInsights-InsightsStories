@@ -32,7 +32,9 @@ def weekly_anomalies():
     df_version_number = constants.DF_VERSION_NUMBER
     cnxn = constants.CNXN
     cursor = constants.CURSOR
-    
+    logesys_engine = constants.LOGESYS_ENGINE
+
+
     tags_list, related_fields_list, string_list, df_actual_list, zscore_list, meas_list, charttitle_list,chartsubtitle_list, xAxisTitle_list, yAxisTitle_list = [],[],[],[],[],[],[],[],[],[]
     
     for dim_table, dim_list in Significant_dimensions.items():
@@ -138,7 +140,8 @@ def weekly_anomalies():
                     
                     data = LineChart(df_actual, [meas], [], xAxisTitle, yAxisTitle, title, subtitle, chartFooterTitle, non_highlight_color='#B0CBFF', highlight_color='#3862FF')
                     cnxn, cursor, logesys_engine = sql_connect()
-                    insert_insights(datamart_id, str(string), str(data), 'Related Measures', 'Line', str(related_fields), importance, tags, 'Weekly Anomalies', 'Insight', cnxn, cursor, insight_code, version_num)
+                    print(f'String:\n{string}')
+                    # insert_insights(datamart_id, str(string), str(data), 'Related Measures', 'Line', str(related_fields), importance, tags, 'Weekly Anomalies', 'Insight', cnxn, cursor, insight_code, version_num)
                     temp_count += 1
             elif j > 0:  
                 if (zscore > zscore_val and zscore <= zscore_val + diff) or (zscore < -zscore_val and zscore >= -zscore_val - diff):
@@ -151,7 +154,8 @@ def weekly_anomalies():
                     
                     data = LineChart(df_actual, [meas], [], xAxisTitle, yAxisTitle, title, subtitle, chartFooterTitle, non_highlight_color='#B0CBFF', highlight_color='#3862FF')
                     cnxn, cursor, logesys_engine = sql_connect()
-                    insert_insights(datamart_id, str(string), str(data), 'Related Measures', 'Line', str(related_fields), importance, tags, 'Weekly Anomalies', 'Insight', cnxn, cursor, insight_code, version_num)
+                    print(f'String:\n{string}')
+                    # insert_insights(datamart_id, str(string), str(data), 'Related Measures', 'Line', str(related_fields), importance, tags, 'Weekly Anomalies', 'Insight', cnxn, cursor, insight_code, version_num)
                     temp_count += 1
         count = count + temp_count
         # count = 50, 90, 170
