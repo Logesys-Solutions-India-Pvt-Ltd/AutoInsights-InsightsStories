@@ -117,4 +117,4 @@ def stories_avg_cy_ly(meas, importance):
         string = rename_variables(string, rename_dim_meas)
         tags = rename_variables(tags, rename_dim_meas)
         story_data = rename_variables(story_data, rename_dim_meas)
-        insert_insights(datamart_id, string, story_data, 'Avg CY vs LY', svg_type, related_fields, importance, tags, 'Story', 'story', cnxn, cursor, insight_code, version_num)
+        # insert_insights(datamart_id, string, story_data, 'Avg CY vs LY', svg_type, related_fields, importance, tags, 'Story', 'story', cnxn, cursor, insight_code, version_num)

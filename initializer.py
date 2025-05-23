@@ -22,8 +22,9 @@ def insights_generator(event):
     # datamart_id = "68F4413C-FD9A-11EF-BA6C-2CEA7F154E8D" ## Timesquare
     # datamart_id = "6AA6BCAA-258A-11F0-A1AD-2CEA7F154E8D" ## JMBaxi- old
 
-# constants.ENGINE_ID = 'BA2ACCBB-31B4-11EB-9A5D-A85E45BE6945'
-# constants.DATAMART_ID = "7F2C4256-3449-447A-B1CC-FAE49431BF7C" ## Vessel Visit testing datamart
+
+    constants.ENGINE_ID = "BA2ACCBB-31B4-11EB-9A5D-A85E45BE6945" #Test Integration 23-05-2025
+    constants.DATAMART_ID = "929D2861-64ED-415D-BECA-FCE2040FD6B8" ## Vessel Visit testing datamart
 
     constants.CNXN, constants.CURSOR, constants.LOGESYS_ENGINE = sql_connect()
     count_tables_in_datamart_query = f"""
@@ -109,6 +110,7 @@ def insights_generator(event):
 
         # ########## Creation of Significant Fields and all date related fields ##########
         sig_fields = collect_sig_fields_for_all_tables(constants.CURSOR, constants.DATAMART_ID, constants.LOGESYS_ENGINE, constants.SOURCE_ENGINE, start_month, end_month)
+        
         constants.SIGNIFICANT_DIMENSIONS = sig_fields['significant_dimensions']
         constants.SIGNIFICANT_MEASURES = sig_fields['significant_measures']
         constants.DATE_COLUMNS = sig_fields['date_columns']
@@ -119,7 +121,6 @@ def insights_generator(event):
         constants.MAX_YEAR = max(max_year_dict.values())
         constants.MAX_MONTH = max(max_month_dict.values())
         constants.MAX_DATE = max(max_date_dict.values())
-
 
         constants.DATES_FILTER_DICT = {
             'ty_start_date_dict': sig_fields['ty_start_date_dict'],

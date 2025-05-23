@@ -49,7 +49,7 @@ def connect_to_db(table, source_engine):
                                 """
                                     
             result_col_dtype = connection.execute(text(query_col_dtype)).fetchall()
-
+            
             col_dtype_dict = {
                             col: (
                                 'Text' if dtype in ('nvarchar', 'varchar') else
@@ -261,12 +261,6 @@ def metadata_generator(event):
 
     ########## Establish Logesys Database Connection ##########
     cnxn, cursor, logesys_engine = sql_connect()
-
-    # datamart_id = "BB158DD7-961B-463C-A78D-A41988411978"
-    # table_id = "3F44ECB1-DE3D-4254-931F-E03F81A9B367"
-    # refresh = 'False'
-
-
 
     try:
         username = "lsdbadmin"

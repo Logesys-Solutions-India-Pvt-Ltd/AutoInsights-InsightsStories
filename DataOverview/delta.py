@@ -6,6 +6,7 @@ import pandas as pd
 
 
 def data_overview_delta(source_type, source_engine, datamart_id, date_columns, dates_filter_dict, derived_measures_dict_expanded, derived_measures_dict, df_sql_table_names, df_sql_meas_functions, df_list, df_list_ly, df_list_ty, dim, meas, dim_table, df_relationship, cnxn, cursor):
+    print('Data Overview Delta')
     split = 10
     is_ratio = False
     DiffValPosOthers, DiffValNegOthers = pd.DataFrame(), pd.DataFrame()

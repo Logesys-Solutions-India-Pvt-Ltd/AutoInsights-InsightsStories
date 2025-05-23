@@ -6,6 +6,7 @@ import pandas as pd
 
 
 def data_overview_area(source_type, source_engine, datamart_id, date_columns, dates_filter_dict, derived_measures_dict_expanded, derived_measures_dict, df_sql_table_names, df_sql_meas_functions, df_list_ly, df_list_ty, df_relationship, pdim, meas, cnxn, cursor):
+    print('Data Overview Area')
     is_ratio = False
     if source_type == 'xlsx':
         this_year_setting, last_year_setting = df_list_ty, df_list_ly

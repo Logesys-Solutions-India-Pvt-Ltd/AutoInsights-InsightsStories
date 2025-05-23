@@ -731,9 +731,7 @@ def get_groupby_data(sourcetype, source_engine, df_sql_table_names, df_sql_meas_
                         {others_filter_clause}
                         {groupby_clause}
                         """
-                
                 df_data = query_on_table(query, source_engine)
-
                 if is_others:
                     return df_data, ''
                 if not is_others:
@@ -745,7 +743,6 @@ def get_groupby_data(sourcetype, source_engine, df_sql_table_names, df_sql_meas_
                         df_data.set_index(dim_col, inplace=True)
                         df_data = df_data[df_data.index != '']
 #                     df_data = df_data.rename(index={'': 'Blank'})   
-                    
                     return df_data, ''
             else:       
                 group_by_columns = [dim_col] if extra_groupby_col is None else [extra_groupby_col, dim_col]
@@ -1008,6 +1005,7 @@ def parent_get_group_data(sourcetype, source_engine, dim_col, meas, date_columns
         column = value['Column']
         filter_condition = value['Filter']
         function = value['Function']
+
         
         if dim_col in ['Month-Day', 'Week', 'Month', 'Quarter']:
             # dim_table = table
@@ -1083,15 +1081,13 @@ def parent_get_group_data(sourcetype, source_engine, dim_col, meas, date_columns
                     f"df_to_use['{df_name}']", 
                     f"df_to_use['{df_name}'][(df_to_use['{df_name}']['{date_col}'] >= '{dates_filter_dict['week_on_week_start_date_dict']['PreviousPeriod']}') & (df_to_use['{df_name}']['{date_col}'] <= '{dates_filter_dict['week_on_week_start_date_dict']['PreviousPeriod']}')]"
                 )
-                  
+
         if sourcetype == 'xlsx':
             df_grouped[key] = eval(formula)
-            
         elif sourcetype == 'table' and (is_others or is_ratio): # Since we need a single value and not a column of values
             df_grouped[key] = df_calculated[key][0]
         else:
             df_grouped[key] = df_calculated
-            
         if not is_ratio and not is_others and not is_total:
             if isinstance(df_grouped[key], pd.Series): # Converting to a dataframe if it is a series
                 df_grouped[key] = df_grouped[key].to_frame(name=key)
@@ -1103,11 +1099,9 @@ def parent_get_group_data(sourcetype, source_engine, dim_col, meas, date_columns
                 df_final = pd.merge(df_final, df_grouped[key], on=merge_on).rename(columns={meas: key})
             # Replace the key in the formula, with the dataframe containing the calculated values 
             final_formula = final_formula.replace(key, f"df_final['{key}']")
-
         elif is_ratio or is_others or is_total:
             # Replace the key in the formula with the calculated singular value itself
             final_formula = final_formula.replace(key, str(df_grouped[key]))
-
     try:
         # Check if final_formula is a string that looks like a DataFrame output
         # (contains a row index and a numeric value)
@@ -1116,9 +1110,10 @@ def parent_get_group_data(sourcetype, source_engine, dim_col, meas, date_columns
             try:
                 # Split by lines and get the second line (which contains the value)
                 lines = final_formula.strip().split('\n')
+                print(f'lines:\n{lines}')
                 if len(lines) >= 2:
                     # Extract the numeric value
-                    value_str = lines[1].split()[-1]  # Get the last part of the second line
+                    value_str = lines[1].split()[-1].split(')')[0]  # Get the last part of the second line
                     df_derived_measure = float(value_str)
             except (IndexError, ValueError):
                 # If extraction fails, evaluate as normal

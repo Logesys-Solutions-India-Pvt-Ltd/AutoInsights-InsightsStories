@@ -6,6 +6,7 @@ import pandas as pd
 
 
 def main_kpi_filter(source_type, source_engine, datamart_id, date_columns, dates_filter_dict, derived_measures_dict_expanded, derived_measures_dict, df_sql_table_names, df_sql_meas_functions, df_list, df_relationship, rename_dim_meas, meas, cnxn, cursor):
+    print('Main KPI filter')
     is_ratio = False
     
     if source_type == 'xlsx':
@@ -31,4 +32,4 @@ def main_kpi_filter(source_type, source_engine, datamart_id, date_columns, dates
     
     # engine = azure_sql_database_connect(source_username, source_password, source_server, source_database)
     cnxn, cursor, logesys_engine = sql_connect()
-    insert_summary(datamart_id, kpi, 'DataOverview_KPI_YTD', 'KPI', section_id, '', meas, cnxn, cursor)
+    # insert_summary(datamart_id, kpi, 'DataOverview_KPI_YTD', 'KPI', section_id, '', meas, cnxn, cursor)
