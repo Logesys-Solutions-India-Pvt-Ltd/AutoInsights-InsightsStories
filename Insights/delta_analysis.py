@@ -178,6 +178,4 @@ def delta_analysis(dim_table, dim, meas):
         related_fields_list = "#|#".join(related_fields_list)
         # engine = azure_sql_database_connect(source_username, source_password, source_server, source_database)
         cnxn, cursor, logesys_engine = sql_connect()
-        print(f'Positive String:\n{positive_string}')
-        print(f'Negative String:\n{negative_string}')
-        # insert_insights(datamart_id, string_list, str(waterfall), 'Avg CY vs LY', 'Waterfall', str(related_fields_list), importance, tags, 'Delta Analysis', 'Insight', cnxn, cursor, insight_code, version_num)
+        insert_insights(datamart_id, string_list, str(waterfall), 'Avg CY vs LY', 'Waterfall', str(related_fields_list), importance, tags, 'Delta Analysis', 'Insight', cnxn, cursor, insight_code, version_num)

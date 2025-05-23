@@ -94,5 +94,4 @@ def new_entrants(dim_table, dim, meas):
             string = rename_variables(string, rename_dim_meas)
 
             cnxn, cursor, logesys_engine = sql_connect()
-            print(f'String:\n{string}')
-            # insert_insights(datamart_id, string, str(data), 'Slope', 'Line', str(related_fields), importance, tags, 'New Entrants', 'Insight', cnxn, cursor, insight_code, version_num)
+            insert_insights(datamart_id, string, str(data), 'Slope', 'Line', str(related_fields), importance, tags, 'New Entrants', 'Insight', cnxn, cursor, insight_code, version_num)

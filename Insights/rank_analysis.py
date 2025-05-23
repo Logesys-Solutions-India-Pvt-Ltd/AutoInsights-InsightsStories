@@ -139,5 +139,4 @@ def rank_analysis(dim_table, dim, meas):
                 ### Renaming ###
                 # engine = azure_sql_database_connect(source_username, source_password, source_server, source_database)
                 cnxn, cursor, logesys_engine = sql_connect()
-                print(f'String:\n{string}')
-                # insert_insights(datamart_id, str(string), str(df_data), 'Rank CY vs LY', 'Rank', str(related_fields_list), importance, tags, 'Rank Analysis', 'Insight', cnxn, cursor, insight_code, version_num)
+                insert_insights(datamart_id, str(string), str(df_data), 'Rank CY vs LY', 'Rank', str(related_fields_list), importance, tags, 'Rank Analysis', 'Insight', cnxn, cursor, insight_code, version_num)
