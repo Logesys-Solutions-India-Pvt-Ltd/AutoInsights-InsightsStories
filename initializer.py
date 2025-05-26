@@ -14,6 +14,7 @@ import importlib
 import constants
 import json
 import boto3
+import logging
 
 
 def insights_generator(event):
@@ -52,7 +53,8 @@ def insights_generator(event):
     end_month = 12
 
     try:
-        print('Process started.')
+        # print('Process started.')
+        logging.info('Process started')
         
         ########## Get the selected insights #########
         selected_insights_query = f"""
