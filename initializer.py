@@ -233,7 +233,6 @@ def insights_generator(event):
         # constants.logger.info('Stories generated.')    
 
         # insights_call()
-        # # insights_call_threaded()
         # constants.logger.info('Insights generated')
 
         # playlist_call()
