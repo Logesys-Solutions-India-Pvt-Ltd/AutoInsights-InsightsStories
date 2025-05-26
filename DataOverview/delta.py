@@ -71,7 +71,6 @@ def data_overview_delta(source_type, source_engine, datamart_id, date_columns, d
             
         DiffVal = pd.concat([DiffValPos, DiffValNeg])
 
-    constants.logger.info(f'DiffVal:{DiffVal}')
     xAxisTitle = dim
     yAxisTitle = meas
     chart_title = 'YTD ' + meas + ' growth by ' + dim
@@ -80,7 +79,6 @@ def data_overview_delta(source_type, source_engine, datamart_id, date_columns, d
     chartFooterTitle = ''
 
     waterfall = waterfallChart(dim, meas, DiffVal, xAxisTitle, yAxisTitle, chart_title, chartSubTitle, chartFooterTitle)
-    constants.logger.info(f'Waterfall:{waterfall}')
     section_id = 6
     # engine = azure_sql_database_connect(source_username, source_password, source_server, source_database)
     cnxn, cursor, logesys_engine = sql_connect()
