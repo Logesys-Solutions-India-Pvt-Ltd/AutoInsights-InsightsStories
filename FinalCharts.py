@@ -196,7 +196,8 @@ def waterfallChart(dim, meas, DiffVal, xAxisTitle = '' , yAxisTitle = '', chart_
     # Reorder columns and rename
     waterfall = waterfall[[meas, meas + '1', meas + '2', meas + '3']]
     waterfall.columns = ['0', '1', '2', '3']
-    
+    waterfall = waterfall.fillna(0)
+
     # Create JSON structure
     data_json = {}
     data_json[meas] = waterfall.to_dict('index')
