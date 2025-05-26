@@ -81,101 +81,105 @@ def insights_generator(event):
         # print('Process started.')
         logger.info('Process started')
         
-        # ########## Get the selected insights #########
-        # selected_insights_query = f"""
-        #                         SELECT selected_insights FROM insight_settings 
-        #                         WHERE datamartid = '{constants.DATAMART_ID}'"""
-        # constants.CURSOR.execute(selected_insights_query)
-        # selected_insights_list = constants.CURSOR.fetchone()
-        # constants.SELECTED_INSIGHTS = json.loads(selected_insights_list[0])
-        # print(f'Insights selected for {constants.DATAMART_ID}: {constants.SELECTED_INSIGHTS}')  
+        ########## Get the selected insights #########
+        selected_insights_query = f"""
+                                SELECT selected_insights FROM insight_settings 
+                                WHERE datamartid = '{constants.DATAMART_ID}'"""
+        constants.CURSOR.execute(selected_insights_query)
+        selected_insights_list = constants.CURSOR.fetchone()
+        constants.SELECTED_INSIGHTS = json.loads(selected_insights_list[0])
+        logger.info(f'Insights selected for {constants.DATAMART_ID}: {constants.SELECTED_INSIGHTS}')  
         
-        # ########## Get client's credentials from the database ##########
-        # tables_info, common_credentials = get_datamart_source_credentials(constants.DATAMART_ID, constants.LOGESYS_ENGINE)
+        ########## Get client's credentials from the database ##########
+        tables_info, common_credentials = get_datamart_source_credentials(constants.DATAMART_ID, constants.LOGESYS_ENGINE)
 
-        # file_path = common_credentials['file_path']
-        # source_server, source_database = file_path.split("//")
-        # source_username = common_credentials['username']
-        # source_password = common_credentials['password']
-        # constants.SOURCE_TYPE = common_credentials['source_type']
-        # constants.SOURCE_ENGINE = create_engine(f"mssql+pymssql://{source_username}:{source_password.replace('@', '%40')}@{source_server}/{source_database}")
+        file_path = common_credentials['file_path']
+        source_server, source_database = file_path.split("//")
+        source_username = common_credentials['username']
+        source_password = common_credentials['password']
+        constants.SOURCE_TYPE = common_credentials['source_type']
+        constants.SOURCE_ENGINE = create_engine(f"mssql+pymssql://{source_username}:{source_password.replace('@', '%40')}@{source_server}/{source_database}")
 
-        # ########## Get the derived measures formula from derived_metrics table ##########
-        # constants.DERIVED_MEASURES_DICT_EXPANDED = combine_formula_json(constants.DATAMART_ID, constants.LOGESYS_ENGINE)
+        ########## Get the derived measures formula from derived_metrics table ##########
+        constants.DERIVED_MEASURES_DICT_EXPANDED = combine_formula_json(constants.DATAMART_ID, constants.LOGESYS_ENGINE)
+        logger.info(f'Formula json:\n{constants.DERIVED_MEASURES_DICT_EXPANDED}')
 
-        # # Convert the dictionary to a JSON string
-        # DERIVED_MEASURES_DICT_EXPANDED_JSON_CONTENT = json.dumps(constants.DERIVED_MEASURES_DICT_EXPANDED, indent=4)
+        # Convert the dictionary to a JSON string
+        DERIVED_MEASURES_DICT_EXPANDED_JSON_CONTENT = json.dumps(constants.DERIVED_MEASURES_DICT_EXPANDED, indent=4)
 
-        # # Upload the JSON string to S3
-        # constants.S3_CLIENT = boto3.client('s3', region_name='us-east-1')
-        # s3_bucket_derived_meas_formula = constants.S3_BUCKET_DERIVED_MEAS_FORMULA
-        # s3_key_name_derived_meas_formula = f"{constants.DATAMART_ID.lower()}_formula.json"
-        # constants.S3_CLIENT.put_object(
-        #     Bucket=s3_bucket_derived_meas_formula,
-        #     Key=s3_key_name_derived_meas_formula,
-        #     Body=DERIVED_MEASURES_DICT_EXPANDED_JSON_CONTENT,
-        #     ContentType='application/json' 
-        # )
+        # Upload the JSON string to S3
+        constants.S3_CLIENT = boto3.client('s3', region_name='us-east-1')
+        s3_bucket_derived_meas_formula = constants.S3_BUCKET_DERIVED_MEAS_FORMULA
+        s3_key_name_derived_meas_formula = f"{constants.DATAMART_ID.lower()}_formula.json"
+        constants.S3_CLIENT.put_object(
+            Bucket=s3_bucket_derived_meas_formula,
+            Key=s3_key_name_derived_meas_formula,
+            Body=DERIVED_MEASURES_DICT_EXPANDED_JSON_CONTENT,
+            ContentType='application/json' 
+        )
 
-        # # ########## Transform expanded derived measures dictionary to a compressed format ##########
-        # constants.DERIVED_MEASURES_DICT_EXPANDED = json.loads(constants.DERIVED_MEASURES_DICT_EXPANDED)
-        # constants.DERIVED_MEASURES_DICT = transform_derived_measures(constants.DERIVED_MEASURES_DICT_EXPANDED)
+        # ########## Transform expanded derived measures dictionary to a compressed format ##########
+        constants.DERIVED_MEASURES_DICT_EXPANDED = json.loads(constants.DERIVED_MEASURES_DICT_EXPANDED)
+        constants.DERIVED_MEASURES_DICT = transform_derived_measures(constants.DERIVED_MEASURES_DICT_EXPANDED)
         
-        # print(f'Formulae received and processed.')
+        logger.info(f'Formulae received and processed.')
 
-        # constants.DF_SQL_TABLE_NAMES = create_table_name_mapping(tables_info)
+        constants.DF_SQL_TABLE_NAMES = create_table_name_mapping(tables_info)
 
-        # constants.DF_SQL_MEAS_FUNCTIONS = {
-        #     'sum()': 'SUM',
-        #     'mean()': 'AVG'
-        # }
+        constants.DF_SQL_MEAS_FUNCTIONS = {
+            'sum()': 'SUM',
+            'mean()': 'AVG'
+        }
 
-        # if constants.SOURCE_TYPE == 'table':
-        #     constants.DF_LIST, constants.DF_LIST_LY, constants.DF_LIST_TY = [], [], []
-        #     constants.DF_LIST_LAST12MONTHS, constants.DF_LIST_LAST52WEEKS = [], []
+        if constants.SOURCE_TYPE == 'table':
+            constants.DF_LIST, constants.DF_LIST_LY, constants.DF_LIST_TY = [], [], []
+            constants.DF_LIST_LAST12MONTHS, constants.DF_LIST_LAST52WEEKS = [], []
 
 
-        # # ########## Creation of Significant Fields and all date related fields ##########
-        # sig_fields = collect_sig_fields_for_all_tables(constants.CURSOR, constants.DATAMART_ID, constants.LOGESYS_ENGINE, constants.SOURCE_ENGINE, start_month, end_month)
+        # ########## Creation of Significant Fields and all date related fields ##########
+        sig_fields = collect_sig_fields_for_all_tables(constants.CURSOR, constants.DATAMART_ID, constants.LOGESYS_ENGINE, constants.SOURCE_ENGINE, start_month, end_month)
         
-        # constants.SIGNIFICANT_DIMENSIONS = sig_fields['significant_dimensions']
-        # constants.SIGNIFICANT_MEASURES = sig_fields['significant_measures']
-        # constants.DATE_COLUMNS = sig_fields['date_columns']
-        # max_year_dict = sig_fields['max_year_dict']
-        # max_month_dict = sig_fields['max_month_dict']
-        # max_date_dict = sig_fields['max_date_dict']
+        constants.SIGNIFICANT_DIMENSIONS = sig_fields['significant_dimensions']
+        constants.SIGNIFICANT_MEASURES = sig_fields['significant_measures']
+        constants.DATE_COLUMNS = sig_fields['date_columns']
+        max_year_dict = sig_fields['max_year_dict']
+        max_month_dict = sig_fields['max_month_dict']
+        max_date_dict = sig_fields['max_date_dict']
 
-        # constants.MAX_YEAR = max(max_year_dict.values())
-        # constants.MAX_MONTH = max(max_month_dict.values())
-        # constants.MAX_DATE = max(max_date_dict.values())
+        constants.MAX_YEAR = max(max_year_dict.values())
+        constants.MAX_MONTH = max(max_month_dict.values())
+        constants.MAX_DATE = max(max_date_dict.values())
 
-        # constants.DATES_FILTER_DICT = {
-        #     'ty_start_date_dict': sig_fields['ty_start_date_dict'],
-        #     'ty_end_date_dict': sig_fields['ty_end_date_dict'],
-        #     'ly_start_date_dict': sig_fields['ly_start_date_dict'],
-        #     'ly_end_date_dict': sig_fields['ly_end_date_dict'],
-        #     'last12months_start_date_dict': sig_fields['last12months_start_date_dict'],
-        #     'last12months_end_date_dict': sig_fields['last12months_end_date_dict'],
-        #     'last52weeks_start_date_dict': sig_fields['last52weeks_start_date_dict'],
-        #     'last52weeks_end_date_dict': sig_fields['last52weeks_end_date_dict']
-        # }
+        constants.DATES_FILTER_DICT = {
+            'ty_start_date_dict': sig_fields['ty_start_date_dict'],
+            'ty_end_date_dict': sig_fields['ty_end_date_dict'],
+            'ly_start_date_dict': sig_fields['ly_start_date_dict'],
+            'ly_end_date_dict': sig_fields['ly_end_date_dict'],
+            'last12months_start_date_dict': sig_fields['last12months_start_date_dict'],
+            'last12months_end_date_dict': sig_fields['last12months_end_date_dict'],
+            'last52weeks_start_date_dict': sig_fields['last52weeks_start_date_dict'],
+            'last52weeks_end_date_dict': sig_fields['last52weeks_end_date_dict']
+        }
 
+        logger.info(f'Significant dimensions:\n{constants.SIGNIFICANT_DIMENSIONS}')
+        logger.info(f'Significant measures:\n{constants.SIGNIFICANT_MEASURES}')
+        logger.info(f'Date columns:\n{constants.DATE_COLUMNS}')
         
-        # # # ########## Dates calculations for Outliers ##########
-        # constants.OUTLIERS_DATES = calculate_periodic_dates_for_outliers(constants.SOURCE_TYPE, constants.SOURCE_ENGINE, 
-        #                                                         constants.DATE_COLUMNS, constants.DF_SQL_TABLE_NAMES, 
-        #                                                         constants.DF_LIST, 
-        #                                                         constants.DF_LIST_TY, constants.DF_LIST_LY)
+        # # ########## Dates calculations for Outliers ##########
+        constants.OUTLIERS_DATES = calculate_periodic_dates_for_outliers(constants.SOURCE_TYPE, constants.SOURCE_ENGINE, 
+                                                                constants.DATE_COLUMNS, constants.DF_SQL_TABLE_NAMES, 
+                                                                constants.DF_LIST, 
+                                                                constants.DF_LIST_TY, constants.DF_LIST_LY)
 
-        # # ######### Significance Score ##########
-        # constants.SIGNIFICANCE_SCORE = significance_engine_sql(constants.SOURCE_ENGINE, constants.DF_SQL_TABLE_NAMES, 
-        #                                                 constants.DF_SQL_MEAS_FUNCTIONS, constants.SIGNIFICANT_DIMENSIONS, 
-        #                                                 constants.SIGNIFICANT_MEASURES, constants.DF_RELATIONSHIP)
-        # print('Significance score assigned to dimensions and metrics.')
+        # ######### Significance Score ##########
+        constants.SIGNIFICANCE_SCORE = significance_engine_sql(constants.SOURCE_ENGINE, constants.DF_SQL_TABLE_NAMES, 
+                                                        constants.DF_SQL_MEAS_FUNCTIONS, constants.SIGNIFICANT_DIMENSIONS, 
+                                                        constants.SIGNIFICANT_MEASURES, constants.DF_RELATIONSHIP)
+        logger.info('Significance score assigned to dimensions and metrics.')
 
-        # ########### Getting Display Names ##########
-        # constants.RENAME_DIM_MEAS = rename_fields(constants.DATAMART_ID, constants.RENAME_DIM_MEAS, 
-        #                                 constants.CNXN, constants.CURSOR)
+        ########### Getting Display Names ##########
+        constants.RENAME_DIM_MEAS = rename_fields(constants.DATAMART_ID, constants.RENAME_DIM_MEAS, 
+                                        constants.CNXN, constants.CURSOR)
 
         # # ### Timesquare ###
         # # constants.DIM_ALLOWED_FOR_DERIVED_METRICS = {
@@ -190,36 +194,38 @@ def insights_generator(event):
         # # ### Timesquare ###
 
 
-        # for meas in list(constants.DERIVED_MEASURES_DICT.keys()):
-        #     meas_id_query = f"""SELECT MetricID FROM derived_metrics
-        #                     WHERE DatamartId = '{constants.DATAMART_ID}' 
-        #                     AND MetricName = '{meas}'"""
-        #     constants.CURSOR.execute(meas_id_query)
-        #     meas_id_tuple = constants.CURSOR.fetchone()
-        #     meas_id = meas_id_tuple[0]
+        for meas in list(constants.DERIVED_MEASURES_DICT.keys()):
+            meas_id_query = f"""SELECT MetricID FROM derived_metrics
+                            WHERE DatamartId = '{constants.DATAMART_ID}' 
+                            AND MetricName = '{meas}'"""
+            constants.CURSOR.execute(meas_id_query)
+            meas_id_tuple = constants.CURSOR.fetchone()
+            meas_id = meas_id_tuple[0]
 
-        #     included_dim_query = f"""
-        #                         SELECT Included_Dimensions FROM metric_settings
-        #                         WHERE DatamartId = '{constants.DATAMART_ID}'
-        #                         AND MetricID = '{meas_id.upper()}'"""
-        #     constants.CURSOR.execute(included_dim_query)
-        #     included_dim_tuple = constants.CURSOR.fetchone()
-        #     included_dim_str = included_dim_tuple[0]
-        #     included_dim_list = json.loads(included_dim_str)
+            included_dim_query = f"""
+                                SELECT Included_Dimensions FROM metric_settings
+                                WHERE DatamartId = '{constants.DATAMART_ID}'
+                                AND MetricID = '{meas_id.upper()}'"""
+            constants.CURSOR.execute(included_dim_query)
+            included_dim_tuple = constants.CURSOR.fetchone()
+            included_dim_str = included_dim_tuple[0]
+            included_dim_list = json.loads(included_dim_str)
 
-        #     constants.DIM_ALLOWED_FOR_DERIVED_METRICS[meas] = included_dim_list
+            constants.DIM_ALLOWED_FOR_DERIVED_METRICS[meas] = included_dim_list
 
-        #     included_insights_query = f"""
-        #                         SELECT Included_Insights FROM metric_settings
-        #                         WHERE DatamartId = '{constants.DATAMART_ID}'
-        #                         AND MetricID = '{meas_id.upper()}'"""
-        #     constants.CURSOR.execute(included_insights_query)
-        #     included_insights_tuple = constants.CURSOR.fetchone()
-        #     included_insights_str = included_insights_tuple[0]
-        #     included_insights_list = json.loads(included_insights_str)
+            included_insights_query = f"""
+                                SELECT Included_Insights FROM metric_settings
+                                WHERE DatamartId = '{constants.DATAMART_ID}'
+                                AND MetricID = '{meas_id.upper()}'"""
+            constants.CURSOR.execute(included_insights_query)
+            included_insights_tuple = constants.CURSOR.fetchone()
+            included_insights_str = included_insights_tuple[0]
+            included_insights_list = json.loads(included_insights_str)
 
-        #     constants.INSIGHTS_ALLOWED_FOR_DERIVED_METRICS[meas] = included_insights_list
-        # print(f'DIM_ALLOWED_FOR_DERIVED_METRICS:{constants.DIM_ALLOWED_FOR_DERIVED_METRICS}')
+            constants.INSIGHTS_ALLOWED_FOR_DERIVED_METRICS[meas] = included_insights_list
+        logger.info(f'DIM_ALLOWED_FOR_DERIVED_METRICS:\n{constants.DIM_ALLOWED_FOR_DERIVED_METRICS}')
+        logger.info(f'INSIGHTS_ALLOWED_FOR_DERIVED_METRICS:\n{constants.INSIGHTS_ALLOWED_FOR_DERIVED_METRICS}')
+        
         # ########### Function Call ###########
         # insightcode_sql = "SELECT InsightCode, MAX(VersionNumber) AS VersionNumber, MAX(Importance) AS Importance FROM tt_insights WHERE datamartid = '" + str(constants.DATAMART_ID) + "' GROUP BY InsightCode"
         # constants.DF_VERSION_NUMBER = pd.read_sql(insightcode_sql, constants.CNXN)
