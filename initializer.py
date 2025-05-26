@@ -17,6 +17,36 @@ import boto3
 import logging
 
 
+# Define your log file path - THIS MUST EXACTLY MATCH your CloudWatch agent config
+LOG_FILE_PATH = "/var/log/auto_insights/application.log" 
+
+# --- Logging Setup (Place this at the very beginning of your main script) ---
+
+# Ensure the log directory exists before setting up the file handler
+log_directory = os.path.dirname(LOG_FILE_PATH)
+if not os.path.exists(log_directory):
+    # This might already be created by the 'sudo mkdir' command, but it's good practice.
+    # Note: os.makedirs creates parent directories too.
+    os.makedirs(log_directory, exist_ok=True) 
+
+# Configure the basic logging setup
+logging.basicConfig(
+    level=logging.INFO, # Set the minimum level of messages to log (INFO, DEBUG, WARNING, ERROR, CRITICAL)
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        # This tells Python to write logs to your specified file
+        logging.FileHandler(LOG_FILE_PATH, mode='a') # 'a' means append to the file
+        # Optional: Add a StreamHandler if you also want logs to appear on the console
+        # logging.StreamHandler() 
+    ]
+)
+
+# Get a logger instance for your application
+logger = logging.getLogger(__name__)
+
+
+
+
 def insights_generator(event):
     constants.DATAMART_ID = event.get('datamart_id')
     constants.ENGINE_ID = event.get('engine_id')
