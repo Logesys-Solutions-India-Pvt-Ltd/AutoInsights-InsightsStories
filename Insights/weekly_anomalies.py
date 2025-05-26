@@ -11,7 +11,7 @@ import constants
 
 
 def weekly_anomalies():
-    print('--WEEKLY ANOMALIES--')
+    constants.logger.info('--WEEKLY ANOMALIES--')
     datamart_id = constants.DATAMART_ID
     source_type = constants.SOURCE_TYPE
     source_engine = constants.SOURCE_ENGINE
@@ -41,7 +41,7 @@ def weekly_anomalies():
         for dim in dim_list:
             for meas in list(derived_measures_dict.keys()):
                 if dim in dim_allowed_for_derived_metrics[meas]:
-                    print(f'dim:{dim}, meas:{meas}')
+                    # logger.info(f'dim:{dim}, meas:{meas}')
                     if 'Weekly Anomalies' in insights_allowed_for_derived_metrics[meas]:
                         start_of_52_weeks, current_week = calculate_week_dates(max_date)
 
@@ -126,7 +126,7 @@ def weekly_anomalies():
     count = 0
     diff = 0.5
     for j, zscore_val in enumerate(zscore_list_actual):
-        print(f'j:{j}')
+        # logger.info(f'j:{j}')
         temp_count = 0
         for tags, related_fields, df_actual, string, zscore, meas, title, subtitle, xAxisTitle, yAxisTitle in zip(tags_list, related_fields_list, df_actual_list, string_list, zscore_list, meas_list, charttitle_list, chartsubtitle_list, xAxisTitle_list, yAxisTitle_list):
             if j == 0:  
@@ -157,6 +157,6 @@ def weekly_anomalies():
                     temp_count += 1
         count = count + temp_count
         # count = 50, 90, 170
-        print(f'count:{count}\n\n')
+        # logger.info(f'count:{count}\n\n')
         if count >= 150:
             break

@@ -8,7 +8,7 @@ import constants
 
 
 def movements(dim_table, dim, meas):
-    print('--MOVEMENTS--')
+    constants.logger.info('--MOVEMENTS--')
     
     datamart_id = constants.DATAMART_ID
     source_type = constants.SOURCE_TYPE
@@ -101,7 +101,6 @@ def movements(dim_table, dim, meas):
         df_data['Growth%'] = round(df_data['This Year'] - df_data['Last Year'],2)
     
     df_data['Abs Growth%'] = abs(df_data['Growth%'])
-#     print(f'df_data after calc Abs Growth %:\n{df_data}')
     
     if shape > split + 1:
         # df_data = df_data.iloc[:-1].sort_values(by = 'Abs Growth%', ascending = False).append(df_data[-1:])
@@ -191,7 +190,6 @@ def movements(dim_table, dim, meas):
             chartFooterTitle = chartFooterTitle + ' (Version: '+str(version_num) + ')'
             tags = tags + '|' + 'Version: ' + str(version_num)
             
-        # print(f'df_data:\n{df_data}')
         df_data = ComboChart(df_data, ['This Year', 'Last Year'], [], ['Growth%'], xAxisTitle, yAxisTitle, chart_title, chartSubTitle, chartFooterTitle, yAxisTitleRight = yAxisTitleRight)
         related_fields_list = "#|#".join(related_fields_list)
         

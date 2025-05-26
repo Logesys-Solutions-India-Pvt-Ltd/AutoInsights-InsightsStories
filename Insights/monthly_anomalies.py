@@ -9,8 +9,9 @@ import pandas as pd
 import numpy as np
 import constants
 
+
 def monthly_anomalies():
-    print('--MONTHLY ANOMALIES--')
+    constants.logger.info('--MONTHLY ANOMALIES--')
     datamart_id = constants.DATAMART_ID
     source_type = constants.SOURCE_TYPE
     source_engine = constants.SOURCE_ENGINE
@@ -40,7 +41,7 @@ def monthly_anomalies():
         for dim in dim_list:
             for meas in list(derived_measures_dict.keys()):
                 if dim in dim_allowed_for_derived_metrics[meas]:
-                    print(f'dim:{dim}, meas:{meas}')
+                    # logger.info(f'dim:{dim}, meas:{meas}')
                     if 'Monthly Anomalies' in insights_allowed_for_derived_metrics[meas]:
                         start_of_last_12_months, start_of_month = calculate_month_dates(max_date)
                         start_of_last_12_months = start_of_last_12_months.strftime("%d-%m-%Y")
@@ -131,7 +132,7 @@ def monthly_anomalies():
     count = 0
     diff = 0.5
     for j, zscore_val in enumerate(zscore_list_actual):
-        print(f'j:{j}')
+        # logger.info(f'j:{j}')
         temp_count = 0
         for tags, related_fields, df_actual, string, zscore, meas, title, subtitle, xAxis, yAxis, importance in zip(tags_list, related_fields_list, df_actual_list, string_list, zscore_list, meas_list, charttitle_list, chartsubtitle_list,xAxisTitle_list, yAxisTitle_list,importance_list):
             if j == 0:  
@@ -159,6 +160,6 @@ def monthly_anomalies():
                     insert_insights(datamart_id, str(string), str(data), 'Related Measures', 'Line', str(related_fields), importance, tags, 'Monthly Anomalies', 'Insight', cnxn, cursor, insight_code, version_num)
                     temp_count += 1
         count = count + temp_count
-        print(f'count:{count}\n\n')
+        # logger.info(f'count:{count}\n\n')
         if count >= 150:
             break

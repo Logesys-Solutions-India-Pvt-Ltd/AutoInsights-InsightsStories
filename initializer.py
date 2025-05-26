@@ -36,10 +36,6 @@ logging.basicConfig(
     ]
 )
 
-# Get a logger instance for your application
-logger = logging.getLogger(__name__)
-
-
 
 
 def insights_generator(event):
@@ -79,7 +75,7 @@ def insights_generator(event):
 
     try:
         # print('Process started.')
-        logger.info('Process started')
+        constants.logger.info('Process started')
         
         ########## Get the selected insights #########
         selected_insights_query = f"""
@@ -88,7 +84,7 @@ def insights_generator(event):
         constants.CURSOR.execute(selected_insights_query)
         selected_insights_list = constants.CURSOR.fetchone()
         constants.SELECTED_INSIGHTS = json.loads(selected_insights_list[0])
-        logger.info(f'Insights selected for {constants.DATAMART_ID}: {constants.SELECTED_INSIGHTS}')  
+        constants.logger.info(f'Insights selected for {constants.DATAMART_ID}: {constants.SELECTED_INSIGHTS}')  
         
         ########## Get client's credentials from the database ##########
         tables_info, common_credentials = get_datamart_source_credentials(constants.DATAMART_ID, constants.LOGESYS_ENGINE)
@@ -102,7 +98,7 @@ def insights_generator(event):
 
         ########## Get the derived measures formula from derived_metrics table ##########
         constants.DERIVED_MEASURES_DICT_EXPANDED = combine_formula_json(constants.DATAMART_ID, constants.LOGESYS_ENGINE)
-        logger.info(f'Formula json:\n{constants.DERIVED_MEASURES_DICT_EXPANDED}')
+        constants.logger.info(f'Formula json:{constants.DERIVED_MEASURES_DICT_EXPANDED}')
 
         # Convert the dictionary to a JSON string
         DERIVED_MEASURES_DICT_EXPANDED_JSON_CONTENT = json.dumps(constants.DERIVED_MEASURES_DICT_EXPANDED, indent=4)
@@ -122,7 +118,7 @@ def insights_generator(event):
         constants.DERIVED_MEASURES_DICT_EXPANDED = json.loads(constants.DERIVED_MEASURES_DICT_EXPANDED)
         constants.DERIVED_MEASURES_DICT = transform_derived_measures(constants.DERIVED_MEASURES_DICT_EXPANDED)
         
-        logger.info(f'Formulae received and processed.')
+        constants.logger.info(f'Formulae received and processed.')
 
         constants.DF_SQL_TABLE_NAMES = create_table_name_mapping(tables_info)
 
@@ -161,9 +157,9 @@ def insights_generator(event):
             'last52weeks_end_date_dict': sig_fields['last52weeks_end_date_dict']
         }
 
-        logger.info(f'Significant dimensions:\n{constants.SIGNIFICANT_DIMENSIONS}')
-        logger.info(f'Significant measures:\n{constants.SIGNIFICANT_MEASURES}')
-        logger.info(f'Date columns:\n{constants.DATE_COLUMNS}')
+        constants.logger.info(f'Significant dimensions:{constants.SIGNIFICANT_DIMENSIONS}')
+        constants.logger.info(f'Significant measures:{constants.SIGNIFICANT_MEASURES}')
+        constants.logger.info(f'Date columns:{constants.DATE_COLUMNS}')
         
         # # ########## Dates calculations for Outliers ##########
         constants.OUTLIERS_DATES = calculate_periodic_dates_for_outliers(constants.SOURCE_TYPE, constants.SOURCE_ENGINE, 
@@ -175,7 +171,7 @@ def insights_generator(event):
         constants.SIGNIFICANCE_SCORE = significance_engine_sql(constants.SOURCE_ENGINE, constants.DF_SQL_TABLE_NAMES, 
                                                         constants.DF_SQL_MEAS_FUNCTIONS, constants.SIGNIFICANT_DIMENSIONS, 
                                                         constants.SIGNIFICANT_MEASURES, constants.DF_RELATIONSHIP)
-        logger.info('Significance score assigned to dimensions and metrics.')
+        constants.logger.info('Significance score assigned to dimensions and metrics.')
 
         ########### Getting Display Names ##########
         constants.RENAME_DIM_MEAS = rename_fields(constants.DATAMART_ID, constants.RENAME_DIM_MEAS, 
@@ -223,27 +219,28 @@ def insights_generator(event):
             included_insights_list = json.loads(included_insights_str)
 
             constants.INSIGHTS_ALLOWED_FOR_DERIVED_METRICS[meas] = included_insights_list
-        logger.info(f'DIM_ALLOWED_FOR_DERIVED_METRICS:\n{constants.DIM_ALLOWED_FOR_DERIVED_METRICS}')
-        logger.info(f'INSIGHTS_ALLOWED_FOR_DERIVED_METRICS:\n{constants.INSIGHTS_ALLOWED_FOR_DERIVED_METRICS}')
-        
-        # ########### Function Call ###########
-        # insightcode_sql = "SELECT InsightCode, MAX(VersionNumber) AS VersionNumber, MAX(Importance) AS Importance FROM tt_insights WHERE datamartid = '" + str(constants.DATAMART_ID) + "' GROUP BY InsightCode"
-        # constants.DF_VERSION_NUMBER = pd.read_sql(insightcode_sql, constants.CNXN)
 
-        # constants.INSIGHTS_TO_SKIP = ['Trends', 'Outliers', 'Monthly Anomalies', 'Weekly Anomalies']
+        constants.logger.info(f'DIM_ALLOWED_FOR_DERIVED_METRICS:{constants.DIM_ALLOWED_FOR_DERIVED_METRICS}')
+        constants.logger.info(f'INSIGHTS_ALLOWED_FOR_DERIVED_METRICS:{constants.INSIGHTS_ALLOWED_FOR_DERIVED_METRICS}')
+
+        ########### Function Call ###########
+        insightcode_sql = "SELECT InsightCode, MAX(VersionNumber) AS VersionNumber, MAX(Importance) AS Importance FROM tt_insights WHERE datamartid = '" + str(constants.DATAMART_ID) + "' GROUP BY InsightCode"
+        constants.DF_VERSION_NUMBER = pd.read_sql(insightcode_sql, constants.CNXN)
+
+        constants.INSIGHTS_TO_SKIP = ['Trends', 'Outliers', 'Monthly Anomalies', 'Weekly Anomalies']
 
         # stories_call()
-        # print('Stories generated.')    
+        # constants.logger.info('Stories generated.')    
 
         # insights_call()
         # # insights_call_threaded()
-        # print('Insights generated')
+        # constants.logger.info('Insights generated')
 
         # playlist_call()
-        # print('Playlist generated')
+        # constants.logger.info('Playlist generated')
 
-        # data_overview_call()
-        # print('Data Overview generated')
+        data_overview_call()
+        constants.logger.info('Data Overview generated')
 
         return {
             "status": "success",
@@ -264,7 +261,7 @@ def insights_generator(event):
         original_line_number = exc_tb.tb_lineno
 
         error_message = f"Error in insights_generator: {e} (originally from file '{original_file_name}' at line {original_line_number})"
-        print(error_message)
+        constants.LOGGER.info(error_message)
         return {"status": "error", "message": error_message}
 
     finally:

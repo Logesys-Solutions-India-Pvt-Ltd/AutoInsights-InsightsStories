@@ -4,6 +4,9 @@ from FinalParameters import *
 from FinalCharts import *
 import pandas as pd
 import sys
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def playlist(df_insights):
@@ -32,7 +35,7 @@ def playlist(df_insights):
         file_name = exc_tb.tb_frame.f_code.co_filename
         line_number = exc_tb.tb_lineno
         error_message = f"Error in playlist: {e} in file '{file_name}' at line {line_number}"
-        print(error_message)
+        logger.info(error_message)
         return pd.DataFrame()
 
 
@@ -68,8 +71,6 @@ def playlist_category(datamart_id, engine_id, sql, category, dim_unique_values_d
             if len(pl_string) > 43:
                 pl_string = pl_string[:40] + '...'
             group = tag_dataframe['Group'].loc[i]
-            print(pl_string)
-            print(group)
             try:
                 groupid = group_df[group_df['GroupName'] == group].index[0]
                 playlist_id = uuid.uuid1()
@@ -85,7 +86,7 @@ def playlist_category(datamart_id, engine_id, sql, category, dim_unique_values_d
                 file_name = exc_tb.tb_frame.f_code.co_filename
                 line_number = exc_tb.tb_lineno
                 error_message = f"Error in playlist_category: {e} in file '{file_name}' at line {line_number}"
-                print(error_message)
+                logger.info(error_message)
 
 
 def trending(datamart_id, engine_id, sql, dim_unique_values_dict, cnxn, cursor):
@@ -98,7 +99,7 @@ def trending(datamart_id, engine_id, sql, dim_unique_values_dict, cnxn, cursor):
         file_name = exc_tb.tb_frame.f_code.co_filename
         line_number = exc_tb.tb_lineno
         error_message = f"Error in trending: {e} in file '{file_name}' at line {line_number}"
-        print(error_message)
+        logger.info(error_message)
 
 
         

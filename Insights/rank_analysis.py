@@ -7,8 +7,9 @@ import numpy as np
 import constants
 
 
+
 def rank_analysis(dim_table, dim, meas):
-    print('--RANK ANALYSIS--')
+    constants.logger.info('--RANK ANALYSIS--')
     
     datamart_id = constants.DATAMART_ID
     source_type = constants.SOURCE_TYPE
@@ -130,9 +131,7 @@ def rank_analysis(dim_table, dim, meas):
             if len(string) > 0:
                 df_data.drop(['Diff'], axis = 1, inplace = True)
                 df_data = df_data.T.to_json()
-            # print(f'df_data in rank analysis:\n{df_data}')
             if string!= '':
-#                 print(f'')
                 ### Renaming ###
                 string = rename_variables(string, rename_dim_meas)
                 tags = rename_variables(tags, rename_dim_meas)

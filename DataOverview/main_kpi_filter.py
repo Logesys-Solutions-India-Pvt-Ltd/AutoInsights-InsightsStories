@@ -3,10 +3,12 @@ from FinalCommon import *
 from FinalParameters import *
 from FinalCharts import *
 import pandas as pd
+import constants
+
 
 
 def main_kpi_filter(source_type, source_engine, datamart_id, date_columns, dates_filter_dict, derived_measures_dict_expanded, derived_measures_dict, df_sql_table_names, df_sql_meas_functions, df_list, df_relationship, rename_dim_meas, meas, cnxn, cursor):
-    print('Main KPI filter')
+    constants.logger.info('Main KPI filter')
     is_ratio = False
     
     if source_type == 'xlsx':

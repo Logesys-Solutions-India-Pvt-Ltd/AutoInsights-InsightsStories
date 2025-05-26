@@ -3,10 +3,12 @@ from FinalCommon import *
 from FinalParameters import *
 from FinalCharts import *
 import pandas as pd
+import logging
+import constants
 
 
 def data_overview_delta(source_type, source_engine, datamart_id, date_columns, dates_filter_dict, derived_measures_dict_expanded, derived_measures_dict, df_sql_table_names, df_sql_meas_functions, df_list, df_list_ly, df_list_ty, dim, meas, dim_table, df_relationship, cnxn, cursor):
-    print('Data Overview Delta')
+    constants.logger.info('Data Overview Delta')
     split = 10
     is_ratio = False
     DiffValPosOthers, DiffValNegOthers = pd.DataFrame(), pd.DataFrame()
@@ -74,7 +76,8 @@ def data_overview_delta(source_type, source_engine, datamart_id, date_columns, d
     chartFooterTitle = ''
 
     waterfall = waterfallChart(dim, meas, DiffVal, xAxisTitle, yAxisTitle, chart_title, chartSubTitle, chartFooterTitle)
+    constants.logger.info(f'Waterfall:{waterfall}')
     section_id = 6
     # engine = azure_sql_database_connect(source_username, source_password, source_server, source_database)
     cnxn, cursor, logesys_engine = sql_connect()
-    insert_summary(datamart_id, waterfall, 'Waterfall', 'Waterfall', section_id, dim, meas, cnxn, cursor)
+    # insert_summary(datamart_id, waterfall, 'Waterfall', 'Waterfall', section_id, dim, meas, cnxn, cursor)

@@ -11,7 +11,7 @@ import constants
 
 
 def outliers():
-    print('--OUTLIERS--')
+    constants.logger.info('--OUTLIERS--')
     datamart_id = constants.DATAMART_ID
     source_type = constants.SOURCE_TYPE
     source_engine = constants.SOURCE_ENGINE
@@ -56,10 +56,10 @@ def outliers():
             # for meas in ['Markdown %', 'ASP', 'UPT', 'ATV']:
 #             for meas in ['Markdown %']:
                 if dim in dim_allowed_for_derived_metrics[meas]:
-                    print(f'dim:{dim}, meas:{meas}')
+                    # logger.info(f'dim:{dim}, meas:{meas}')
                     if 'Outliers' in insights_allowed_for_derived_metrics[meas]:
                         for val, importance in zip(['Week On Week', 'Month On Month', 'Rolling 3 Months', 'MTD', 'YTD'], [220, 209, 198, 187, 176]):  
-                            print(f'Val:{val}')
+                            # logger.info(f'Val:{val}')
                             if val == 'MTD':
                                 if source_type == 'xlsx':
                                     this_period_setting, last_period_setting = df_list_ty.copy(), df_list_ly.copy()
@@ -159,7 +159,6 @@ def outliers():
                                 val_list.append(val)
                                 df_final_growth.dropna(inplace = True)
                                 df_final_growth.replace([np.inf, -np.inf], 0, inplace=True)
-    #                             print(f'df_final_growth:\n{df_final_growth}')
                                 df_final_growth_styled = chart_index_styling(df_final_growth.copy(), list(zscore_outlier[meas + ' Gr %'].index), meas + ' Gr %', average = 'Average Gr %', def_color = '#B0CBFF', highlight_color = '#3862FF')
                                 xAxisTitle = dim
                                 yAxisTitle = meas + ' Gr %'
@@ -196,7 +195,7 @@ def outliers():
     count = 0
     diff = 0.5
     for j, zscore_val in enumerate(zscore_list_actual):  
-        print(f'j:{j}')
+        # logger.info(f'j:{j}')
         temp_count = 0
         for tags, related_fields, df_actual, string, zscore, meas, xAxis, yAxis, title, subtitle, importance,val in zip(tags_list, related_fields_final_list, df_actual_list, string_final_list, growth_list, meas_list, xAxisTitle_list, yAxisTitle_list, charttitle_list, chartsubtitle_list, importance_list, val_list):
             if j == 0:  
@@ -228,6 +227,6 @@ def outliers():
                     insert_insights(datamart_id, string, data, val, 'Combo', str(related_fields), importance , tags, 'Outlier', 'Insight', cnxn, cursor, insight_code, version_num)
                     temp_count += 1
         count = count + temp_count
-        print(f'count:{count}\n\n')
+        # logger.info(f'count:{count}\n\n')
         if count >= 150:
             break

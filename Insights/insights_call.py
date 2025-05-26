@@ -10,8 +10,10 @@ from Insights.outliers import outliers
 import threading
 import constants
 
+
 ### Without multithreading ###
 def insights_call():
+    constants.logger.info('Started generating Insights.')
     selected_insights = constants.SELECTED_INSIGHTS
     insights_to_skip = constants.INSIGHTS_TO_SKIP
     dim_allowed_for_derived_metrics = constants.DIM_ALLOWED_FOR_DERIVED_METRICS
@@ -26,7 +28,7 @@ def insights_call():
         for dim_table, dim_list in Significant_dimensions.items():  
             for dim in dim_list:  
                 if dim in allowed_dims_for_meas:  # Check if the dimension is allowed for the current measure.
-                    print(f'dim:{dim}, meas{meas}')
+                    # print(f'dim:{dim}, meas{meas}')
                     for insight_name in selected_insights:  # Iterate through the selected insights.
                         if insight_name in insights_to_skip:
                             continue

@@ -3,10 +3,11 @@ from FinalCommon import *
 from FinalParameters import *
 from FinalCharts import *
 import pandas as pd
+import constants
 
 
 def data_overview_pie(source_type, source_engine, datamart_id, date_columns, dates_filter_dict, derived_measures_dict_expanded, derived_measures_dict, df_sql_table_names, df_sql_meas_functions, df_list_ty, df_relationship, dim, meas, dim_table, cnxn, cursor):
-    print('Data Overview Pie')
+    constants.logger.info('Data Overview Pie')
     is_ratio = False
     if source_type == 'xlsx':
         this_year_setting = df_list_ty
@@ -28,7 +29,7 @@ def data_overview_pie(source_type, source_engine, datamart_id, date_columns, dat
 
 
 def data_overview_bar(source_type, source_engine, datamart_id, date_columns, dates_filter_dict, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, dim, meas, dim_table, df_list_ty, df_relationship, cnxn, cursor):
-    print('Data Overview Bar')
+    constants.logger.info('Data Overview Bar')
     split = 10
     is_ratio = False
     df_others_value = pd.DataFrame()

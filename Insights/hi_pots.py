@@ -8,7 +8,7 @@ import constants
 
 
 def hi_pots(dim_table, dim, meas):
-    print('--HI POTS--')
+    constants.logger.info('--HI POTS--')
     datamart_id = constants.DATAMART_ID
     source_type = constants.SOURCE_TYPE
     source_engine = constants.SOURCE_ENGINE
@@ -67,7 +67,6 @@ def hi_pots(dim_table, dim, meas):
         average = df_data[meas].mean()
 
     df_data = round(df_data, 2)
-    # print(f'df_data in hi pots after others:\n{df_data}')
     average = round(average, 2)
     
     df_data['Average'] = average
@@ -77,7 +76,6 @@ def hi_pots(dim_table, dim, meas):
     df_temp_data = df_data[df_data['X Times'] > 1.3].sort_values(by='X Times', ascending=False)[:3]
     df_temp_data.replace([np.inf, -np.inf], 0, inplace=True)
     
-#     print(f'df_temp_data in hi pots:\n{df_temp_data}')
     ## Percentage and Units
     is_percentage, meas_units = '', ''
     show_in_percentage_query = f"""
@@ -106,7 +104,6 @@ def hi_pots(dim_table, dim, meas):
         df_data.fillna(0, inplace=True)
         df_data.drop(['X Times'], axis=1, inplace=True)
         df_data['Average'] = df_data['Average'].max()
-#         print(f'df_data in hi pots:\n{df_data}')
         df_data = chart_index_styling(df_data, list(df_temp_data.index), meas, average='Average', def_color='#B0CBFF',highlight_color='#3862FF')
         xAxisTitle = dim
         yAxisTitle = f'{meas}'

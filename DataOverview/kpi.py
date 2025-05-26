@@ -5,8 +5,9 @@ from FinalCharts import *
 import pandas as pd
 
 
+
 def data_overview_kpi(source_type, source_engine, datamart_id, meas, date_columns, dates_filter_dict, outliers_dates, derived_measures_dict_expanded, derived_measures_dict, df_sql_table_names, df_sql_meas_functions, df_list, df_list_ly, df_list_ty, df_relationship, cnxn, cursor):
-    print('Data Overview KPI')
+    constants.logger.info('Data Overview KPI')
     is_ratio = False
     
     if '/' in derived_measures_dict[meas]['Formula']:
@@ -51,7 +52,7 @@ def data_overview_kpi(source_type, source_engine, datamart_id, meas, date_column
         cnxn, cursor, logesys_engine = sql_connect()
         insert_summary(datamart_id, kpi, 'DataOverview_KPI_YTD', 'KPI', section_id, '', meas, cnxn, cursor)
     else:
-        print('YTD growth : NA')
+        constants.logger.info('YTD growth : NA')
     
     ################################################## MTD ####################################################
     if source_type == 'xlsx':
@@ -96,7 +97,7 @@ def data_overview_kpi(source_type, source_engine, datamart_id, meas, date_column
         cnxn, cursor, logesys_engine = sql_connect()
         insert_summary(datamart_id, kpi, 'DataOverview_KPI_MTD', 'KPI', section_id, '', meas, cnxn, cursor)
     else:
-        print('MTD growth : NA')
+        constants.logger.info('MTD growth : NA')
         
     ################################################## Rolling 3 Months ##################################################
     if source_type == 'xlsx':
@@ -138,4 +139,4 @@ def data_overview_kpi(source_type, source_engine, datamart_id, meas, date_column
         cnxn, cursor, logesys_engine = sql_connect()
         insert_summary(datamart_id, kpi, 'DataOverview_KPI_3Month', 'KPI', section_id, '', meas, cnxn, cursor)
     else:
-        print('3 month growth : NA')
+        constants.logger.info('3 month growth : NA')

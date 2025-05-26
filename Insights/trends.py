@@ -9,7 +9,7 @@ import constants
 
 
 def trends():
-    print('--TRENDS--')
+    constants.logger.info('--TRENDS--')
     datamart_id = constants.DATAMART_ID
     source_type = constants.SOURCE_TYPE
     source_engine = constants.SOURCE_ENGINE
@@ -40,7 +40,7 @@ def trends():
         for dim in dim_list:
             for meas in list(derived_measures_dict.keys()):
                 if dim in dim_allowed_for_derived_metrics[meas]:
-                    print(f'dim:{dim}, meas:{meas}')
+                    # logger.info(f'dim:{dim}, meas:{meas}')
                     if 'Trends' in insights_allowed_for_derived_metrics[meas]:
                         start_of_last_12_months, start_of_month = calculate_month_dates(max_date)
                         start_of_last_12_months = start_of_last_12_months.strftime("%d-%m-%Y")
@@ -79,7 +79,6 @@ def trends():
 
                         for dim_val in list(significance_score[dim_table][dim][:].index):
                             df_filtered = df_data[df_data[dim] == dim_val]
-                    #                     print(f'df_filtered:\n{df_filtered}')
                             if df_filtered.shape[0] > 1:
                                 df_filtered['Year-Month LE'] = range(1, df_filtered['Year-Month'].shape[0] + 1)
                                 df_filtered[dim].fillna(0, inplace = True)
@@ -148,7 +147,7 @@ def trends():
     count = 0
     diff = 0.05
     for j, cut_off_val in enumerate(cut_off_list_actual):
-        print(f'j:{j}')
+        # logger.info(f'j:{j}')
         temp_count = 0
         for tags, related_fields, df_actual, string, cut_off, meas, title, subtitle, xAxis, yAxis, importance in zip(tags_list, related_fields_list, df_actual_list, string_list, cut_off_list, meas_list, charttitle_list, chartsubtitle_list, xAxisTitle_list, yAxisTitle_list, importance_list):
             if (cut_off > cut_off_val and cut_off <= cut_off_val + diff) or (cut_off < -cut_off_val and cut_off >= -cut_off_val - diff):
@@ -167,6 +166,6 @@ def trends():
                 insert_insights(datamart_id, string, str(data), 'Slope', 'Line', str(related_fields), importance, tags, 'Trends', 'Insight', cnxn, cursor, insight_code, version_num)
         count = count + temp_count
         # count = 50, 90, 170
-        print(f'count:{count}\n')
+        # logger.info(f'count:{count}\n')
         if count >= 150:
             break

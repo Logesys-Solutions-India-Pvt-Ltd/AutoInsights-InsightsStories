@@ -1,3 +1,7 @@
+import logging
+
+logger = logging.getLogger(__name__)
+
 ENGINE_ID = None
 DATAMART_ID = None
 START_MONTH = None
