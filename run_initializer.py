@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 import os
 import signal
+import logging
 from flask import Flask, request, jsonify, Response
 from flask_cors import CORS
 from initializer import insights_generator
 from metadata_generation import metadata_generator
 from ask_summary_generation import ask_summary_generator
 
+app_logger = logging.getLogger(__name__)
 app = Flask(__name__)
 CORS(app)
 
@@ -23,7 +25,9 @@ def stop_gunicorn():
 def metadata_generation():
     try:
         event = request.get_json()
+        app_logger.info(f"Received /metadata request with payload: {event}") # Log request
         result = metadata_generator(event)
+        app_logger.info("Metadata generation completed.") # Log completion
 
         if isinstance(result, dict):
             # stop_gunicorn()
@@ -33,6 +37,8 @@ def metadata_generation():
             return Response(result, status=200, mimetype='application/json')
     except Exception as e:
         error_message = f"Error in metadata_generation: {e}"
+        app_logger.error(error_message, exc_info=True) # Log error with traceback
+
         # stop_gunicorn()
         return jsonify({"status": "ERROR", "message": error_message}), 500
 
@@ -42,12 +48,12 @@ def metadata_generation():
 def trigger_insights_generation():
     try:
         event = request.get_json()
-        print(f"Received /trigger request from {request.remote_addr} with payload: {event}")
+        app_logger.info(f"Received /trigger request from {request.remote_addr} with payload: {event}") 
         result = insights_generator(event)
 
         # return "Hello World"
         if isinstance(result, dict): 
-            print(result.get("status"))
+            app_logger.info(f"Insights generation status: {result.get('status')}") 
             if result.get("status") == "error":  
                 # stop_gunicorn()
                 return jsonify({"status": "ERROR", "message": result["message"]}), 500
@@ -66,7 +72,7 @@ def trigger_insights_generation():
 
     except Exception as e:
         error_message = f"Error in trigger_insights_generation: {e}"
-        print(error_message)  
+        app_logger.error(error_message, exc_info=True)
         # stop_gunicorn()
         return jsonify({"status": "ERROR", "message": error_message}), 500
     
@@ -75,7 +81,9 @@ def trigger_insights_generation():
 def ask_summary_generation():
     try:
         event = request.get_json()
+        app_logger.info(f"Received /ask request with payload: {event}") # Log request
         result = ask_summary_generator(event)
+        app_logger.info("Ask summary generation completed.") # Log completion
 
         if isinstance(result, dict):
             # stop_gunicorn()
@@ -85,5 +93,7 @@ def ask_summary_generation():
             return Response(result, status=200, mimetype='application/json')
     except Exception as e:
         error_message = f"Error in ask_summary_generation: {e}"
+        app_logger.error(error_message, exc_info=True) # Log error with traceback
+
         # stop_gunicorn()
         return jsonify({"status": "ERROR", "message": error_message}), 500
