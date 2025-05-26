@@ -2,6 +2,7 @@
 import os
 import signal
 import logging
+import constants
 from flask import Flask, request, jsonify, Response
 from flask_cors import CORS
 from initializer import insights_generator
@@ -11,6 +12,20 @@ from ask_summary_generation import ask_summary_generator
 app_logger = logging.getLogger(__name__)
 app = Flask(__name__)
 CORS(app)
+
+
+def clear_application_log_file():
+    if os.path.exists(constants.LOG_FILE_PATH):
+        try:
+            # Open the file in 'write' mode ('w') which truncates it (clears content)
+            with open(constants.LOG_FILE_PATH, 'w') as f:
+                f.truncate(0) 
+            app_logger.info(f"Log file '{constants.LOG_FILE_PATH}' successfully cleared.")
+        except OSError as e:
+            app_logger.error(f"Error clearing log file '{constants.LOG_FILE_PATH}': {e}", exc_info=True)
+    else:
+        app_logger.info(f"Log file '{constants.LOG_FILE_PATH}' does not exist, nothing to clear.")
+
 
 def stop_gunicorn():
     """
@@ -24,6 +39,9 @@ def stop_gunicorn():
 @app.route("/metadata", methods=["POST"])
 def metadata_generation():
     try:
+        app_logger.info("Received /metadata request. Clearing log file...")
+        clear_application_log_file() 
+        
         event = request.get_json()
         app_logger.info(f"Received /metadata request with payload: {event}") # Log request
         result = metadata_generator(event)

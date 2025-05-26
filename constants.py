@@ -1,4 +1,24 @@
 import logging
+import os
+
+LOG_FILE_PATH = "/var/log/auto_insights/application.log" 
+
+# Ensure the log directory exists before setting up the file handler
+log_directory = os.path.dirname(LOG_FILE_PATH)
+if not os.path.exists(log_directory):
+    os.makedirs(log_directory, exist_ok=True) 
+
+# Configure the basic logging setup
+logging.basicConfig(
+    level=logging.INFO, 
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        # This tells Python to write logs to your specified file
+        logging.FileHandler(LOG_FILE_PATH, mode='a') # 'a' means append to the file
+        # Optional: Add a StreamHandler if you also want logs to appear on the console
+        # logging.StreamHandler() 
+    ]
+)
 
 logger = logging.getLogger(__name__)
 
