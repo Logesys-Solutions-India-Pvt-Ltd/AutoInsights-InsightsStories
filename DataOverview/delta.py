@@ -49,6 +49,8 @@ def data_overview_delta(source_type, source_engine, datamart_id, date_columns, d
                 DiffValPosOthers = pd.DataFrame({meas: [others_value_pos]}, index=[f"{others_count_pos} others"])
                 DiffValPosOthers.index.name = dim
                 DiffValPos = pd.concat([DiffValPos, DiffValPosOthers])
+                DiffValPos = DiffValPos.fillna(0)
+                constants.logger.info(f'DiffValPos:{DiffValPos}')
         else:
             # Keep all positive rows without creating "Others" row
             pass
@@ -63,12 +65,14 @@ def data_overview_delta(source_type, source_engine, datamart_id, date_columns, d
                 DiffValNegOthers = pd.DataFrame({meas: [others_value_neg]}, index=[f"{others_count_neg} others"])
                 DiffValNegOthers.index.name = dim
                 DiffValNeg = pd.concat([DiffValNeg, DiffValNegOthers])
+                DiffValNeg = DiffValNeg.fillna(0)
+                constants.logger.info(f'DiffValNeg:{DiffValNeg}')
         else:
             # Keep all negative rows without creating "Others" row
             pass
             
         DiffVal = pd.concat([DiffValPos, DiffValNeg])
-    DiffVal = DiffVal.fillna(0)
+
     constants.logger.info(f'DiffVal:{DiffVal}')
     xAxisTitle = dim
     yAxisTitle = meas
