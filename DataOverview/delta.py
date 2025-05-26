@@ -69,6 +69,7 @@ def data_overview_delta(source_type, source_engine, datamart_id, date_columns, d
             
         DiffVal = pd.concat([DiffValPos, DiffValNeg])
     DiffVal = DiffVal.fillna(0)
+    constants.logger.info(f'DiffVal:{DiffVal}')
     xAxisTitle = dim
     yAxisTitle = meas
     chart_title = 'YTD ' + meas + ' growth by ' + dim
