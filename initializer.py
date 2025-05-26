@@ -208,15 +208,14 @@ def insights_generator(event):
 
         constants.INSIGHTS_TO_SKIP = ['Trends', 'Outliers', 'Monthly Anomalies', 'Weekly Anomalies']
 
-        # stories_call()
-        # constants.logger.info('Stories generated.')    
+        stories_call()
+        constants.logger.info('Stories generated.')    
 
-        # insights_call()
+        insights_call()
+        constants.logger.info('Insights generated')
 
-        # constants.logger.info('Insights generated')
-
-        # playlist_call()
-        # constants.logger.info('Playlist generated')
+        playlist_call()
+        constants.logger.info('Playlist generated')
 
         data_overview_call()
         constants.logger.info('Data Overview generated')

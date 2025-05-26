@@ -1,12 +1,10 @@
 from Playlist.playlist_def import *
 import constants
-import logging
 
-logger = logging.getLogger(__name__)
 
 
 def playlist_call():
-    logger.info('Started generation Playlist.')
+    constants.logger.info('Generating Playlist.')
     datamart_id = constants.DATAMART_ID
     engine_id = constants.ENGINE_ID
     source_engine = constants.SOURCE_ENGINE

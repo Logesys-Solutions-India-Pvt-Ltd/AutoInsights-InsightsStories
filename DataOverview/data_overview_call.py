@@ -7,7 +7,7 @@ import constants
 
 
 def data_overview_call():
-    constants.logger.info('Started generating Data Overview')
+    constants.logger.info('Generating Data Overview')
     datamart_id = constants.DATAMART_ID
     source_type = constants.SOURCE_TYPE
     source_engine = constants.SOURCE_ENGINE
@@ -29,29 +29,28 @@ def data_overview_call():
     cursor = constants.CURSOR
     
 
-    
-    # for meas in list(derived_measures_dict.keys()): 
-    #     main_kpi_filter(source_type, source_engine, datamart_id, date_columns, dates_filter_dict, derived_measures_dict_expanded, derived_measures_dict, df_sql_table_names, df_sql_meas_functions, df_list, df_relationship, rename_dim_meas, meas, cnxn, cursor)  
+    for meas in list(derived_measures_dict.keys()): 
+        main_kpi_filter(source_type, source_engine, datamart_id, date_columns, dates_filter_dict, derived_measures_dict_expanded, derived_measures_dict, df_sql_table_names, df_sql_meas_functions, df_list, df_relationship, rename_dim_meas, meas, cnxn, cursor)  
 
-    # for dim_table, dim_list in Significant_dimensions.items():
-    #     for dim in dim_list:
-    #         for meas in list(derived_measures_dict.keys()):  
-    #             if dim in dim_allowed_for_derived_metrics[meas]:
-    #                 data_overview_pie(source_type, source_engine, datamart_id, date_columns, dates_filter_dict, derived_measures_dict_expanded, derived_measures_dict, df_sql_table_names, df_sql_meas_functions, df_list_ty, df_relationship, dim, meas, dim_table, cnxn, cursor)
-
+    for dim_table, dim_list in Significant_dimensions.items():
+        for dim in dim_list:
+            for meas in list(derived_measures_dict.keys()):  
+                if dim in dim_allowed_for_derived_metrics[meas]:
+                    data_overview_pie(source_type, source_engine, datamart_id, date_columns, dates_filter_dict, derived_measures_dict_expanded, derived_measures_dict, df_sql_table_names, df_sql_meas_functions, df_list_ty, df_relationship, dim, meas, dim_table, cnxn, cursor)
 
 
-    # for dim_table, dim_list in Significant_dimensions.items():
-    #     for dim in dim_list:
-    #         for meas in list(derived_measures_dict.keys()):
-    #             if dim in dim_allowed_for_derived_metrics[meas]:
-    #                 data_overview_bar(source_type, source_engine, datamart_id, date_columns, dates_filter_dict, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, dim, meas, dim_table, df_list_ty, df_relationship, cnxn, cursor)
+
+    for dim_table, dim_list in Significant_dimensions.items():
+        for dim in dim_list:
+            for meas in list(derived_measures_dict.keys()):
+                if dim in dim_allowed_for_derived_metrics[meas]:
+                    data_overview_bar(source_type, source_engine, datamart_id, date_columns, dates_filter_dict, derived_measures_dict_expanded, df_sql_table_names, df_sql_meas_functions, dim, meas, dim_table, df_list_ty, df_relationship, cnxn, cursor)
 
 
-    # period_dim = ['Month-Day', 'Week', 'Month', 'Quarter']
-    # for pdim in period_dim:
-    #     for meas in list(derived_measures_dict.keys()):
-    #         data_overview_area(source_type, source_engine, datamart_id, date_columns, dates_filter_dict, derived_measures_dict_expanded, derived_measures_dict, df_sql_table_names, df_sql_meas_functions, df_list_ly, df_list_ty, df_relationship, pdim, meas, cnxn, cursor)
+    period_dim = ['Month-Day', 'Week', 'Month', 'Quarter']
+    for pdim in period_dim:
+        for meas in list(derived_measures_dict.keys()):
+            data_overview_area(source_type, source_engine, datamart_id, date_columns, dates_filter_dict, derived_measures_dict_expanded, derived_measures_dict, df_sql_table_names, df_sql_meas_functions, df_list_ly, df_list_ty, df_relationship, pdim, meas, cnxn, cursor)
 
     
     for dim_table, dim_list in Significant_dimensions.items():
@@ -61,5 +60,5 @@ def data_overview_call():
                     data_overview_delta(source_type, source_engine, datamart_id, date_columns, dates_filter_dict, derived_measures_dict_expanded, derived_measures_dict, df_sql_table_names, df_sql_meas_functions, df_list, df_list_ly, df_list_ty, dim, meas, dim_table, df_relationship, cnxn, cursor)
 
 
-    # for meas in list(derived_measures_dict.keys()):
-    #     data_overview_kpi(source_type, source_engine, datamart_id, meas, date_columns, dates_filter_dict, outliers_dates, derived_measures_dict_expanded, derived_measures_dict, df_sql_table_names, df_sql_meas_functions, df_list, df_list_ly, df_list_ty, df_relationship, cnxn, cursor)
+    for meas in list(derived_measures_dict.keys()):
+        data_overview_kpi(source_type, source_engine, datamart_id, meas, date_columns, dates_filter_dict, outliers_dates, derived_measures_dict_expanded, derived_measures_dict, df_sql_table_names, df_sql_meas_functions, df_list, df_list_ly, df_list_ty, df_relationship, cnxn, cursor)

@@ -13,7 +13,7 @@ import constants
 
 ### Without multithreading ###
 def insights_call():
-    constants.logger.info('Started generating Insights.')
+    constants.logger.info('Generating Insights.')
     selected_insights = constants.SELECTED_INSIGHTS
     insights_to_skip = constants.INSIGHTS_TO_SKIP
     dim_allowed_for_derived_metrics = constants.DIM_ALLOWED_FOR_DERIVED_METRICS

@@ -80,10 +80,10 @@ def data_overview_delta(source_type, source_engine, datamart_id, date_columns, d
     
     chartSubTitle = 'Overall delta is ' + human_format(ThisYearDimVal[meas].sum() - LastYearDimVal[meas].sum())
     chartFooterTitle = ''
-    
+
     waterfall = waterfallChart(dim, meas, DiffVal, xAxisTitle, yAxisTitle, chart_title, chartSubTitle, chartFooterTitle)
     constants.logger.info(f'Waterfall:{waterfall}')
     section_id = 6
     # engine = azure_sql_database_connect(source_username, source_password, source_server, source_database)
     cnxn, cursor, logesys_engine = sql_connect()
-    # insert_summary(datamart_id, waterfall, 'Waterfall', 'Waterfall', section_id, dim, meas, cnxn, cursor)
+    insert_summary(datamart_id, waterfall, 'Waterfall', 'Waterfall', section_id, dim, meas, cnxn, cursor)
