@@ -2,6 +2,7 @@ from azure.storage.blob import BlobServiceClient
 from sqlalchemy import create_engine, text
 from datetime import datetime
 from FinalCommon import sql_connect
+import constants
 import pandas as pd
 import numpy as np
 import json
@@ -123,7 +124,7 @@ def process_csv_excel_from_azure(source_type, connection_string, container_name,
         return blob_metadata
 
     except Exception as e:
-        print(f"Error processing blob: {e}")
+        constants.logger.info(f"Error processing blob: {e}")
         raise
 
 
@@ -151,7 +152,7 @@ def process_csv_excel_from_s3(source_type, bucket_name, file_key, region):
         return blob_metadata
         
     except Exception as e:
-        print(f"Error processing file from S3: {e}")
+        constants.logger.info(f"Error processing file from S3: {e}")
         raise
 
 
@@ -178,7 +179,7 @@ def get_metadata_json(table, json_output_str):
 
 
 def update_metadata(datamart_id, table_id, df_metadata, engine):
-    print('Entered update_metadata()')
+    constants.logger.info('Entered update_metadata()')
     updated_date = datetime.now()
     field_id = 0
     for i in range(0,len(df_metadata['New Name'])):
@@ -314,14 +315,14 @@ def metadata_generator(event):
                 with logesys_engine.connect() as cnxn:
                     cnxn.execute(delete_metadata_query)
                     cnxn.commit()  
-                print(f"Deleted existing metadata for datamartid: {datamart_id}, tableid: {table_id}")
+                constants.logger.info(f"Deleted existing metadata for datamartid: {datamart_id}, tableid: {table_id}")
 
                 with logesys_engine.connect() as cnxn:
                     cnxn.execute(delete_derived_metrics_query)
                     cnxn.commit() 
-                print(f"Deleted existing derived metrics for datamartid: {datamart_id}, tableid: {table_id}")
+                constants.logger.info(f"Deleted existing derived metrics for datamartid: {datamart_id}, tableid: {table_id}")
 
-            print(f'Creating metadata for the table:{table_name}')
+            constants.logger.info(f'Creating metadata for the table:{table_name}')
             if source_type == 'csv' or source_type == 'xlsx':
                 if 'connectionString' in file_path_json:
                     connection_string = file_path_json['connectionString']
@@ -366,7 +367,7 @@ def metadata_generator(event):
             return created_metadata_json
         
         elif count_metadata_rows > 0 and refresh == 'False':
-            print(f"Retrieving metadata for the table:{table_name} ")
+            constants.logger.info(f"Retrieving metadata for the table:{table_name} ")
 
             retrieve_metadata_query = f"""
                                     SELECT MetaDataId,
@@ -397,7 +398,7 @@ def metadata_generator(event):
         original_line_number = exc_tb.tb_lineno
 
         error_message = f"Error in metadata_generator: {e} (originally from file '{original_file_name}' at line {original_line_number})"
-        print(error_message)
+        constants.logger.info(error_message)
         return {"status": "error", "message": error_message}
 
     finally:

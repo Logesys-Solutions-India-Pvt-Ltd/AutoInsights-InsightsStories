@@ -239,7 +239,7 @@ def insights_generator(event):
         original_line_number = exc_tb.tb_lineno
 
         error_message = f"Error in insights_generator: {e} (originally from file '{original_file_name}' at line {original_line_number})"
-        constants.LOGGER.info(error_message)
+        constants.logger.info(error_message)
         return {"status": "error", "message": error_message}
 
     finally:

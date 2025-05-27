@@ -5,7 +5,7 @@ import datetime
 from sqlalchemy import create_engine, text
 import pandas as pd 
 import numpy as np
-
+import constants
 
 
 def get_datamart_source_credentials(datamart_id, logesys_engine):
@@ -195,7 +195,7 @@ def ask_summary_generator(event):
             json_output_str = json.dumps(json_output)
 
             s3_client.put_object(Bucket=s3_summary_bucket, Key=output_files[table], Body=json_output_str)
-            print(f"Summary created for table: {table}")
+            constants.logger.info(f"Summary created for table: {table}")
 
         return {
             'statusCode': 200,
@@ -203,7 +203,7 @@ def ask_summary_generator(event):
         }
 
     except Exception as e:
-        print(f"Error processing data: {str(e)}")
+        constants.logger.info(f"Error processing data: {str(e)}")
         return {
             'statusCode': 500,
             'body': json.dumps(f"Error processing data: {str(e)}")
