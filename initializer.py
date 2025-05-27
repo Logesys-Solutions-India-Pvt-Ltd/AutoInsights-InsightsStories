@@ -231,7 +231,6 @@ def insights_generator(event):
         file_name = exc_tb.tb_frame.f_code.co_filename
         line_number = exc_tb.tb_lineno
 
-        # To get the origin of the exception, we need to go to the last frame in the traceback
         while exc_tb.tb_next:
             exc_tb = exc_tb.tb_next
 
