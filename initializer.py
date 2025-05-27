@@ -172,7 +172,8 @@ def insights_generator(event):
         for meas in list(constants.DERIVED_MEASURES_DICT.keys()):
             meas_id_query = f"""SELECT MetricID FROM derived_metrics
                             WHERE DatamartId = '{constants.DATAMART_ID}' 
-                            AND MetricName = '{meas}'"""
+                            AND MetricName = '{meas}'
+                            AND Indicator = '1'"""
             constants.CURSOR.execute(meas_id_query)
             meas_id_tuple = constants.CURSOR.fetchone()
             meas_id = meas_id_tuple[0]
