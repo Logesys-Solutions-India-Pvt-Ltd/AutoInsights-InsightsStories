@@ -170,7 +170,7 @@ def delta_analysis(dim_table, dim, meas):
         df_diff_val = pd.concat([df_diff_val_positive, df_diff_val_negative])
         waterfall = waterfallChart(dim, meas, df_diff_val, xAxisTitle, yAxisTitle, chart_title, chartSubTitle, chartFooterTitle, ty_meas, ly_meas)
         insight_id = uuid.uuid1()
-#         importance = 0
+#        importance = 0
         related_fields_list = "#|#".join(related_fields_list)
         # engine = azure_sql_database_connect(source_username, source_password, source_server, source_database)
         cnxn, cursor, logesys_engine = sql_connect()
