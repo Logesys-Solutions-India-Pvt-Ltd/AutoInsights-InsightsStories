@@ -3,7 +3,6 @@ from Stories.stories_x_times import stories_x_times
 from Stories.stories_rank_cy_ly import stories_rank_cy_ly
 import constants
 
-
 def stories_call():
     derived_measures_dict = constants.DERIVED_MEASURES_DICT
     constants.logger.info('Generating stories.')
