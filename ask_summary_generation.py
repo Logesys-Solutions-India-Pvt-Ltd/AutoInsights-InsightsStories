@@ -127,7 +127,9 @@ def connect_to_db(table, query, source_engine, col_description_dict):
                 }            
         return json_output
     except Exception as e:
+        constants.logger.error(f"Database connection error: {e}")
         raise ValueError(f"Database connection error: {e}")
+        
 
 
 def build_summary_query(table_name):
@@ -203,7 +205,7 @@ def ask_summary_generator(event):
         }
 
     except Exception as e:
-        constants.logger.info(f"Error processing data: {str(e)}")
+        constants.logger.error(f"Error processing data: {str(e)}")
         return {
             'statusCode': 500,
             'body': json.dumps(f"Error processing data: {str(e)}")

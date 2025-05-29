@@ -39,8 +39,19 @@ def insights_generator(event):
         constants.DF_RELATIONSHIP = pd.DataFrame()
     else:
         df_relationship_query = f"""
-                                SELECT * FROM relationship_table 
-                                WHERE datamartid = '{constants.DATAMART_ID}'"""
+                                    SELECT 
+                                        FromTable, FromColumn, ToTable, ToColumn
+                                    FROM relationship
+                                    WHERE datamartid = '{constants.DATAMART_ID}'
+                                    UNION ALL
+                                    SELECT 
+                                        ToTable as FromTable,ToColumn as FromColumn,
+                                        FromTable as ToTable, FromColumn as ToColumn
+                                    FROM relationship
+                                    WHERE datamartid = '{constants.DATAMART_ID}'
+                                    """
+
+        constants.DF_RELATIONSHIP = pd.read_sql(df_relationship_query, constants.CNXN)
         
     # df_relationship_path = 'Relationship Table Dist.xlsx'
 
@@ -239,7 +250,7 @@ def insights_generator(event):
         original_line_number = exc_tb.tb_lineno
 
         error_message = f"Error in insights_generator: {e} (originally from file '{original_file_name}' at line {original_line_number})"
-        constants.logger.info(error_message)
+        constants.logger.error(error_message)
         return {"status": "error", "message": error_message}
 
     finally:

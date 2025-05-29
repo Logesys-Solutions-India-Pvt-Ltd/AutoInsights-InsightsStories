@@ -34,7 +34,7 @@ def playlist(df_insights):
         file_name = exc_tb.tb_frame.f_code.co_filename
         line_number = exc_tb.tb_lineno
         error_message = f"Error in playlist: {e} in file '{file_name}' at line {line_number}"
-        constants.logger.info(error_message)
+        constants.logger.error(error_message)
         return pd.DataFrame()
 
 
@@ -85,7 +85,7 @@ def playlist_category(datamart_id, engine_id, sql, category, dim_unique_values_d
                 file_name = exc_tb.tb_frame.f_code.co_filename
                 line_number = exc_tb.tb_lineno
                 error_message = f"Error in playlist_category: {e} in file '{file_name}' at line {line_number}"
-                constants.logger.info(error_message)
+                constants.logger.error(error_message)
 
 
 def trending(datamart_id, engine_id, sql, dim_unique_values_dict, cnxn, cursor):
@@ -98,7 +98,7 @@ def trending(datamart_id, engine_id, sql, dim_unique_values_dict, cnxn, cursor):
         file_name = exc_tb.tb_frame.f_code.co_filename
         line_number = exc_tb.tb_lineno
         error_message = f"Error in trending: {e} in file '{file_name}' at line {line_number}"
-        constants.logger.info(error_message)
+        constants.logger.error(error_message)
 
 
         

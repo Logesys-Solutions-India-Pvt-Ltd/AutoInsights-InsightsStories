@@ -90,8 +90,8 @@ def connect_to_db(table, source_engine):
                 # logger.info(f"Samples: {samples} ")
         return json_output
     except Exception as e:
+        constants.logger.error(f"Database connection error: {e}")
         raise ValueError(f"Database connection error: {e}")
-
 
 def get_secret(secret_name, region_name="us-east-1"):
     session = boto3.session.Session()
@@ -102,6 +102,7 @@ def get_secret(secret_name, region_name="us-east-1"):
         secret = response['SecretString']
         return json.loads(secret)
     except Exception as e:
+        constants.logger.error(f"Error retrieving secret {secret_name}: {str(e)}")
         raise Exception(f"Error retrieving secret {secret_name}: {str(e)}")
 
 
@@ -175,6 +176,7 @@ def get_metadata_json(table, json_output_str):
         
         return df_metadata
     except Exception as e:
+        constants.logger.error(f"Error while inserting metadata of {table} into m_datamart_metadata: {e}")
         raise ValueError(f"Error while inserting metadata of {table} into m_datamart_metadata: {e}")
 
 
@@ -398,7 +400,7 @@ def metadata_generator(event):
         original_line_number = exc_tb.tb_lineno
 
         error_message = f"Error in metadata_generator: {e} (originally from file '{original_file_name}' at line {original_line_number})"
-        constants.logger.info(error_message)
+        constants.logger.error(error_message)
         return {"status": "error", "message": error_message}
 
     finally:
