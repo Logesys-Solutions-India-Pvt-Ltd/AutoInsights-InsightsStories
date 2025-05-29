@@ -125,11 +125,17 @@ def movements(dim_table, dim, meas):
     show_in_percentage_result = query_on_table(show_in_percentage_query, logesys_engine)
 
     if not show_in_percentage_result.empty:
-        show_in_percentage = show_in_percentage_result['ShowInPercentage'][0]
-        if show_in_percentage:
+        row = show_in_percentage_result.iloc[0]
+
+        show_in_percentage = row.get('ShowInPercentage')
+        if show_in_percentage: 
             is_percentage = '%'
-        
-        meas_units = show_in_percentage_result['Units'][0]
+
+        units_from_db = row.get('Units')
+        if units_from_db is not None:
+            meas_units = str(units_from_db)
+        else:
+            meas_units = ''
 
     string= ''
     if shape > split + 1:

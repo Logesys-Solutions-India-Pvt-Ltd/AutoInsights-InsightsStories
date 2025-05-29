@@ -20,12 +20,9 @@ import logging
 def insights_generator(event):
     constants.DATAMART_ID = event.get('datamart_id')
     constants.ENGINE_ID = event.get('engine_id')
-    # datamart_id = "68F4413C-FD9A-11EF-BA6C-2CEA7F154E8D" ## Timesquare
-    # datamart_id = "6AA6BCAA-258A-11F0-A1AD-2CEA7F154E8D" ## JMBaxi- old
-
 
     # constants.ENGINE_ID = "BA2ACCBB-31B4-11EB-9A5D-A85E45BE6945" #Test Integration 23-05-2025
-    # constants.DATAMART_ID = "929D2861-64ED-415D-BECA-FCE2040FD6B8" ## Vessel Visit testing datamart
+    # constants.DATAMART_ID = "326C3C83-FB19-4E33-9AED-90690FAAF1CC" ## Vessel Visit testing datamart
 
     constants.CNXN, constants.CURSOR, constants.LOGESYS_ENGINE = sql_connect()
     count_tables_in_datamart_query = f"""
@@ -158,6 +155,7 @@ def insights_generator(event):
                                                                 constants.DF_LIST_TY, constants.DF_LIST_LY)
 
         # ######### Significance Score ##########
+        constants.logger.info('Generating significance score for dimensions and metrics.')
         constants.SIGNIFICANCE_SCORE = significance_engine_sql(constants.SOURCE_ENGINE, constants.DF_SQL_TABLE_NAMES, 
                                                         constants.DF_SQL_MEAS_FUNCTIONS, constants.SIGNIFICANT_DIMENSIONS, 
                                                         constants.SIGNIFICANT_MEASURES, constants.DF_RELATIONSHIP)
