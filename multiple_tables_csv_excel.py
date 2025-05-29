@@ -754,15 +754,15 @@ def get_groupby_data(sourcetype, source_engine, df_sql_table_names, df_sql_meas_
                 return {}, meas_formula
         # Different table logic
         meas_key_col = df_relationship.loc[
-                    ((df_relationship['file 1'] == meas_table_name) & (df_relationship['file 2'] == dim_table_name)) |
-                    ((df_relationship['file 2'] == meas_table_name) & (df_relationship['file 1'] == dim_table_name)),
-                    'column 1'
+                    ((df_relationship['FromTable'] == meas_table_name) & (df_relationship['ToTable'] == dim_table_name)) |
+                    ((df_relationship['ToTable'] == meas_table_name) & (df_relationship['FromTable'] == dim_table_name)),
+                    'FromColumn'
                 ].iloc[0]
         
         dim_key_col = df_relationship.loc[
-                    ((df_relationship['file 1'] == meas_table_name) & (df_relationship['file 2'] == dim_table_name)) |
-                    ((df_relationship['file 2'] == meas_table_name) & (df_relationship['file 1'] == dim_table_name)),
-                    'column 2'
+                    ((df_relationship['FromTable'] == meas_table_name) & (df_relationship['ToTable'] == dim_table_name)) |
+                    ((df_relationship['ToTable'] == meas_table_name) & (df_relationship['FromTable'] == dim_table_name)),
+                    'ToColumn'
                 ].iloc[0]        
         
         if sourcetype == 'xlsx':
