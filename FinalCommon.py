@@ -563,13 +563,13 @@ def significance_engine_sql(source_engine, df_sql_table_names, df_sql_meas_funct
                         """
                     else:
                         relationship = df_relationship.loc[
-                            ((df_relationship['table 1'] == meas_sourcetable) & (df_relationship['table 2'] == dim_sourcetable)) |
-                            ((df_relationship['table 2'] == meas_sourcetable) & (df_relationship['table 1'] == dim_sourcetable))
+                            ((df_relationship['FromTable'] == meas_sourcetable) & (df_relationship['ToTable'] == dim_sourcetable)) |
+                            ((df_relationship['ToTable'] == meas_sourcetable) & (df_relationship['FromTable'] == dim_sourcetable))
                         ]
                         if relationship.empty:
                             continue
-                        meas_key_col = relationship['column 1'].iloc[0]
-                        dim_key_col = relationship['column 2'].iloc[0]
+                        meas_key_col = relationship['FromColumn'].iloc[0]
+                        dim_key_col = relationship['ToColumn'].iloc[0]
                         query = f"""
                             SELECT t2.[{dim_col}], {meas_operation}(ABS([{meas_col}])) AS [{meas_col}]
                             FROM [dbo].[{meas_sourcetable}] t1
